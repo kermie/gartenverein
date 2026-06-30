@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Mitglieder{% endblock %}
+{% block page_title %}Mitglieder{% endblock %}
+
+{% block topbar_actions %}
+<div class="d-flex gap-2">
+    <a href="/mitglieder/export/csv" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-download me-1"></i>CSV Export
+    </a>
+    <a href="/mitglieder/neu" class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Neues Mitglied
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Suche -->
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="d-flex gap-2 align-items-center">
+            <i class="bi bi-search text-muted"></i>
+            <input type="text" name="suche" value="{{ suche }}" class="form-control form-control-sm border-0"
+                   placeholder="Nach Name oder Ort suchen…" style="box-shadow: none;">
+            <button type="submit" class="btn btn-sm btn-primary">Suchen</button>
+            {% if suche %}
+            <a href="/mitglieder/" class="btn btn-sm btn-outline-secondary">Zurücksetzen</a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- Tabelle -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Ort</th>
+                        <th>Mitglied seit</th>
+                        <th>Parzellen</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in mitglieder %}
+                    <tr>
+                        <td>
+                            <a href="/mitglieder/{{ m.id }}" class="text-decoration-none fw-semibold"
+                               style="color: var(--gv-gruen);">
+                                {{ m.nachname }}, {{ m.vorname }}
+                            </a>
+                        </td>
+                        <td class="text-muted">
+                            {% if m.plz and m.ort %}{{ m.plz }} {{ m.ort }}{% elif m.ort %}{{ m.ort }}{% else %}–{% endif %}
+                        </td>
+                        <td class="text-muted">
+                            {{ m.mitglied_seit.strftime('%d.%m.%Y') if m.mitglied_seit else '–' }}
+                        </td>
+                        <td>
+                            {% for z in m.parzellen_zuordnungen %}
+                            <span class="badge" style="background: var(--gv-gruen-blass); color: var(--gv-gruen);">
+                                {{ z.parzelle.gartennummer }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted">–</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% if m.ist_aktiv %}
+                            <span class="badge badge-aktiv">aktiv</span>
+                            {% else %}
+                            <span class="badge badge-gekuendigt">inaktiv</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="/mitglieder/{{ m.id }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            {% if suche %}
+                            <i class="bi bi-search d-block mb-2" style="font-size: 1.5rem;"></i>
+                            Keine Mitglieder gefunden für „{{ suche }}"
+                            {% else %}
+                            <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
+                            Noch keine Mitglieder angelegt.<br>
+                            <a href="/mitglieder/neu" class="btn btn-sm btn-primary mt-2">Erstes Mitglied anlegen</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if mitglieder %}
+    <div class="card-footer text-muted" style="font-size: 0.82rem;">
+        {{ mitglieder | length }} Mitglied{{ 'er' if mitglieder | length != 1 else '' }}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

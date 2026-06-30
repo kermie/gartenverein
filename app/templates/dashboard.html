@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div style="font-size: 2rem; color: var(--gv-gruen); background: var(--gv-gruen-blass);
+                            width: 56px; height: 56px; border-radius: 12px;
+                            display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">Mitglieder</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--gv-gruen);" id="stat-mitglieder">–</div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0 pt-0">
+                <a href="/mitglieder/" class="btn btn-sm btn-outline-primary w-100">Alle anzeigen</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div style="font-size: 2rem; color: var(--gv-braun); background: #f5ede8;
+                            width: 56px; height: 56px; border-radius: 12px;
+                            display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-grid-3x3"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">Parzellen</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--gv-braun);" id="stat-parzellen">–</div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0 pt-0">
+                <a href="/parzellen/" class="btn btn-sm btn-outline-primary w-100">Alle anzeigen</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div style="font-size: 2rem; color: #92400e; background: #fef3c7;
+                            width: 56px; height: 56px; border-radius: 12px;
+                            display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">Gekündigt</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #92400e;" id="stat-gekuendigt">–</div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0 pt-0">
+                <a href="/parzellen/?status_filter=gekuendigt" class="btn btn-sm btn-outline-primary w-100">Anzeigen</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div style="font-size: 2rem; color: #1e40af; background: #dbeafe;
+                            width: 56px; height: 56px; border-radius: 12px;
+                            display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-rulers"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">C-Fläche (qm)</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #1e40af;" id="stat-flaeche">–</div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0 pt-0 text-muted" style="font-size: 0.75rem;">Summe aktiver Parzellen</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-people me-2"></i>Neueste Mitglieder</div>
+            <div class="card-body p-0">
+                <div id="neueste-mitglieder" class="list-group list-group-flush">
+                    <div class="list-group-item text-muted">Wird geladen…</div>
+                </div>
+            </div>
+            <div class="card-footer"><a href="/mitglieder/neu" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>Neues Mitglied</a></div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-grid-3x3 me-2"></i>Schnellzugriff</div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="/mitglieder/neu" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-person-plus me-2"></i>Neues Mitglied anlegen
+                    </a>
+                    <a href="/parzellen/neu" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-plus-square me-2"></i>Neue Parzelle anlegen
+                    </a>
+                    <a href="/mitglieder/export/csv" class="btn btn-outline-secondary text-start">
+                        <i class="bi bi-download me-2"></i>Mitglieder als CSV exportieren
+                    </a>
+                    <a href="/parzellen/export/csv" class="btn btn-outline-secondary text-start">
+                        <i class="bi bi-download me-2"></i>Parzellen als CSV exportieren
+                    </a>
+                    {% if benutzer.rolle.value in ['admin', 'vorstand'] %}
+                    <a href="/admin/" class="btn btn-outline-secondary text-start">
+                        <i class="bi bi-people-fill me-2"></i>Benutzer verwalten
+                    </a>
+                    {% endif %}
+                    <a href="/api/docs" target="_blank" class="btn btn-outline-secondary text-start">
+                        <i class="bi bi-code-slash me-2"></i>API-Dokumentation (Swagger)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Einfache Statistiken per fetch nachladen (ohne extra API-Endpunkt, nur DOM-Update)
+async function ladeStats() {
+    // Mitglieder
+    const mRes = await fetch('/mitglieder/export/csv');
+    // Wir zählen einfach Zeilen (minus Header)
+    // Für echte Stats bauen wir später einen /api/stats Endpunkt
+    // Vorerst: Platzhalter mit Linktext
+    document.getElementById('stat-mitglieder').textContent = '→';
+    document.getElementById('stat-parzellen').textContent = '→';
+    document.getElementById('stat-gekuendigt').textContent = '→';
+    document.getElementById('stat-flaeche').textContent = '–';
+}
+// ladeStats();  // Wird in Phase 2 aktiviert wenn /api/stats Endpunkt da ist
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Administration{% endblock %}
+{% block page_title %}Benutzerverwaltung{% endblock %}
+
+{% block content %}
+
+{% if request.query_params.get('erfolg') %}
+<div class="alert alert-success d-flex gap-2 align-items-center mb-3">
+    <i class="bi bi-check-circle-fill"></i> {{ request.query_params.get('erfolg') }}
+</div>
+{% endif %}
+{% if request.query_params.get('fehler') %}
+<div class="alert alert-danger d-flex gap-2 align-items-center mb-3">
+    <i class="bi bi-exclamation-circle-fill"></i> {{ request.query_params.get('fehler') }}
+</div>
+{% endif %}
+{% if request.query_params.get('info') %}
+<div class="alert alert-info mb-3">
+    <i class="bi bi-info-circle me-2"></i>
+    <strong>Entwicklungsmodus:</strong> {{ request.query_params.get('info') }}
+</div>
+{% endif %}
+
+<div class="row g-3">
+
+    <!-- Einladen -->
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-envelope-plus me-2"></i>Benutzer einladen</div>
+            <div class="card-body">
+                <form method="post" action="/admin/einladen">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">E-Mail-Adresse</label>
+                        <input type="email" name="email" class="form-control"
+                               placeholder="person@beispiel.de" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rolle</label>
+                        <select name="rolle" class="form-select">
+                            <option value="lesend">Lesend (nur anschauen)</option>
+                            <option value="kassierer">Kassierer</option>
+                            <option value="vorstand">Vorstand</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-send me-1"></i>Einladung senden
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Offene Einladungen -->
+        {% if offene_einladungen %}
+        <div class="card mt-3">
+            <div class="card-header"><i class="bi bi-clock-history me-2"></i>Ausstehende Einladungen</div>
+            <ul class="list-group list-group-flush">
+                {% for e in offene_einladungen %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <div>{{ e.email }}</div>
+                        <small class="text-muted">{{ e.rolle.value }} · Gültig bis {{ e.gueltig_bis.strftime('%d.%m.%Y') }}</small>
+                    </div>
+                    <span class="badge" style="background: #fef3c7; color: #92400e;">ausstehend</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Benutzerliste -->
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-people me-2"></i>Registrierte Benutzer</div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>E-Mail</th>
+                            <th>Rolle</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in alle_benutzer %}
+                        <tr>
+                            <td class="fw-semibold">{{ b.name }}</td>
+                            <td class="text-muted">{{ b.email }}</td>
+                            <td>
+                                <span class="badge" style="background: var(--gv-gruen-blass); color: var(--gv-gruen);">
+                                    {{ b.rolle.value }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if b.ist_aktiv %}
+                                <span class="badge badge-aktiv">aktiv</span>
+                                {% else %}
+                                <span class="badge" style="background: #fee2e2; color: #991b1b;">inaktiv</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if b.id != benutzer.id %}
+                                <form method="post" action="/admin/benutzer/{{ b.id }}/deaktivieren" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                            title="{{ 'Deaktivieren' if b.ist_aktiv else 'Aktivieren' }}">
+                                        <i class="bi bi-{{ 'toggle-on' if b.ist_aktiv else 'toggle-off' }}"></i>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted" style="font-size: 0.8rem;">Ich</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

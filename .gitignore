@@ -1,0 +1,25 @@
+# Umgebungsvariablen (enthält Geheimnisse, niemals committen)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+
+# Docker
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Geany-Projektdateien (lokal, nicht relevant für andere Mitwirkende)
+*.geany
+
+# Betriebssystem
+.DS_Store
+Thumbs.db

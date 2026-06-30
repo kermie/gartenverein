@@ -1,0 +1,46 @@
+                    GNU AFFERO GENERAL PUBLIC LICENSE
+                       Version 3, 19 November 2007
+
+WICHTIGER HINWEIS:
+Diese Datei muss durch den offiziellen, vollständigen Lizenztext der
+GNU Affero General Public License v3.0 ersetzt werden. Der Text darf
+aus urheberrechtlichen Gründen nicht automatisiert erzeugt werden,
+ist aber als Public-Domain-Lizenztext frei verfügbar unter:
+
+    https://www.gnu.org/licenses/agpl-3.0.txt
+
+So gehst du vor:
+
+1. Öffne den obigen Link in deinem Browser.
+2. Kopiere den kompletten Text.
+3. Ersetze den Inhalt dieser Datei (LICENSE) vollständig damit.
+
+Alternativ direkt per Kommandozeile (curl funktioniert dort i.d.R.,
+da kein Browser-Header/robots.txt-Check greift):
+
+    curl -o LICENSE https://www.gnu.org/licenses/agpl-3.0.txt
+
+Nach dem Ersetzen sollte die Datei mit folgender Zeile beginnen:
+
+    GNU AFFERO GENERAL PUBLIC LICENSE
+    Version 3, 19 November 2007
+
+Vergiss nicht, am Ende jeder Quelldatei (oder zumindest zentral im
+Projekt) den Copyright-Hinweis zu ergänzen, z.B.:
+
+    Gartenverein-Verwaltung
+    Copyright (C) 2026 <Dein Name / Vereinsname>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public
+    License along with this program. If not, see
+    <https://www.gnu.org/licenses/>.

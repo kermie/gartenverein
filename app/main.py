@@ -1,0 +1,120 @@
+"""
+Gartenverein-Verwaltung – Hauptanwendung.
+"""
+from contextlib import asynccontextmanager
+import logging
+
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+from app.config import settings
+from app.database import get_db, AsyncSessionLocal
+from app.models import Benutzer, BenutzerRolle
+from app.auth import hash_passwort, get_current_user
+from app.routers import auth, mitglieder, parzellen, admin as admin_router
+from app.routers import api_auth, api_mitglieder, api_parzellen, api_einstellungen
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup: ersten Admin anlegen falls die Benutzertabelle leer ist.
+
+    Das Datenbankschema selbst wird NICHT mehr hier erzeugt, sondern über
+    Alembic-Migrationen verwaltet (siehe migrations/). Vor dem ersten Start
+    bzw. nach Schemaänderungen: `alembic upgrade head` ausführen.
+    """
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(select(Benutzer))
+        if not result.scalar_one_or_none():
+            erster_admin = Benutzer(
+                email="admin@gartenverein.local",
+                name="Administrator",
+                passwort_hash=hash_passwort("admin1234"),
+                rolle=BenutzerRolle.ADMIN,
+            )
+            db.add(erster_admin)
+            await db.commit()
+            logger.warning(
+                "Erster Admin-Benutzer angelegt: admin@gartenverein.local / admin1234 "
+                "– BITTE SOFORT PASSWORT ÄNDERN!"
+            )
+
+    yield
+
+
+app = FastAPI(
+    title=settings.app_name,
+    version=settings.app_version,
+    description=(
+        "REST-API zur Verwaltung eines Kleingärtnervereins: Mitglieder, Parzellen, "
+        "Zuordnungen und Vereinseinstellungen. Authentifizierung über JWT-Bearer-Token "
+        "(siehe `/api/v1/auth/token` bzw. `/api/v1/auth/login`).\n\n"
+        "Die interaktive Web-Oberfläche (Jinja2-Templates) läuft parallel unter `/`, "
+        "`/mitglieder/`, `/parzellen/` usw. und nutzt eine separate, cookie-basierte "
+        "Session-Authentifizierung."
+    ),
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
+    lifespan=lifespan,
+)
+
+# Statische Dateien
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+# Router registrieren – Web-UI (Jinja2)
+app.include_router(auth.router)
+app.include_router(mitglieder.router)
+app.include_router(parzellen.router)
+app.include_router(admin_router.router)
+
+# Router registrieren – REST-API (JSON, JWT-Auth)
+app.include_router(api_auth.router)
+app.include_router(api_mitglieder.router)
+app.include_router(api_parzellen.router)
+app.include_router(api_einstellungen.router)
+
+templates = Jinja2Templates(directory="app/templates")
+
+
+@app.get("/", response_class=HTMLResponse)
+async def startseite(request: Request):
+    async with AsyncSessionLocal() as db:
+        benutzer = await get_current_user(request, db)
+
+    if not benutzer:
+        return RedirectResponse("/auth/login", status_code=302)
+
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request": request, "benutzer": benutzer},
+    )
+
+
+@app.exception_handler(403)
+async def forbidden_handler(request: Request, exc):
+    async with AsyncSessionLocal() as db:
+        benutzer = await get_current_user(request, db)
+    return templates.TemplateResponse(
+        "fehler.html",
+        {"request": request, "benutzer": benutzer, "code": 403, "meldung": "Keine Berechtigung"},
+        status_code=403,
+    )
+
+
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc):
+    async with AsyncSessionLocal() as db:
+        benutzer = await get_current_user(request, db)
+    return templates.TemplateResponse(
+        "fehler.html",
+        {"request": request, "benutzer": benutzer, "code": 404, "meldung": "Seite nicht gefunden"},
+        status_code=404,
+    )
