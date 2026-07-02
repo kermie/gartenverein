@@ -362,13 +362,38 @@ async def teilnahme_entfernen(
 # ---------------------------------------------------------------------------
 
 @router.get("/vereinsrollen", response_class=HTMLResponse)
-async def vereinsrollen_seite(request: Request, db: AsyncSession = Depends(get_db)):
+async def vereinsrollen_seite(
+    request: Request,
+    jahr: Optional[int] = None,
+    db: AsyncSession = Depends(get_db),
+):
     benutzer = await require_user(request, db)
 
-    result = await db.execute(
+    if not jahr:
+        jahr = date.today().year
+
+    rollen_result = await db.execute(
         select(Vereinsrolle).order_by(Vereinsrolle.name)
     )
-    rollen = result.scalars().all()
+    rollen = rollen_result.scalars().all()
+
+    zuordnungen_result = await db.execute(
+        select(MitgliedVereinsrolle)
+        .options(
+            selectinload(MitgliedVereinsrolle.mitglied),
+            selectinload(MitgliedVereinsrolle.vereinsrolle),
+        )
+        .where(MitgliedVereinsrolle.jahr == jahr)
+        .order_by(MitgliedVereinsrolle.vereinsrolle_id)
+    )
+    zuordnungen = zuordnungen_result.scalars().all()
+
+    mitglieder_result = await db.execute(
+        select(Mitglied)
+        .where(Mitglied.deleted_at.is_(None))
+        .order_by(Mitglied.nachname, Mitglied.vorname)
+    )
+    alle_mitglieder = mitglieder_result.scalars().all()
 
     return templates.TemplateResponse(
         "pflichtstunden/vereinsrollen.html",
@@ -376,9 +401,69 @@ async def vereinsrollen_seite(request: Request, db: AsyncSession = Depends(get_d
             "request": request,
             "benutzer": benutzer,
             "rollen": rollen,
+            "zuordnungen": zuordnungen,
+            "alle_mitglieder": alle_mitglieder,
+            "jahr": jahr,
             "BefreiungsGrund": BefreiungsGrund,
+            "aktuelles_jahr": date.today().year,
         },
     )
+
+
+@router.post("/vereinsrollen/mitglied-zuordnen")
+async def mitglied_vereinsrolle_zuordnen(
+    request: Request,
+    mitglied_id: str = Form(...),
+    vereinsrolle_id: str = Form(...),
+    jahr: int = Form(...),
+    von: str = Form(""),
+    bis: str = Form(""),
+    notiz: str = Form(""),
+    db: AsyncSession = Depends(get_db),
+):
+    await require_user(request, db)
+
+    existing = await db.execute(
+        select(MitgliedVereinsrolle).where(
+            MitgliedVereinsrolle.mitglied_id == mitglied_id,
+            MitgliedVereinsrolle.vereinsrolle_id == vereinsrolle_id,
+            MitgliedVereinsrolle.jahr == jahr,
+        )
+    )
+    if not existing.scalar_one_or_none():
+        zuordnung = MitgliedVereinsrolle(
+            mitglied_id=mitglied_id,
+            vereinsrolle_id=vereinsrolle_id,
+            jahr=jahr,
+            von=date.fromisoformat(von) if von.strip() else None,
+            bis=date.fromisoformat(bis) if bis.strip() else None,
+            notiz=notiz.strip() or None,
+        )
+        db.add(zuordnung)
+        await db.commit()
+
+    return RedirectResponse(f"/pflichtstunden/vereinsrollen?jahr={jahr}", status_code=302)
+
+
+@router.post("/vereinsrollen/zuordnung/{zuordnung_id}/entfernen")
+async def mitglied_vereinsrolle_entfernen(
+    zuordnung_id: str,
+    request: Request,
+    jahr: int = Form(0),
+    db: AsyncSession = Depends(get_db),
+):
+    await require_user(request, db)
+
+    result = await db.execute(
+        select(MitgliedVereinsrolle).where(MitgliedVereinsrolle.id == zuordnung_id)
+    )
+    zuordnung = result.scalar_one_or_none()
+    rueck_jahr = zuordnung.jahr if zuordnung else date.today().year
+    if zuordnung:
+        await db.delete(zuordnung)
+        await db.commit()
+
+    return RedirectResponse(f"/pflichtstunden/vereinsrollen?jahr={rueck_jahr}", status_code=302)
 
 
 @router.post("/vereinsrollen/neu")

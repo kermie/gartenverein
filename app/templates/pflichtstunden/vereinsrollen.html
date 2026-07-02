@@ -3,14 +3,25 @@
 {% block page_title %}Vereinsrollen{% endblock %}
 
 {% block topbar_actions %}
-<a href="/pflichtstunden/" class="btn btn-sm btn-outline-secondary">
-    <i class="bi bi-arrow-left me-1"></i>Zurück
-</a>
+<div class="d-flex gap-2 align-items-center">
+    <form method="get" class="d-flex gap-2">
+        <select name="jahr" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
+            {% for j in range(aktuelles_jahr, aktuelles_jahr - 5, -1) %}
+            <option value="{{ j }}" {% if j == jahr %}selected{% endif %}>{{ j }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <a href="/pflichtstunden/" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Zurück
+    </a>
+</div>
 {% endblock %}
 
 {% block content %}
 <div class="row g-3">
-    <div class="col-lg-5">
+
+    <!-- Neue Vereinsrolle anlegen -->
+    <div class="col-lg-4">
         <div class="card">
             <div class="card-header"><i class="bi bi-plus-lg me-2"></i>Neue Vereinsrolle</div>
             <div class="card-body">
@@ -53,7 +64,8 @@
         </div>
     </div>
 
-    <div class="col-lg-7">
+    <!-- Bestehende Rollen -->
+    <div class="col-lg-8">
         <div class="card">
             <div class="card-header"><i class="bi bi-person-badge me-2"></i>Bestehende Rollen</div>
             <div class="card-body p-0">
@@ -89,7 +101,7 @@
                                 <form method="post"
                                       action="/pflichtstunden/vereinsrollen/{{ r.id }}/loeschen">
                                     <button type="submit" class="btn btn-sm btn-outline-danger border-0"
-                                            onclick="return confirm('Rolle wirklich löschen?')">
+                                            onclick="return confirm('Rolle wirklich löschen? Alle Zuordnungen gehen verloren.')">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
@@ -107,5 +119,113 @@
             </div>
         </div>
     </div>
+
+    <!-- Mitglieder-Zuordnung -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-people me-2"></i>Mitglieder in Vereinsrollen – {{ jahr }}</span>
+            </div>
+
+            <!-- Neue Zuordnung -->
+            <div class="card-body border-bottom">
+                <form method="post" action="/pflichtstunden/vereinsrollen/mitglied-zuordnen"
+                      class="row g-2 align-items-end">
+                    <input type="hidden" name="jahr" value="{{ jahr }}">
+                    <div class="col-sm-3">
+                        <label class="form-label fw-semibold">Mitglied <span class="text-danger">*</span></label>
+                        <select name="mitglied_id" class="form-select form-select-sm" required>
+                            <option value="">– bitte wählen –</option>
+                            {% for m in alle_mitglieder %}
+                            <option value="{{ m.id }}">{{ m.vollname }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="form-label fw-semibold">Vereinsrolle <span class="text-danger">*</span></label>
+                        <select name="vereinsrolle_id" class="form-select form-select-sm" required>
+                            <option value="">– bitte wählen –</option>
+                            {% for r in rollen %}
+                            <option value="{{ r.id }}">{{ r.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <label class="form-label fw-semibold">Von</label>
+                        <input type="date" name="von" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-sm-2">
+                        <label class="form-label fw-semibold">Bis</label>
+                        <input type="date" name="bis" class="form-control form-control-sm">
+                        <div class="form-text" style="font-size: 0.72rem;">Leer = läuft noch</div>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="submit" class="btn btn-sm btn-primary w-100">
+                            <i class="bi bi-plus-lg me-1"></i>Zuordnen
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bestehende Zuordnungen -->
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Mitglied</th>
+                            <th>Rolle</th>
+                            <th>Befreit</th>
+                            <th>Von</th>
+                            <th>Bis</th>
+                            <th>Notiz</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for z in zuordnungen %}
+                        <tr>
+                            <td>
+                                <a href="/mitglieder/{{ z.mitglied.id }}" class="text-decoration-none fw-semibold"
+                                   style="color: var(--gv-gruen);">{{ z.mitglied.vollname }}</a>
+                            </td>
+                            <td>
+                                <span class="badge" style="background: var(--gv-gruen-blass); color: var(--gv-gruen);">
+                                    {{ z.vereinsrolle.name }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if z.vereinsrolle.pflichtstunden_befreit %}
+                                <span class="badge badge-aktiv">Ja</span>
+                                {% else %}
+                                <span class="text-muted">Nein</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted">{{ z.von.strftime('%d.%m.%Y') if z.von else '–' }}</td>
+                            <td class="text-muted">{{ z.bis.strftime('%d.%m.%Y') if z.bis else 'laufend' }}</td>
+                            <td class="text-muted" style="font-size: 0.85rem;">{{ z.notiz or '' }}</td>
+                            <td class="text-end">
+                                <form method="post"
+                                      action="/pflichtstunden/vereinsrollen/zuordnung/{{ z.id }}/entfernen">
+                                    <input type="hidden" name="jahr" value="{{ jahr }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                            onclick="return confirm('Zuordnung wirklich entfernen?')">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-3">
+                                Keine Mitglieder in Vereinsrollen für {{ jahr }}.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}
