@@ -14,7 +14,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from app.config import settings
-from app.database import get_db, AsyncSessionLocal
+from app.database import get_db, AsyncSessionLocal, aktives_mitglied_filter
 from app.models import Benutzer, BenutzerRolle, Mitglied, Parzelle, ParzelleStatus, MitgliedParzelle
 from app.auth import hash_passwort, get_current_user
 from app.routers import auth, mitglieder, parzellen, admin as admin_router, pflichtstunden
@@ -91,14 +91,9 @@ async def startseite(request: Request):
             return RedirectResponse("/auth/login", status_code=302)
 
         mitglieder_gesamt = await db.scalar(
-            select(func.count()).where(Mitglied.deleted_at.is_(None))
+            select(func.count()).where(aktives_mitglied_filter())
         )
-        mitglieder_aktiv = await db.scalar(
-            select(func.count()).where(
-                Mitglied.deleted_at.is_(None),
-                (Mitglied.mitglied_bis.is_(None)) | (Mitglied.mitglied_bis >= date.today())
-            )
-        )
+        mitglieder_aktiv = mitglieder_gesamt  # gesamt zählt bereits nur aktive
         parzellen_aktiv = await db.scalar(
             select(func.count()).select_from(Parzelle).where(
                 Parzelle.status == ParzelleStatus.AKTIV
@@ -123,7 +118,7 @@ async def startseite(request: Request):
         )
         neueste_result = await db.execute(
             select(Mitglied)
-            .where(Mitglied.deleted_at.is_(None))
+            .where(aktives_mitglied_filter())
             .order_by(Mitglied.created_at.desc())
             .limit(5)
         )

@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 
-from app.database import get_db
+from app.database import get_db, aktives_mitglied_filter
 from app.models import Mitglied, MitgliedTelefon, MitgliedEmail, MitgliedParzelle, Parzelle
 from app.auth import get_current_user, require_user
 
@@ -38,6 +38,7 @@ async def _get_mitglied_mit_details(db: AsyncSession, mitglied_id: str) -> Optio
 async def mitglieder_liste(
     request: Request,
     suche: str = "",
+    auch_inaktive: bool = False,
     db: AsyncSession = Depends(get_db),
 ):
     benutzer = await require_user(request, db)
@@ -48,9 +49,14 @@ async def mitglieder_liste(
             selectinload(Mitglied.email_adressen),
             selectinload(Mitglied.parzellen_zuordnungen).selectinload(MitgliedParzelle.parzelle),
         )
-        .where(Mitglied.deleted_at.is_(None))
         .order_by(Mitglied.nachname, Mitglied.vorname)
     )
+
+    if auch_inaktive:
+        # Alle nicht-gelöschten Mitglieder (inkl. abgelaufene Mitgliedschaften)
+        query = query.where(Mitglied.deleted_at.is_(None))
+    else:
+        query = query.where(aktives_mitglied_filter())
 
     if suche:
         query = query.where(
@@ -71,6 +77,7 @@ async def mitglieder_liste(
             "benutzer": benutzer,
             "mitglieder": mitglieder,
             "suche": suche,
+            "auch_inaktive": auch_inaktive,
         },
     )
 
@@ -326,7 +333,7 @@ async def mitglieder_export_csv(request: Request, db: AsyncSession = Depends(get
             selectinload(Mitglied.telefonnummern),
             selectinload(Mitglied.parzellen_zuordnungen).selectinload(MitgliedParzelle.parzelle),
         )
-        .where(Mitglied.deleted_at.is_(None))
+        .where(aktives_mitglied_filter())
         .order_by(Mitglied.nachname, Mitglied.vorname)
     )
     mitglieder = result.scalars().all()

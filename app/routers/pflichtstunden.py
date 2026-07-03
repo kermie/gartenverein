@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import selectinload
 
-from app.database import get_db
+from app.database import get_db, aktives_mitglied_filter
 from app.models import (
     Arbeitseinsatz, EinsatzTeilnahme, EinsatzTyp, TeilnahmeStatus,
     Patenschaft, Vereinsrolle, MitgliedVereinsrolle, BefreiungsGrund,
@@ -259,7 +259,7 @@ async def einsatz_detail(
     # Alle aktiven Mitglieder für Anmelde-Dropdown
     mitglieder_result = await db.execute(
         select(Mitglied)
-        .where(Mitglied.deleted_at.is_(None))
+        .where(aktives_mitglied_filter())
         .order_by(Mitglied.nachname, Mitglied.vorname)
     )
     alle_mitglieder = mitglieder_result.scalars().all()
@@ -390,7 +390,7 @@ async def vereinsrollen_seite(
 
     mitglieder_result = await db.execute(
         select(Mitglied)
-        .where(Mitglied.deleted_at.is_(None))
+        .where(aktives_mitglied_filter())
         .order_by(Mitglied.nachname, Mitglied.vorname)
     )
     alle_mitglieder = mitglieder_result.scalars().all()
@@ -532,7 +532,7 @@ async def patenschaften_seite(
 
     mitglieder_result = await db.execute(
         select(Mitglied)
-        .where(Mitglied.deleted_at.is_(None))
+        .where(aktives_mitglied_filter())
         .order_by(Mitglied.nachname, Mitglied.vorname)
     )
     alle_mitglieder = mitglieder_result.scalars().all()
@@ -640,9 +640,13 @@ async def auswertung(
         parzellen = parzellen_result.scalars().all()
 
         for parzelle in parzellen:
-            paechter = [z.mitglied for z in parzelle.mitglieder_zuordnungen]
+            paechter = [
+                z.mitglied for z in parzelle.mitglieder_zuordnungen
+                if z.mitglied.deleted_at is None
+                and (z.mitglied.mitglied_bis is None or z.mitglied.mitglied_bis >= date.today())
+            ]
             if not paechter:
-                continue  # Unbesetzte Parzellen überspringen
+                continue  # Unbesetzte oder nur inaktive Pächter überspringen
 
             # Stunden aller Pächter summieren
             gesamt_stunden = 0.0
@@ -751,7 +755,11 @@ async def auswertung_export_csv(
             .order_by(Parzelle.gartennummer)
         )
         for parzelle in parzellen_result.scalars().all():
-            paechter = [z.mitglied for z in parzelle.mitglieder_zuordnungen]
+            paechter = [
+                z.mitglied for z in parzelle.mitglieder_zuordnungen
+                if z.mitglied.deleted_at is None
+                and (z.mitglied.mitglied_bis is None or z.mitglied.mitglied_bis >= date.today())
+            ]
             if not paechter:
                 continue
             gesamt = 0.0

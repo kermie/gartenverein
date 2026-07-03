@@ -24,17 +24,31 @@
 <!-- Suche -->
 <div class="card mb-3">
     <div class="card-body py-2">
-        <form method="get" class="d-flex gap-2 align-items-center">
+        <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
             <i class="bi bi-search text-muted"></i>
             <input type="text" name="suche" value="{{ suche }}" class="form-control form-control-sm border-0"
-                   placeholder="Nach Name oder Ort suchen…" style="box-shadow: none;">
+                   placeholder="Nach Name oder Ort suchen…" style="box-shadow: none; max-width: 260px;">
+            <div class="form-check form-check-inline my-auto ms-1">
+                <input class="form-check-input" type="checkbox" name="auch_inaktive" id="auch-inaktive"
+                       value="true" {% if auch_inaktive %}checked{% endif %}
+                       onchange="this.form.submit()">
+                <label class="form-check-label text-muted" for="auch-inaktive" style="font-size: 0.85rem;">
+                    Inaktive anzeigen
+                </label>
+            </div>
             <button type="submit" class="btn btn-sm btn-primary">Suchen</button>
-            {% if suche %}
+            {% if suche or auch_inaktive %}
             <a href="/mitglieder/" class="btn btn-sm btn-outline-secondary">Zurücksetzen</a>
             {% endif %}
         </form>
     </div>
 </div>
+{% if auch_inaktive %}
+<div class="alert alert-info d-flex gap-2 align-items-center mb-3" style="font-size: 0.875rem;">
+    <i class="bi bi-info-circle-fill"></i>
+    Inaktive Mitglieder werden angezeigt (Mitgliedschaft abgelaufen).
+</div>
+{% endif %}
 
 <!-- CSV Import -->
 <div class="mb-3">
@@ -111,6 +125,9 @@
                             <span class="badge badge-aktiv">aktiv</span>
                             {% else %}
                             <span class="badge badge-gekuendigt">inaktiv</span>
+                            {% if m.mitglied_bis %}
+                            <div class="text-muted" style="font-size: 0.72rem;">seit {{ m.mitglied_bis.strftime('%d.%m.%Y') }}</div>
+                            {% endif %}
                             {% endif %}
                         </td>
                         <td class="text-end">

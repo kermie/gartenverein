@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 
-from app.database import get_db
+from app.database import get_db, aktives_mitglied_filter
 from app.models import (
     Parzelle, ParzelleStatus, MitgliedParzelle, Mitglied
 )
@@ -142,7 +142,7 @@ async def parzelle_detail(
     # Alle Mitglieder für Zuordnung
     mitglieder_result = await db.execute(
         select(Mitglied)
-        .where(Mitglied.deleted_at.is_(None))
+        .where(aktives_mitglied_filter())
         .order_by(Mitglied.nachname, Mitglied.vorname)
     )
     alle_mitglieder = mitglieder_result.scalars().all()
