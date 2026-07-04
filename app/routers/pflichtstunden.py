@@ -530,6 +530,22 @@ async def patenschaften_seite(
     result = await db.execute(query)
     patenschaften = result.scalars().all()
 
+    # Nach Bereich gruppieren, damit mehrere Mitglieder pro Bereich
+    # gemeinsam dargestellt werden
+    bereiche_gruppiert = {}
+    for p in patenschaften:
+        bereiche_gruppiert.setdefault(p.bereich, []).append(p)
+
+    # Alle bekannten Bereichsnamen (für Autovervollständigung, auch aus
+    # vergangenen Jahren, damit Tippfehler beim Wiederverwenden vermieden werden)
+    alle_bereiche_result = await db.execute(
+        select(Patenschaft.bereich).distinct().order_by(Patenschaft.bereich)
+    )
+    alle_bereiche = [r[0] for r in alle_bereiche_result.all()]
+
+    # Aktuelle Pflichtstunden-Konfiguration für Vorbefüllung
+    config = await _get_config_fuer_jahr(db, jahr)
+
     mitglieder_result = await db.execute(
         select(Mitglied)
         .where(aktives_mitglied_filter())
@@ -543,6 +559,9 @@ async def patenschaften_seite(
             "request": request,
             "benutzer": benutzer,
             "patenschaften": patenschaften,
+            "bereiche_gruppiert": bereiche_gruppiert,
+            "alle_bereiche": alle_bereiche,
+            "config": config,
             "alle_mitglieder": alle_mitglieder,
             "jahr": jahr,
         },
