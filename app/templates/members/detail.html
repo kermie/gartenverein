@@ -70,11 +70,7 @@
                 <ul class="list-group list-group-flush">
                     {% for t in mitglied.telefonnummern %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>
-                            {{ t.nummer }}
-                            {% if t.bezeichnung %}<small class="text-muted ms-1">({{ t.bezeichnung }})</small>{% endif %}
-                            {% if t.ist_primaer %}<i class="bi bi-star-fill text-warning ms-1" title="Primär"></i>{% endif %}
-                        </span>
+                        <span>{{ t.nummer }}</span>
                         <form method="post" action="/mitglieder/{{ mitglied.id }}/telefon/{{ t.id }}/loeschen" class="d-inline">
                             <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Entfernen">
                                 <i class="bi bi-trash"></i>
@@ -89,12 +85,7 @@
             <div class="card-footer">
                 <form method="post" action="/mitglieder/{{ mitglied.id }}/telefon/hinzufuegen"
                       class="d-flex gap-2 flex-wrap">
-                    <input type="text" name="nummer" class="form-control form-control-sm" placeholder="+49 123 456789" required style="min-width: 140px;">
-                    <input type="text" name="bezeichnung" class="form-control form-control-sm" placeholder="Typ (Mobil, Festnetz…)" style="min-width: 120px;">
-                    <div class="form-check form-check-inline my-auto">
-                        <input class="form-check-input" type="checkbox" name="ist_primaer" id="tel-primaer">
-                        <label class="form-check-label small" for="tel-primaer">Primär</label>
-                    </div>
+                    <input type="text" name="nummer" class="form-control form-control-sm" placeholder="+49 123 456789" required style="min-width: 180px;">
                     <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i></button>
                 </form>
             </div>
@@ -106,11 +97,7 @@
                 <ul class="list-group list-group-flush">
                     {% for e in mitglied.email_adressen %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>
-                            <a href="mailto:{{ e.adresse }}">{{ e.adresse }}</a>
-                            {% if e.bezeichnung %}<small class="text-muted ms-1">({{ e.bezeichnung }})</small>{% endif %}
-                            {% if e.ist_primaer %}<i class="bi bi-star-fill text-warning ms-1" title="Primär"></i>{% endif %}
-                        </span>
+                        <span><a href="mailto:{{ e.adresse }}">{{ e.adresse }}</a></span>
                         <form method="post" action="/mitglieder/{{ mitglied.id }}/email/{{ e.id }}/loeschen" class="d-inline">
                             <button type="submit" class="btn btn-sm btn-outline-danger border-0">
                                 <i class="bi bi-trash"></i>
@@ -125,12 +112,7 @@
             <div class="card-footer">
                 <form method="post" action="/mitglieder/{{ mitglied.id }}/email/hinzufuegen"
                       class="d-flex gap-2 flex-wrap">
-                    <input type="email" name="adresse" class="form-control form-control-sm" placeholder="email@beispiel.de" required style="min-width: 180px;">
-                    <input type="text" name="bezeichnung" class="form-control form-control-sm" placeholder="Typ (Privat, Arbeit…)" style="min-width: 120px;">
-                    <div class="form-check form-check-inline my-auto">
-                        <input class="form-check-input" type="checkbox" name="ist_primaer" id="mail-primaer">
-                        <label class="form-check-label small" for="mail-primaer">Primär</label>
-                    </div>
+                    <input type="email" name="adresse" class="form-control form-control-sm" placeholder="email@beispiel.de" required style="min-width: 220px;">
                     <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i></button>
                 </form>
             </div>

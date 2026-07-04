@@ -4,6 +4,9 @@
 
 {% block topbar_actions %}
 <div class="d-flex gap-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#csvImportModal">
+        <i class="bi bi-upload me-1"></i>CSV Import
+    </button>
     <a href="/mitglieder/export/csv" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-download me-1"></i>CSV Export
     </a>
@@ -49,37 +52,6 @@
     Inaktive Mitglieder werden angezeigt (Mitgliedschaft abgelaufen).
 </div>
 {% endif %}
-
-<!-- CSV Import -->
-<div class="mb-3">
-    <details>
-        <summary class="text-muted" style="cursor: pointer; font-size: 0.85rem;">
-            <i class="bi bi-upload me-1"></i>CSV-Import
-        </summary>
-        <div class="card mt-2">
-            <div class="card-body">
-                <form method="post" action="/mitglieder/import/csv" enctype="multipart/form-data"
-                      class="d-flex gap-2 align-items-center flex-wrap">
-                    <input type="file" name="datei" accept=".csv" class="form-control form-control-sm"
-                           required style="max-width: 300px;">
-                    <button type="submit" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-upload me-1"></i>Importieren
-                    </button>
-                </form>
-                <div class="form-text mt-2">
-                    Format: Semikolon-getrennte CSV mit Spalten:
-                    <code>Vorname; Nachname; Strasse; PLZ; Ort; Geburtsdatum; IBAN;
-                    Mitglied seit; Mitglied bis; E-Mail-Benachrichtigungen;
-                    E-Mail-Adressen; Telefonnummern; Notizen</code><br>
-                    Datumsformat: <code>JJJJ-MM-TT</code> oder <code>TT.MM.JJJJ</code>.
-                    Mehrere E-Mail-Adressen / Telefonnummern jeweils durch Semikolon trennen.<br>
-                    Tipp: Einfach einen <a href="/mitglieder/export/csv">CSV-Export</a>
-                    als Vorlage verwenden.
-                </div>
-            </div>
-        </div>
-    </details>
-</div>
 
 <!-- Tabelle -->
 <div class="card">
@@ -159,5 +131,37 @@
         {{ mitglieder | length }} Mitglied{{ 'er' if mitglieder | length != 1 else '' }}
     </div>
     {% endif %}
+</div>
+
+<!-- CSV Import Modal -->
+<div class="modal fade" id="csvImportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-upload me-2"></i>CSV-Import</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/mitglieder/import/csv" enctype="multipart/form-data"
+                      class="d-flex gap-2 align-items-center flex-wrap">
+                    <input type="file" name="datei" accept=".csv" class="form-control form-control-sm"
+                           required style="max-width: 300px;">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-upload me-1"></i>Importieren
+                    </button>
+                </form>
+                <div class="form-text mt-2">
+                    Format: Semikolon-getrennte CSV mit Spalten:
+                    <code>Vorname; Nachname; Strasse; PLZ; Ort; Geburtsdatum; IBAN;
+                    Mitglied seit; Mitglied bis; E-Mail-Benachrichtigungen;
+                    E-Mail-Adressen; Telefonnummern; Notizen</code><br>
+                    Datumsformat: <code>JJJJ-MM-TT</code> oder <code>TT.MM.JJJJ</code>.
+                    Mehrere E-Mail-Adressen / Telefonnummern jeweils durch Semikolon trennen.<br>
+                    Tipp: Einfach einen <a href="/mitglieder/export/csv">CSV-Export</a>
+                    als Vorlage verwenden.
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
