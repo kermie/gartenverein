@@ -594,6 +594,79 @@ async def patenschaft_erstellen(
     return RedirectResponse("/pflichtstunden/patenschaften", status_code=302)
 
 
+@router.get("/patenschaften/{patenschaft_id}/bearbeiten", response_class=HTMLResponse)
+async def patenschaft_bearbeiten_seite(
+    patenschaft_id: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    benutzer = await require_user(request, db)
+
+    result = await db.execute(
+        select(Patenschaft)
+        .options(selectinload(Patenschaft.mitglied))
+        .where(Patenschaft.id == patenschaft_id)
+    )
+    patenschaft = result.scalar_one_or_none()
+    if not patenschaft:
+        raise HTTPException(status_code=404, detail="Patenschaft nicht gefunden")
+
+    mitglieder_result = await db.execute(
+        select(Mitglied)
+        .where(aktives_mitglied_filter())
+        .order_by(Mitglied.nachname, Mitglied.vorname)
+    )
+    alle_mitglieder = mitglieder_result.scalars().all()
+
+    alle_bereiche_result = await db.execute(
+        select(Patenschaft.bereich).distinct().order_by(Patenschaft.bereich)
+    )
+    alle_bereiche = [r[0] for r in alle_bereiche_result.all()]
+
+    return templates.TemplateResponse(
+        "pflichtstunden/patenschaft_formular.html",
+        {
+            "request": request,
+            "benutzer": benutzer,
+            "patenschaft": patenschaft,
+            "alle_mitglieder": alle_mitglieder,
+            "alle_bereiche": alle_bereiche,
+        },
+    )
+
+
+@router.post("/patenschaften/{patenschaft_id}/bearbeiten")
+async def patenschaft_aktualisieren(
+    patenschaft_id: str,
+    request: Request,
+    mitglied_id: str = Form(""),
+    bereich: str = Form(...),
+    beschreibung: str = Form(""),
+    stunden_anrechenbar: str = Form(...),
+    von: str = Form(...),
+    bis: str = Form(""),
+    db: AsyncSession = Depends(get_db),
+):
+    await require_user(request, db)
+
+    result = await db.execute(select(Patenschaft).where(Patenschaft.id == patenschaft_id))
+    patenschaft = result.scalar_one_or_none()
+    if not patenschaft:
+        raise HTTPException(status_code=404, detail="Patenschaft nicht gefunden")
+
+    patenschaft.mitglied_id = mitglied_id.strip() or None
+    patenschaft.bereich = bereich.strip()
+    patenschaft.beschreibung = beschreibung.strip() or None
+    patenschaft.stunden_anrechenbar = float(stunden_anrechenbar.replace(",", "."))
+    patenschaft.von = date.fromisoformat(von)
+    patenschaft.bis = date.fromisoformat(bis) if bis.strip() else None
+
+    await db.commit()
+
+    jahr = patenschaft.von.year
+    return RedirectResponse(f"/pflichtstunden/patenschaften?jahr={jahr}", status_code=302)
+
+
 @router.post("/patenschaften/{patenschaft_id}/loeschen")
 async def patenschaft_loeschen(
     patenschaft_id: str,

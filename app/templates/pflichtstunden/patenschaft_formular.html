@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Patenschaft bearbeiten{% endblock %}
+{% block page_title %}Patenschaft bearbeiten{% endblock %}
+
+{% block topbar_actions %}
+<a href="/pflichtstunden/patenschaften" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>Zurück
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3" style="max-width: 640px;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-heart me-2"></i>Patenschaft bearbeiten</div>
+            <div class="card-body">
+                <form method="post" action="/pflichtstunden/patenschaften/{{ patenschaft.id }}/bearbeiten">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Bereich <span class="text-danger">*</span></label>
+                        <input type="text" name="bereich" class="form-control" list="bereiche-liste"
+                               value="{{ patenschaft.bereich }}" required>
+                        <datalist id="bereiche-liste">
+                            {% for b in alle_bereiche %}
+                            <option value="{{ b }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mitglied</label>
+                        <select name="mitglied_id" class="form-select">
+                            <option value="">– noch nicht vergeben –</option>
+                            {% for m in alle_mitglieder %}
+                            <option value="{{ m.id }}"
+                                {% if patenschaft.mitglied and patenschaft.mitglied.id == m.id %}selected{% endif %}>
+                                {{ m.vollname }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Beschreibung</label>
+                        <textarea name="beschreibung" class="form-control" rows="2">{{ patenschaft.beschreibung or '' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Anrechenbare Stunden/Jahr <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="text" name="stunden_anrechenbar" class="form-control"
+                                   value="{{ patenschaft.stunden_anrechenbar|int }}" required>
+                            <span class="input-group-text">h</span>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Gültig ab <span class="text-danger">*</span></label>
+                            <input type="date" name="von" class="form-control"
+                                   value="{{ patenschaft.von.isoformat() }}" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Gültig bis</label>
+                            <input type="date" name="bis" class="form-control"
+                                   value="{{ patenschaft.bis.isoformat() if patenschaft.bis else '' }}">
+                            <div class="form-text">Leer = läuft noch</div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="/pflichtstunden/patenschaften" class="btn btn-outline-secondary">Abbrechen</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Änderungen speichern
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
