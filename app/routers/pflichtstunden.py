@@ -445,6 +445,80 @@ async def mitglied_vereinsrolle_zuordnen(
     return RedirectResponse(f"/pflichtstunden/vereinsrollen?jahr={jahr}", status_code=302)
 
 
+@router.get("/vereinsrollen/zuordnung/{zuordnung_id}/bearbeiten", response_class=HTMLResponse)
+async def mitglied_vereinsrolle_bearbeiten_seite(
+    zuordnung_id: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    benutzer = await require_user(request, db)
+
+    result = await db.execute(
+        select(MitgliedVereinsrolle)
+        .options(
+            selectinload(MitgliedVereinsrolle.mitglied),
+            selectinload(MitgliedVereinsrolle.vereinsrolle),
+        )
+        .where(MitgliedVereinsrolle.id == zuordnung_id)
+    )
+    zuordnung = result.scalar_one_or_none()
+    if not zuordnung:
+        raise HTTPException(status_code=404, detail="Zuordnung nicht gefunden")
+
+    mitglieder_result = await db.execute(
+        select(Mitglied)
+        .where(aktives_mitglied_filter())
+        .order_by(Mitglied.nachname, Mitglied.vorname)
+    )
+    alle_mitglieder = mitglieder_result.scalars().all()
+
+    rollen_result = await db.execute(select(Vereinsrolle).order_by(Vereinsrolle.name))
+    alle_rollen = rollen_result.scalars().all()
+
+    return templates.TemplateResponse(
+        "pflichtstunden/mitglied_vereinsrolle_formular.html",
+        {
+            "request": request,
+            "benutzer": benutzer,
+            "zuordnung": zuordnung,
+            "alle_mitglieder": alle_mitglieder,
+            "alle_rollen": alle_rollen,
+        },
+    )
+
+
+@router.post("/vereinsrollen/zuordnung/{zuordnung_id}/bearbeiten")
+async def mitglied_vereinsrolle_aktualisieren(
+    zuordnung_id: str,
+    request: Request,
+    mitglied_id: str = Form(...),
+    vereinsrolle_id: str = Form(...),
+    jahr: int = Form(...),
+    von: str = Form(""),
+    bis: str = Form(""),
+    notiz: str = Form(""),
+    db: AsyncSession = Depends(get_db),
+):
+    await require_user(request, db)
+
+    result = await db.execute(
+        select(MitgliedVereinsrolle).where(MitgliedVereinsrolle.id == zuordnung_id)
+    )
+    zuordnung = result.scalar_one_or_none()
+    if not zuordnung:
+        raise HTTPException(status_code=404, detail="Zuordnung nicht gefunden")
+
+    zuordnung.mitglied_id = mitglied_id
+    zuordnung.vereinsrolle_id = vereinsrolle_id
+    zuordnung.jahr = jahr
+    zuordnung.von = date.fromisoformat(von) if von.strip() else None
+    zuordnung.bis = date.fromisoformat(bis) if bis.strip() else None
+    zuordnung.notiz = notiz.strip() or None
+
+    await db.commit()
+    return RedirectResponse(f"/pflichtstunden/vereinsrollen?jahr={jahr}", status_code=302)
+
+
 @router.post("/vereinsrollen/zuordnung/{zuordnung_id}/entfernen")
 async def mitglied_vereinsrolle_entfernen(
     zuordnung_id: str,
@@ -485,6 +559,53 @@ async def vereinsrolle_erstellen(
     )
     db.add(rolle)
     await db.commit()
+    return RedirectResponse("/pflichtstunden/vereinsrollen", status_code=302)
+
+
+@router.get("/vereinsrollen/{rolle_id}/bearbeiten", response_class=HTMLResponse)
+async def vereinsrolle_bearbeiten_seite(
+    rolle_id: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    benutzer = await require_user(request, db)
+
+    result = await db.execute(select(Vereinsrolle).where(Vereinsrolle.id == rolle_id))
+    rolle = result.scalar_one_or_none()
+    if not rolle:
+        raise HTTPException(status_code=404, detail="Vereinsrolle nicht gefunden")
+
+    return templates.TemplateResponse(
+        "pflichtstunden/vereinsrolle_formular.html",
+        {
+            "request": request,
+            "benutzer": benutzer,
+            "rolle": rolle,
+        },
+    )
+
+
+@router.post("/vereinsrollen/{rolle_id}/bearbeiten")
+async def vereinsrolle_aktualisieren(
+    rolle_id: str,
+    request: Request,
+    name: str = Form(...),
+    beschreibung: str = Form(""),
+    pflichtstunden_befreit: bool = Form(False),
+    befreiungsgrund: str = Form(""),
+    db: AsyncSession = Depends(get_db),
+):
+    await require_user(request, db)
+
+    result = await db.execute(select(Vereinsrolle).where(Vereinsrolle.id == rolle_id))
+    rolle = result.scalar_one_or_none()
+    if rolle:
+        rolle.name = name.strip()
+        rolle.beschreibung = beschreibung.strip() or None
+        rolle.pflichtstunden_befreit = pflichtstunden_befreit
+        rolle.befreiungsgrund = BefreiungsGrund(befreiungsgrund) if befreiungsgrund else None
+        await db.commit()
+
     return RedirectResponse("/pflichtstunden/vereinsrollen", status_code=302)
 
 
