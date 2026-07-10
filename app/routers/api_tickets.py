@@ -18,7 +18,7 @@ from app.ticket_mailer import sende_ticket_antwort
 from app.email_service import sende_email
 from app.schemas import (
     TicketCreate, TicketOut, TicketDetailOut, TicketStatusUpdate,
-    TicketZuweisungUpdate, TicketMitgliedUpdate,
+    TicketZuweisungUpdate, TicketMitgliedUpdate, TicketSpamUpdate,
     TicketNachrichtCreate, TicketNachrichtOut,
 )
 
@@ -191,6 +191,28 @@ async def mitglied_zuordnen(
         raise HTTPException(status_code=404, detail="Ticket nicht gefunden")
 
     ticket.mitglied_id = daten.mitglied_id
+    await db.commit()
+    await db.refresh(ticket)
+    return ticket
+
+
+@router.put(
+    "/{ticket_id}/spam-status", response_model=TicketOut, summary="Spam-Verdacht setzen/aufheben",
+    description="Wird primär genutzt, um einen automatisch erkannten Spam-Verdacht als "
+                "falsch-positiv zu markieren (spam_verdacht=false).",
+)
+async def spam_status_aendern(
+    ticket_id: str,
+    daten: TicketSpamUpdate,
+    db: AsyncSession = Depends(get_db),
+    benutzer: Benutzer = Depends(require_schreibzugriff),
+):
+    result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
+    ticket = result.scalar_one_or_none()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket nicht gefunden")
+
+    ticket.spam_verdacht = daten.spam_verdacht
     await db.commit()
     await db.refresh(ticket)
     return ticket

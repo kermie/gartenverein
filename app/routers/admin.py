@@ -155,6 +155,11 @@ EINSTELLUNGEN_FELDER = [
     ("imap_host", "IMAP-Server (für Ticket-Postfach)"),
     ("imap_port", "IMAP-Port"),
     ("imap_ssl", "IMAP SSL (true/false)"),
+    ("spam_domain_blocklist", "Spam: gesperrte Absender-Domains (kommagetrennt)"),
+    ("spam_keyword_blocklist", "Spam: gesperrte Schlüsselwörter (kommagetrennt)"),
+    ("spam_schwellenwert", "Spam: Schwellenwert (0.0–1.0, Standard 0.5)"),
+    ("spam_api_url", "Spam: externe Prüf-API-URL (optional)"),
+    ("spam_api_key", "Spam: externer API-Key (optional)"),
 ]
 
 # Optionale Funktionsbereiche, die sich pro Verein ein-/ausschalten lassen.
@@ -213,7 +218,7 @@ async def einstellungen_speichern(
         )
         eintrag = result.scalar_one_or_none()
 
-        if schluessel.endswith("_password"):
+        if schluessel.endswith("_password") or schluessel.endswith("_api_key"):
             # Leeres Feld = "unverändert lassen" (wie im Platzhaltertext
             # versprochen), damit man nicht bei jedem Speichern das
             # Passwort neu eintippen muss. Nur ein NEUER Wert wird

@@ -69,14 +69,16 @@ async def tickets_uebersicht(
     )
 
     if filter == "aktiv":
-        query = query.where(Ticket.status != TicketStatus.GESCHLOSSEN)
+        query = query.where(Ticket.status != TicketStatus.GESCHLOSSEN, Ticket.spam_verdacht == False)
     elif filter == "mir":
         query = query.where(
             Ticket.zugewiesen_an_id == benutzer.id, Ticket.status != TicketStatus.GESCHLOSSEN
         )
     elif filter == "geschlossen":
         query = query.where(Ticket.status == TicketStatus.GESCHLOSSEN)
-    # "alle": kein zusätzlicher Filter
+    elif filter == "spam":
+        query = query.where(Ticket.spam_verdacht == True)
+    # "alle": kein zusätzlicher Filter (zeigt auch Spam-Verdachtsfälle)
 
     if suche:
         query = query.where(
@@ -94,10 +96,15 @@ async def tickets_uebersicht(
     # unabhängig vom gespeicherten Status – rein berechnet, kein Hintergrundjob.
     faellige_anzahl = sum(1 for t in tickets if t.ist_faellig)
 
+    spam_anzahl_result = await db.execute(
+        select(Ticket).where(Ticket.spam_verdacht == True)
+    )
+    spam_anzahl = len(spam_anzahl_result.scalars().all())
+
     return templates.TemplateResponse("tickets/uebersicht.html", {
         "request": request, "benutzer": benutzer,
         "tickets": tickets, "filter": filter, "suche": suche,
-        "faellige_anzahl": faellige_anzahl,
+        "faellige_anzahl": faellige_anzahl, "spam_anzahl": spam_anzahl,
         "TicketStatus": TicketStatus,
     })
 
@@ -285,6 +292,27 @@ async def ticket_mitglied_zuordnen(
         raise HTTPException(status_code=404)
 
     ticket.mitglied_id = mitglied_id.strip() or None
+    await db.commit()
+    return RedirectResponse(f"/tickets/{ticket_id}", status_code=302)
+
+
+# ---------------------------------------------------------------------------
+# Spam-Verdacht aufheben (falsch-positiv)
+# ---------------------------------------------------------------------------
+
+@router.post("/{ticket_id}/kein-spam")
+async def ticket_kein_spam(
+    ticket_id: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    await require_user(request, db)
+    result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
+    ticket = result.scalar_one_or_none()
+    if not ticket:
+        raise HTTPException(status_code=404)
+
+    ticket.spam_verdacht = False
     await db.commit()
     return RedirectResponse(f"/tickets/{ticket_id}", status_code=302)
 

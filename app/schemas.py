@@ -553,6 +553,10 @@ class TicketMitgliedUpdate(BaseModel):
     mitglied_id: Optional[str] = None
 
 
+class TicketSpamUpdate(BaseModel):
+    spam_verdacht: bool = Field(..., description="false zum Aufheben eines Spam-Verdachts (falsch-positiv)")
+
+
 class TicketOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str
@@ -564,6 +568,8 @@ class TicketOut(BaseModel):
     absender_email: str
     absender_name: Optional[str] = None
     spam_verdacht: bool
+    spam_score: Optional[Decimal] = None
+    spam_begruendung: Optional[str] = None
     erstellt_am: datetime
     aktualisiert_am: datetime
     geschlossen_am: Optional[datetime] = None

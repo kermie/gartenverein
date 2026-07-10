@@ -893,6 +893,9 @@ class Ticket(Base):
     # ist in Etappe 1 ein No-Op (siehe app/spam_filter.py).
     spam_verdacht: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     spam_score: Mapped[Optional[float]] = mapped_column(Numeric(5, 2), nullable=True)
+    spam_begruendung: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True, comment="Nachvollziehbare Begründung, warum als Spam eingestuft (Transparenz)"
+    )
 
     erstellt_am: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

@@ -13,9 +13,41 @@ Modul-Flag: `tickets`
 2. **E-Mail-Integration** (fertig) – IMAP-Postfach-Konfiguration,
    Hintergrund-Polling (alle 2 Min.), eingehende Mails werden zu
    Tickets/Nachrichten, ausgehende Antworten werden per SMTP versendet.
-3. **Spam-Schnittstelle** (geplant) – die in Etappe 1 vorbereitete
-   No-Op-Funktion (`app/spam_filter.py`) wird an einen echten Dienst
-   angebunden.
+3. **Spam-Schnittstelle** (fertig) – eingebaute Heuristiken plus optionale
+   externe API, konfigurierbar unter `/admin/einstellungen`.
+
+## Etappe 3: Spam-Filter
+
+**Zwei kombinierte Ebenen.** Eingebaute Heuristiken laufen sofort, ohne
+externen Dienst: Absender-Domain-Sperrliste, Schlüsselwort-Sperrliste,
+Anzahl Links im Text. Eine optionale externe API (`app/spam_filter.py`,
+`_externe_pruefung()`) wird nur genutzt, wenn eine URL konfiguriert ist –
+sie muss lediglich `{"spam_score": 0.0-1.0}` als JSON zurückgeben, damit
+beliebige Dienste (Akismet, ein selbst gehosteter Filter, ein kleiner
+Adapter vor einem bezahlten Dienst) angebunden werden können, ohne
+Aufrufer-Code anzufassen. Der finale Score ist das Maximum aus Heuristik-
+und externem Score; schlägt der externe Aufruf fehl, wird stillschweigend
+auf die Heuristiken zurückgefallen – ein Ausfall des externen Diensts darf
+niemals die Ticketerstellung blockieren.
+
+**Transparenz statt stillem Aussortieren.** Als Spam markierte Tickets
+werden nicht gelöscht, sondern nur aus dem Standard-Filter "Aktiv"
+ausgeblendet. Ein eigener Filter-Tab "Verdächtig" (mit Zähler-Badge) zeigt
+sie weiterhin an, inklusive Score und einer nachvollziehbaren Begründung
+(`spam_begruendung`, z.B. "Schlüsselwörter gefunden: casino, gewinn").
+Jedes Ticket lässt sich mit einem Klick als "kein Spam" (falsch-positiv)
+freigeben – wichtig, weil Heuristiken nie perfekt sind und ein Verein
+niemals ein echtes Anliegen versehentlich für immer verlieren soll.
+
+**Spam-Prüfung nur bei neuen Tickets, nicht bei Antworten.** Antwortet
+jemand auf ein bereits bestehendes (per Threading zugeordnetes) Ticket,
+läuft keine erneute Spam-Prüfung – spart unnötige (ggf. kostenpflichtige)
+externe Aufrufe und ist inhaltlich korrekt: eine bereits als legitim
+erkannte Konversation muss nicht bei jeder Antwort neu bewertet werden.
+
+**Neue Abhängigkeit:** `httpx` (für die optionale externe API) wurde zu
+`requirements.txt` hinzugefügt – erfordert `docker compose build`, nicht
+nur `restart`.
 
 ## Etappe 2: E-Mail-Integration
 

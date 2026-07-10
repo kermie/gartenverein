@@ -82,14 +82,37 @@
                     Postfach zum Senden von Antworten und ruft es zusätzlich per
                     IMAP ab, um eingehende Anfragen als Tickets zu erfassen.
                 </p>
-                {% for schluessel, label in felder[10:] %}
+                {% for schluessel, label in felder[10:18] %}
                 <div class="mb-3">
                     <label class="form-label fw-semibold">{{ label }}</label>
-                    <input type="{{ 'password' if 'password' in schluessel else 'text' }}"
+                    <input type="{{ 'password' if ('password' in schluessel or 'api_key' in schluessel) else 'text' }}"
                            name="{{ schluessel }}" class="form-control"
-                           value="{{ '' if 'password' in schluessel else (einstellungen.get(schluessel, '') or '') }}"
-                           {% if 'password' in schluessel %}placeholder="{% if einstellungen.get(schluessel) %}•••••••• (gesetzt – neu eingeben zum Ändern){% else %}Noch nicht gesetzt{% endif %}"
+                           value="{{ '' if ('password' in schluessel or 'api_key' in schluessel) else (einstellungen.get(schluessel, '') or '') }}"
+                           {% if 'password' in schluessel or 'api_key' in schluessel %}placeholder="{% if einstellungen.get(schluessel) %}•••••••• (gesetzt – neu eingeben zum Ändern){% else %}Noch nicht gesetzt{% endif %}"
                            {% elif 'ssl' in schluessel or 'tls' in schluessel %}placeholder="true oder false"
+                           {% endif %}>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header"><i class="bi bi-shield-exclamation me-2"></i>Spam-Filter (Ticketsystem)</div>
+            <div class="card-body">
+                <p class="text-muted mb-3" style="font-size: 0.82rem;">
+                    Eingebaute Heuristiken (Domain-/Schlüsselwort-Sperrliste, Link-Anzahl)
+                    laufen sofort ohne externen Dienst. Eine externe Prüf-API ist optional
+                    und wird nur genutzt, wenn eine URL hinterlegt ist – ein Ausfall der
+                    externen API blockiert nie die Ticketerstellung.
+                </p>
+                {% for schluessel, label in felder[18:] %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ label }}</label>
+                    <input type="{{ 'password' if ('password' in schluessel or 'api_key' in schluessel) else 'text' }}"
+                           name="{{ schluessel }}" class="form-control"
+                           value="{{ '' if ('password' in schluessel or 'api_key' in schluessel) else (einstellungen.get(schluessel, '') or '') }}"
+                           {% if 'password' in schluessel or 'api_key' in schluessel %}placeholder="{% if einstellungen.get(schluessel) %}•••••••• (gesetzt – neu eingeben zum Ändern){% else %}Noch nicht gesetzt{% endif %}"
+                           {% elif 'schwellenwert' in schluessel %}placeholder="0.5"
                            {% endif %}>
                 </div>
                 {% endfor %}

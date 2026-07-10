@@ -327,8 +327,6 @@ async def verarbeite_eingehende_mails(db: AsyncSession) -> int:
         if not mail["von_email"]:
             continue  # unbrauchbare Nachricht (keine Absenderadresse geparst)
 
-        spam_ergebnis = await pruefe_auf_spam(mail["von_email"], mail["betreff"], mail["text"])
-
         ticket = await _finde_passendes_ticket(db, mail)
 
         if ticket:
@@ -337,6 +335,10 @@ async def verarbeite_eingehende_mails(db: AsyncSession) -> int:
                 ticket.status = TicketStatus.ZUGEWIESEN if ticket.zugewiesen_an_id else TicketStatus.NICHT_ZUGEWIESEN
                 ticket.geschlossen_am = None
         else:
+            # Spam-Prüfung nur für neue Tickets, nicht für Antworten auf
+            # bestehende – spart unnötige (ggf. kostenpflichtige) externe Aufrufe.
+            spam_ergebnis = await pruefe_auf_spam(mail["von_email"], mail["betreff"], mail["text"], db)
+
             treffer = await finde_mitglieder_per_email(db, mail["von_email"])
             mitglied_id = treffer[0].id if len(treffer) == 1 else None
 
@@ -347,6 +349,7 @@ async def verarbeite_eingehende_mails(db: AsyncSession) -> int:
                 mitglied_id=mitglied_id,
                 spam_verdacht=spam_ergebnis.ist_spam_verdacht,
                 spam_score=spam_ergebnis.score,
+                spam_begruendung=spam_ergebnis.begruendung,
             )
             db.add(ticket)
             await db.flush()
