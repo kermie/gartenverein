@@ -716,3 +716,129 @@ class Zaehlerstand(Base):
 
     def __repr__(self) -> str:
         return f"<Zaehlerstand {self.jahr}: {self.stand}>"
+
+
+# ---------------------------------------------------------------------------
+# Versicherungsmodul: Sach- und Unfallversicherung pro Parzelle
+# ---------------------------------------------------------------------------
+
+class SachversicherungPaket(Base):
+    """
+    Ein wählbares Sachversicherungs-Paket für ein bestimmtes Jahr
+    (z.B. "Paket 1" = 40 €, "Paket 2" = 60 € usw.). Anzahl und Beträge
+    der Pakete sind frei konfigurierbar und können sich jährlich ändern.
+    """
+    __tablename__ = "sachversicherung_pakete"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    jahr: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    bezeichnung: Mapped[str] = mapped_column(String(100), nullable=False)
+    betrag_eur: Mapped[float] = mapped_column(Numeric(8, 2), nullable=False)
+    reihenfolge: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    def __repr__(self) -> str:
+        return f"<SachversicherungPaket {self.jahr} {self.bezeichnung}: {self.betrag_eur}€>"
+
+
+class VersicherungsKonfiguration(Base):
+    """
+    Jährliche Konfiguration der Unfallversicherungs-Beträge. Sachversicherung
+    wird separat über SachversicherungPaket konfiguriert (mehrere Pakete
+    pro Jahr), Unfallversicherung hat pro Jahr genau einen Grund- und
+    Zusatzbetrag.
+    """
+    __tablename__ = "versicherungs_konfiguration"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    jahr: Mapped[int] = mapped_column(Integer, nullable=False, unique=True, index=True)
+    unfall_grundbetrag_eur: Mapped[float] = mapped_column(
+        Numeric(8, 2), nullable=False,
+        comment="Deckt alle Mitglieder im selben Haushalt (gleiche Adresse) ab"
+    )
+    unfall_zusatzbetrag_eur: Mapped[float] = mapped_column(
+        Numeric(8, 2), nullable=False,
+        comment="Pro zusätzlich mitversicherter Person außerhalb des Haushalts"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+    def __repr__(self) -> str:
+        return f"<VersicherungsKonfiguration {self.jahr}>"
+
+
+class ParzelleVersicherung(Base):
+    """
+    Versicherungsstatus einer Parzelle für ein bestimmtes Jahr:
+    Sachversicherung (optional, mit gewähltem Paket) und Unfallversicherung
+    (optional, Grundbetrag deckt den Haushalt des Hauptpächters ab).
+    """
+    __tablename__ = "parzelle_versicherung"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    parzelle_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("parzellen.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    jahr: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    hat_sachversicherung: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    sach_paket_id: Mapped[Optional[str]] = mapped_column(
+        String(36), ForeignKey("sachversicherung_pakete.id", ondelete="SET NULL"), nullable=True
+    )
+
+    hat_unfallversicherung: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+    parzelle: Mapped["Parzelle"] = relationship("Parzelle")
+    sach_paket: Mapped[Optional["SachversicherungPaket"]] = relationship("SachversicherungPaket")
+    zusatzpersonen: Mapped[List["UnfallversicherungZusatzperson"]] = relationship(
+        "UnfallversicherungZusatzperson", back_populates="parzelle_versicherung", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("parzelle_id", "jahr", name="uq_parzelle_versicherung_jahr"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ParzelleVersicherung {self.parzelle_id} {self.jahr}>"
+
+
+class UnfallversicherungZusatzperson(Base):
+    """
+    Ein Mitglied, das zusätzlich zum Haushalt des Hauptpächters gegen
+    Aufpreis in die Unfallversicherung der Parzelle aufgenommen wurde
+    (z.B. ein Mitpächter, der nicht am selben Wohnort lebt).
+    """
+    __tablename__ = "unfallversicherung_zusatzpersonen"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    parzelle_versicherung_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("parzelle_versicherung.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    mitglied_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("mitglieder.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    parzelle_versicherung: Mapped["ParzelleVersicherung"] = relationship(
+        "ParzelleVersicherung", back_populates="zusatzpersonen"
+    )
+    mitglied: Mapped["Mitglied"] = relationship("Mitglied")
+
+    __table_args__ = (
+        UniqueConstraint("parzelle_versicherung_id", "mitglied_id", name="uq_versicherung_mitglied"),
+    )

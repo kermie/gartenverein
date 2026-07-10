@@ -171,6 +171,22 @@
         </a>
         {% endif %}
 
+        {% if request.state.module_flags.versicherungen %}
+        <div class="nav-label">Versicherungen</div>
+        <a href="/versicherungen/" class="{% if request.url.path == '/versicherungen/' %}aktiv{% endif %}">
+            <i class="bi bi-shield-check"></i> Übersicht
+        </a>
+        <a href="/versicherungen/parzellen" class="{% if '/versicherungen/parzellen' in request.url.path %}aktiv{% endif %}">
+            <i class="bi bi-grid-3x3"></i> Parzellen
+        </a>
+        <a href="/versicherungen/konfiguration" class="{% if '/versicherungen/konfiguration' in request.url.path %}aktiv{% endif %}">
+            <i class="bi bi-gear"></i> Konfiguration
+        </a>
+        <a href="/versicherungen/auswertung" class="{% if '/versicherungen/auswertung' in request.url.path %}aktiv{% endif %}">
+            <i class="bi bi-bar-chart"></i> Auswertung
+        </a>
+        {% endif %}
+
         {% if benutzer.rolle.value in ['admin', 'vorstand'] %}
         <div class="nav-label">Administration</div>
         <a href="/admin/" class="{% if '/admin/' == request.url.path %}aktiv{% endif %}">

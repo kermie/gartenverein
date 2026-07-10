@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Versicherungs-Konfiguration{% endblock %}
+{% block page_title %}Versicherungs-Konfiguration {{ jahr }}{% endblock %}
+
+{% block topbar_actions %}
+<div class="d-flex gap-2 align-items-center">
+    <form method="get" class="d-flex gap-2">
+        <select name="jahr" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
+            {% for j in verfuegbare_jahre %}
+            <option value="{{ j }}" {% if j == jahr %}selected{% endif %}>{{ j }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <a href="/versicherungen/" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Zurück
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+
+    <!-- Unfallversicherung -->
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-heart-pulse me-2"></i>Unfallversicherung {{ jahr }}</div>
+            <div class="card-body">
+                <form method="post" action="/versicherungen/konfiguration/speichern">
+                    <input type="hidden" name="jahr" value="{{ jahr }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Grundbetrag pro Parzelle</label>
+                        <div class="input-group">
+                            <input type="text" name="unfall_grundbetrag_eur" class="form-control"
+                                   value="{{ '%.2f'|format(konfiguration.unfall_grundbetrag_eur|float) if konfiguration else '3,00' }}"
+                                   required>
+                            <span class="input-group-text">€</span>
+                        </div>
+                        <div class="form-text">
+                            Deckt alle Mitglieder im selben Haushalt (gleiche Adresse wie
+                            Hauptpächter) automatisch mit ab.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Zusatzbetrag pro weiterer Person</label>
+                        <div class="input-group">
+                            <input type="text" name="unfall_zusatzbetrag_eur" class="form-control"
+                                   value="{{ '%.2f'|format(konfiguration.unfall_zusatzbetrag_eur|float) if konfiguration else '3,00' }}"
+                                   required>
+                            <span class="input-group-text">€</span>
+                        </div>
+                        <div class="form-text">
+                            Für Parzellenmitglieder, die nicht im selben Haushalt leben und
+                            optional mitversichert werden.
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-lg me-1"></i>Speichern
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sachversicherungs-Pakete -->
+    <div class="col-lg-7">
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-plus-lg me-2"></i>Neues Sachversicherungs-Paket</div>
+            <div class="card-body">
+                <form method="post" action="/versicherungen/konfiguration/pakete/neu"
+                      class="row g-2 align-items-end">
+                    <input type="hidden" name="jahr" value="{{ jahr }}">
+                    <div class="col-sm-4">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Bezeichnung</label>
+                        <input type="text" name="bezeichnung" class="form-control form-control-sm"
+                               placeholder="z.B. Paket 1" required>
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Betrag</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="betrag_eur" class="form-control" placeholder="40,00" required>
+                            <span class="input-group-text">€</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Reihenfolge</label>
+                        <input type="number" name="reihenfolge" class="form-control form-control-sm" value="0">
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="submit" class="btn btn-sm btn-primary w-100">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><i class="bi bi-box-seam me-2"></i>Pakete {{ jahr }}</div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Bezeichnung</th>
+                            <th>Betrag</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pakete %}
+                        <tr>
+                            <td>
+                                <form method="post" action="/versicherungen/konfiguration/pakete/{{ p.id }}/bearbeiten"
+                                      class="d-flex gap-2 align-items-center">
+                                    <input type="text" name="bezeichnung" class="form-control form-control-sm"
+                                           value="{{ p.bezeichnung }}" style="max-width: 140px;" required>
+                            </td>
+                            <td>
+                                    <div class="input-group input-group-sm" style="max-width: 130px;">
+                                        <input type="text" name="betrag_eur" class="form-control"
+                                               value="{{ '%.2f'|format(p.betrag_eur|float) }}" required>
+                                        <span class="input-group-text">€</span>
+                                    </div>
+                            </td>
+                            <td class="text-end">
+                                    <input type="hidden" name="reihenfolge" value="{{ p.reihenfolge }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary border-0">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                                <form method="post" action="/versicherungen/konfiguration/pakete/{{ p.id }}/loeschen" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                            onclick="return confirm('Paket wirklich löschen?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-3">
+                                Noch keine Pakete für {{ jahr }} angelegt.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

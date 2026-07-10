@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Versicherungsauswertung {{ jahr }}{% endblock %}
+{% block page_title %}Versicherungsauswertung {{ jahr }}{% endblock %}
+
+{% block topbar_actions %}
+<div class="d-flex gap-2 align-items-center">
+    <form method="get" class="d-flex gap-2">
+        <select name="jahr" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
+            {% for j in verfuegbare_jahre %}
+            <option value="{{ j }}" {% if j == jahr %}selected{% endif %}>{{ j }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <a href="/versicherungen/auswertung/csv?jahr={{ jahr }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-download me-1"></i>CSV Export
+    </a>
+    <a href="/versicherungen/" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Zurück
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="card text-center p-3">
+            <div class="text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Versicherte Parzellen</div>
+            <div style="font-size: 1.8rem; font-weight: 700; color: var(--gv-gruen);">{{ zeilen | length }}</div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card text-center p-3">
+            <div class="text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Gesamteinnahmen</div>
+            <div style="font-size: 1.8rem; font-weight: 700; color: var(--gv-gruen);">{{ "%.2f"|format(summe_gesamt) }} €</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Parzelle</th>
+                    <th>Sachversicherung</th>
+                    <th>Sach-Kosten</th>
+                    <th>Unfallversicherung</th>
+                    <th>Zusatzpersonen</th>
+                    <th>Unfall-Kosten</th>
+                    <th>Gesamt</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for z in zeilen %}
+                <tr>
+                    <td class="fw-semibold">
+                        <a href="/versicherungen/parzellen/{{ z.pv.parzelle.id }}?jahr={{ jahr }}"
+                           class="text-decoration-none" style="color: var(--gv-gruen);">
+                            {{ z.pv.parzelle.gartennummer }}
+                        </a>
+                    </td>
+                    <td>{{ z.pv.sach_paket.bezeichnung if z.pv.sach_paket else '–' }}</td>
+                    <td>{{ "%.2f"|format(z.kosten.sach_kosten) }} €</td>
+                    <td>{% if z.pv.hat_unfallversicherung %}Ja{% else %}–{% endif %}</td>
+                    <td>{{ z.pv.zusatzpersonen | length }}</td>
+                    <td>{{ "%.2f"|format(z.kosten.unfall_kosten) }} €</td>
+                    <td class="fw-semibold">{{ "%.2f"|format(z.kosten.gesamt) }} €</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                        Keine versicherten Parzellen für {{ jahr }}.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
