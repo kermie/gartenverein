@@ -636,7 +636,7 @@ class Zaehlpunkt(Base):
     def anzeigename(self) -> str:
         if self.parzelle:
             return f"Parzelle {self.parzelle.gartennummer}"
-        return self.bezeichnung or "Unbenannter Zaehlpunkt"
+        return self.bezeichnung or "Unbenannter Zählpunkt"
 
     @property
     def aktueller_zaehler(self) -> Optional["Zaehler"]:

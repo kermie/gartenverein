@@ -253,7 +253,7 @@ def erstelle_zaehler_router(
         benutzer = await require_user(request, db)
         zaehlpunkt = await _lade_zaehlpunkt_mit_details(db, zaehlpunkt_id)
         if not zaehlpunkt:
-            raise HTTPException(status_code=404, detail=f"{medium_label}-Zaehlpunkt nicht gefunden")
+            raise HTTPException(status_code=404, detail=f"{medium_label}-Zählpunkt nicht gefunden")
 
         aktueller_zaehler = zaehlpunkt.aktueller_zaehler
         fruehere_zaehler = sorted(
@@ -378,7 +378,7 @@ def erstelle_zaehler_router(
 
         zaehler = zaehlpunkt.aktueller_zaehler
         if not zaehler:
-            raise HTTPException(status_code=400, detail="Kein aktiver Zähler für diesen Zaehlpunkt vorhanden")
+            raise HTTPException(status_code=400, detail="Kein aktiver Zähler für diesen Zählpunkt vorhanden")
 
         neuer_stand = _parse_zahl(stand, dezimalstellen)
         if neuer_stand is None:
@@ -556,7 +556,7 @@ def erstelle_zaehler_router(
 
         output = io.StringIO()
         writer = csv.writer(output, delimiter=";")
-        writer.writerow(["Typ", "Zaehlpunkt", f"{medium_label}zähler-Nr.", "Zählerstand", f"Verbrauch ({einheit})"])
+        writer.writerow(["Typ", "Zählpunkt", f"{medium_label}zähler-Nr.", "Zählerstand", f"Verbrauch ({einheit})"])
 
         typ_label = {
             ZaehlpunktTyp.HAUPTZAEHLER: "Hauptzähler",

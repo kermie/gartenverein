@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ medium_label }}-Zaehlpunkte{% endblock %}
-{% block page_title %}{{ medium_label }}-Zaehlpunkte{% endblock %}
+{% block title %}{{ medium_label }}-Zählpunkte{% endblock %}
+{% block page_title %}{{ medium_label }}-Zählpunkte{% endblock %}
 
 {% block topbar_actions %}
 <div class="d-flex gap-2">
@@ -8,7 +8,7 @@
         <i class="bi bi-arrow-left me-1"></i>Zurück
     </a>
     <a href="{{ url_prefix }}/zaehlpunkte/neu" class="btn btn-sm btn-primary">
-        <i class="bi bi-plus-lg me-1"></i>Neuer Zaehlpunkt
+        <i class="bi bi-plus-lg me-1"></i>Neuer Zählpunkt
     </a>
 </div>
 {% endblock %}
@@ -20,7 +20,7 @@
             <thead>
                 <tr>
                     <th>Typ</th>
-                    <th>Zaehlpunkt</th>
+                    <th>Zählpunkt</th>
                     <th>Zähler-Nr.</th>
                     <th>Status</th>
                     <th>Geeicht bis</th>
@@ -75,8 +75,8 @@
                 <tr>
                     <td colspan="6" class="text-center py-5 text-muted">
                         <i class="bi {{ icon }} d-block mb-2" style="font-size: 1.5rem;"></i>
-                        Noch keine {{ medium_label }}-Zaehlpunkte angelegt.<br>
-                        <a href="{{ url_prefix }}/zaehlpunkte/neu" class="btn btn-sm btn-primary mt-2">Ersten Zaehlpunkt anlegen</a>
+                        Noch keine {{ medium_label }}-Zählpunkte angelegt.<br>
+                        <a href="{{ url_prefix }}/zaehlpunkte/neu" class="btn btn-sm btn-primary mt-2">Ersten Zählpunkt anlegen</a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -85,7 +85,7 @@
     </div>
     {% if zaehlpunkte %}
     <div class="card-footer text-muted" style="font-size: 0.82rem;">
-        {{ zaehlpunkte | length }} Zaehlpunkt(e)
+        {{ zaehlpunkte | length }} Zählpunkt(e)
     </div>
     {% endif %}
 </div>
