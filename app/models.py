@@ -934,6 +934,11 @@ class TicketNachricht(Base):
     verfasst_von_id: Mapped[Optional[str]] = mapped_column(
         String(36), ForeignKey("benutzer.id", ondelete="SET NULL"), nullable=True
     )
+    # Für E-Mail-Threading (Etappe 2): Message-ID dieser Nachricht bzw. der
+    # Message-ID, auf die sie antwortet. Ermöglicht, eingehende Antworten
+    # dem richtigen Ticket zuzuordnen, statt nur nach Betreff zu raten.
+    message_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
+    in_reply_to: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     erstellt_am: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

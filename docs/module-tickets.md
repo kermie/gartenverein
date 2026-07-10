@@ -10,13 +10,59 @@ Modul-Flag: `tickets`
 
 1. **Datenmodell + manuelle Ticketverwaltung** (fertig) – Tickets, Verlauf,
    Zuweisung, Status, Mitglied-Abgleich. Noch kein automatischer E-Mail-Abruf.
-2. **E-Mail-Integration** (geplant) – IMAP-Postfach-Konfiguration,
-   Hintergrund-Polling (alle ~2 Min.), eingehende Mails werden zu
-   Tickets/Nachrichten, ausgehende Antworten werden tatsächlich per SMTP
-   versendet.
+2. **E-Mail-Integration** (fertig) – IMAP-Postfach-Konfiguration,
+   Hintergrund-Polling (alle 2 Min.), eingehende Mails werden zu
+   Tickets/Nachrichten, ausgehende Antworten werden per SMTP versendet.
 3. **Spam-Schnittstelle** (geplant) – die in Etappe 1 vorbereitete
    No-Op-Funktion (`app/spam_filter.py`) wird an einen echten Dienst
    angebunden.
+
+## Etappe 2: E-Mail-Integration
+
+**Ein Postfach für IMAP-Abruf und SMTP-Versand**, getrennt von der
+allgemeinen Vereins-SMTP-Konfiguration (die nur für Einladungs-E-Mails
+dient). Konfiguration unter `/admin/einstellungen`, Karte
+"Ticket-Postfach (IMAP/SMTP)". Beide Passwörter werden verschlüsselt
+gespeichert (siehe `app/crypto_utils.py`) – die Passwort-Sonderbehandlung
+beim Speichern (leer = unverändert lassen) wurde dafür generalisiert
+(`if schluessel.endswith("_password")` statt einem hartkodierten Einzelfall).
+
+**Hintergrund-Polling ohne neuen Dienst.** Ein `asyncio`-Task, gestartet
+in der `lifespan`-Funktion von `main.py`, ruft alle 2 Minuten
+`verarbeite_eingehende_mails()` auf. Kein Celery, kein Redis, kein
+separater Container – passt zum "klein und robust"-Anspruch des Projekts.
+Zusätzlich gibt es einen manuellen "Postfach jetzt abrufen"-Button für
+sofortiges Testen, ohne auf den nächsten Zyklus zu warten.
+
+**IMAP läuft synchron in einem Thread, nicht async.** Es gibt keine
+ausgereifte async-IMAP-Bibliothek in den Standard-Abhängigkeiten. Statt
+eine neue hinzuzufügen, nutzt `app/ticket_mailer.py` Python-Bordmittel
+(`imaplib`, `email`) synchron, ausgeführt über `asyncio.to_thread(...)`,
+damit der Event-Loop währenddessen nicht blockiert.
+
+**Betriebsdaten in der bestehenden Vereinseinstellungen-Tabelle.** Die
+zuletzt verarbeitete IMAP-UID und der letzte Fehler landen als
+`ticket_imap_letzte_uid` / `ticket_imap_letzter_fehler` in derselben
+Key-Value-Tabelle, die auch Modul-Flags und SMTP-Einstellungen speichert –
+keine zusätzliche Tabelle/Migration nur für diesen Zweck.
+
+**Threading über Message-ID, mit Fallback.** Eingehende Antworten werden
+zuerst über `In-Reply-To`/`References`-Header gegen gespeicherte
+`message_id`-Werte vorheriger `TicketNachricht`-Einträge abgeglichen.
+Schlägt das fehl (z.B. weil der Kunde eine neue Mail statt zu antworten
+schreibt, aber mit gleichem Betreff), wird ersatzweise nach Absender-
+Adresse + bereinigtem Betreff (ohne "Re:"/"AW:"-Präfix) in offenen
+Tickets gesucht. Ohne Treffer entsteht ein neues Ticket.
+
+**Geschlossene Tickets öffnen sich bei neuer Antwort automatisch
+wieder** – der Status springt zurück auf `ZUGEWIESEN` (falls weiterhin
+zugewiesen) oder `NICHT_ZUGEWIESEN`.
+
+**Spam-Prüfung wird bereits aufgerufen, obwohl sie noch ein No-Op ist.**
+`pruefe_auf_spam()` aus Etappe 1 wird bei jeder eingehenden Mail bereits
+aufgerufen und das Ergebnis in `spam_verdacht`/`spam_score` gespeichert –
+nur die eigentliche Prüflogik ist noch leer. In Etappe 3 muss daher nur
+noch diese eine Funktion ausgetauscht werden, keine Aufrufer.
 
 ## Datenmodell (Etappe 1)
 

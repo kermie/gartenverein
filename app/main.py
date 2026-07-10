@@ -3,6 +3,7 @@ Gartenverein-Verwaltung – Hauptanwendung.
 """
 from contextlib import asynccontextmanager
 from datetime import date
+import asyncio
 import logging
 
 from fastapi import FastAPI, Request
@@ -18,6 +19,7 @@ from app.database import get_db, AsyncSessionLocal, aktives_mitglied_filter
 from app.models import Benutzer, BenutzerRolle, Mitglied, Parzelle, ParzelleStatus, MitgliedParzelle
 from app.auth import hash_passwort, get_current_user
 from app.module_flags import lade_modul_flags
+from app.ticket_mailer import verarbeite_eingehende_mails
 from app.routers import auth, mitglieder, parzellen, admin as admin_router, pflichtstunden, versicherungen, tickets
 from app.routers.zaehlerwesen import erstelle_zaehler_router
 from app.models import ZaehlerMedium
@@ -27,6 +29,25 @@ from app.routers.api_zaehlerwesen import erstelle_zaehler_api_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+async def _ticket_postfach_polling_schleife():
+    """
+    Fragt alle 2 Minuten das konfigurierte Ticket-Postfach nach neuen
+    E-Mails ab. Läuft dauerhaft im Hintergrund; Fehler werden abgefangen,
+    damit die Schleife nicht durch einen einzelnen fehlgeschlagenen
+    Abruf beendet wird.
+    """
+    while True:
+        try:
+            async with AsyncSessionLocal() as db:
+                anzahl = await verarbeite_eingehende_mails(db)
+                if anzahl:
+                    logger.info(f"Ticket-Postfach: {anzahl} neue E-Mail(s) verarbeitet.")
+        except Exception as e:
+            logger.error(f"Ticket-Postfach-Polling fehlgeschlagen: {e}")
+
+        await asyncio.sleep(120)  # 2 Minuten
 
 
 @asynccontextmanager
@@ -47,7 +68,10 @@ async def lifespan(app: FastAPI):
                 "Erster Admin-Benutzer angelegt: admin@gartenverein.local / admin1234 "
                 "– BITTE SOFORT PASSWORT ÄNDERN!"
             )
+
+    polling_task = asyncio.create_task(_ticket_postfach_polling_schleife())
     yield
+    polling_task.cancel()
 
 
 app = FastAPI(

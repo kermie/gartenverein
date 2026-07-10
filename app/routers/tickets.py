@@ -24,6 +24,7 @@ from app.auth import require_user
 from app.module_flags import require_modul
 from app.aenderungstracker import AenderungsTracker
 from app.ticket_utils import finde_mitglieder_per_email
+from app.ticket_mailer import sende_ticket_antwort, verarbeite_eingehende_mails
 from app.email_service import sende_email
 from app.config import settings
 
@@ -301,21 +302,36 @@ async def nachricht_hinzufuegen(
     db: AsyncSession = Depends(get_db),
 ):
     benutzer = await require_user(request, db)
-    result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
-    ticket = result.scalar_one_or_none()
+    ticket = await _lade_ticket_mit_details(db, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404)
 
+    richtung_enum = NachrichtRichtung(richtung)
+    message_id = None
+
+    if richtung_enum == NachrichtRichtung.AUSGEHEND:
+        message_id = await sende_ticket_antwort(ticket, inhalt.strip(), db)
+
     db.add(TicketNachricht(
         ticket_id=ticket_id,
-        richtung=NachrichtRichtung(richtung),
+        richtung=richtung_enum,
         inhalt=inhalt.strip(),
         verfasst_von_id=benutzer.id,
+        message_id=message_id,
     ))
     await db.commit()
 
-    # Hinweis: der tatsächliche E-Mail-Versand an den Absender folgt in
-    # Etappe 2 (Ticket-Postfach-Integration). Aktuell wird die Antwort nur
-    # im Verlauf gespeichert.
-
     return RedirectResponse(f"/tickets/{ticket_id}", status_code=302)
+
+
+# ---------------------------------------------------------------------------
+# Ticket-Postfach: manueller Abruf (zusätzlich zum Hintergrund-Polling)
+# ---------------------------------------------------------------------------
+
+@router.post("/postfach/abrufen-jetzt")
+async def postfach_jetzt_abrufen(request: Request, db: AsyncSession = Depends(get_db)):
+    await require_user(request, db)
+    anzahl = await verarbeite_eingehende_mails(db)
+    import urllib.parse
+    meldung = urllib.parse.quote(f"{anzahl} neue E-Mail(s) verarbeitet.")
+    return RedirectResponse(f"/tickets/?meldung={meldung}", status_code=302)

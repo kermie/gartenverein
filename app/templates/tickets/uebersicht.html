@@ -3,12 +3,25 @@
 {% block page_title %}Tickets{% endblock %}
 
 {% block topbar_actions %}
-<a href="/tickets/neu" class="btn btn-sm btn-primary">
-    <i class="bi bi-plus-lg me-1"></i>Neues Ticket
-</a>
+<div class="d-flex gap-2">
+    <form method="post" action="/tickets/postfach/abrufen-jetzt" class="d-inline">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-clockwise me-1"></i>Postfach jetzt abrufen
+        </button>
+    </form>
+    <a href="/tickets/neu" class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Neues Ticket
+    </a>
+</div>
 {% endblock %}
 
 {% block content %}
+
+{% if request.query_params.get('meldung') %}
+<div class="alert alert-info d-flex gap-2 align-items-center mb-3">
+    <i class="bi bi-info-circle-fill"></i> {{ request.query_params.get('meldung') }}
+</div>
+{% endif %}
 
 {% if faellige_anzahl > 0 %}
 <div class="alert alert-warning d-flex gap-2 align-items-center mb-3">

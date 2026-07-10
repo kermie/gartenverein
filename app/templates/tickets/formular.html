@@ -11,8 +11,9 @@
 {% block content %}
 <div class="alert alert-info d-flex gap-2 align-items-center mb-3" style="font-size: 0.85rem;">
     <i class="bi bi-info-circle-fill"></i>
-    Manuelles Anlegen für den Testbetrieb. Ab Etappe 2 entstehen Tickets
-    automatisch aus eingehenden E-Mails.
+    Manuelles Anlegen für Tickets, die nicht per E-Mail eingegangen sind.
+    Eingehende E-Mails an das konfigurierte Ticket-Postfach werden automatisch
+    zu Tickets (Hintergrund-Abruf alle 2 Minuten).
 </div>
 
 <form method="post" action="/tickets/neu">

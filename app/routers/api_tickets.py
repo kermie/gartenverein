@@ -14,6 +14,7 @@ from app.models import Ticket, TicketNachricht, TicketStatus, NachrichtRichtung,
 from app.api_auth import get_current_api_user, require_schreibzugriff
 from app.module_flags import require_modul
 from app.ticket_utils import finde_mitglieder_per_email
+from app.ticket_mailer import sende_ticket_antwort
 from app.email_service import sende_email
 from app.schemas import (
     TicketCreate, TicketOut, TicketDetailOut, TicketStatusUpdate,
@@ -222,13 +223,21 @@ async def nachricht_erstellen(
     db: AsyncSession = Depends(get_db),
     benutzer: Benutzer = Depends(require_schreibzugriff),
 ):
-    ticket_result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
-    if not ticket_result.scalar_one_or_none():
+    ticket_result = await db.execute(
+        select(Ticket).options(selectinload(Ticket.nachrichten)).where(Ticket.id == ticket_id)
+    )
+    ticket = ticket_result.scalar_one_or_none()
+    if not ticket:
         raise HTTPException(status_code=404, detail="Ticket nicht gefunden")
 
+    richtung = NachrichtRichtung(daten.richtung)
+    message_id = None
+    if richtung == NachrichtRichtung.AUSGEHEND:
+        message_id = await sende_ticket_antwort(ticket, daten.inhalt, db)
+
     nachricht = TicketNachricht(
-        ticket_id=ticket_id, richtung=NachrichtRichtung(daten.richtung),
-        inhalt=daten.inhalt, verfasst_von_id=benutzer.id,
+        ticket_id=ticket_id, richtung=richtung,
+        inhalt=daten.inhalt, verfasst_von_id=benutzer.id, message_id=message_id,
     )
     db.add(nachricht)
     await db.commit()
