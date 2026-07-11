@@ -1,0 +1,6 @@
+# Test-Abhängigkeiten – separat von requirements.txt, damit das
+# Produktions-Image schlank bleibt. Installation nur für Testläufe:
+#   pip install -r requirements-dev.txt --break-system-packages
+pytest==8.3.3
+pytest-asyncio==0.24.0
+httpx==0.27.2

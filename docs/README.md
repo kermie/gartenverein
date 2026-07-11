@@ -18,6 +18,7 @@ und Beweggründe noch frisch sind.
 
 - [Architektur-Entscheidungen](./architektur-entscheidungen.md) – warum manche Dinge so gebaut sind, wie sie sind
 - [Betrieb](./betrieb.md) – Docker, Migrationen, SMTP-Einrichtung, Fehlerbehebung
+- [Automatisierte Tests](./testing.md) – Testphilosophie, Ausführung, bekannte Grenzen
 
 ## Für neue Module
 
@@ -27,8 +28,10 @@ Architektur-Entscheidungen für Details):
 1. Modelle in `app/models.py`, Enum-Werte **immer großschreiben** (siehe
    Lehre aus mehreren Bugs dazu)
 2. Migration in `migrations/versions/`, Revisionsname unter 32 Zeichen
-3. Router mit `dependencies=[Depends(require_modul("<name>"))]`
+3. Router mit `dependencies=[Depends(require_modul("<name>"))]` – sowohl
+   Web-Oberfläche als auch REST-API von Anfang an (API-first-Regel)
 4. Eintrag in `app/module_flags.py` (`MODULE_DEFAULTS`)
 5. Eintrag in `app/routers/admin.py` (`MODULE_FELDER`) für die Ein-/Ausschalt-Oberfläche
 6. Navigationsblock in `app/templates/base.html` als aufklappbare `nav-group`
-7. Eine neue Seite hier in `docs/` schreiben, solange die Entscheidungen noch frisch sind
+7. `tests/test_<modul>.py` mit mindestens einem Happy-Path-Test
+8. Eine neue Seite hier in `docs/` schreiben, solange die Entscheidungen noch frisch sind

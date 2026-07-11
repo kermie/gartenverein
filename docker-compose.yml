@@ -16,6 +16,25 @@ services:
       timeout: 5s
       retries: 5
 
+  # Wegwerf-Datenbank für automatisierte Tests. Läuft nur, wenn explizit mit
+  # --profile test gestartet (nicht bei normalem "docker compose up").
+  # tmpfs statt Volume: Daten verschwinden beim Stoppen, jeder Testlauf
+  # startet garantiert mit einer leeren Datenbank.
+  db_test:
+    image: postgres:16-alpine
+    profiles: ["test"]
+    environment:
+      POSTGRES_DB: gartenverein_test
+      POSTGRES_USER: gartenverein
+      POSTGRES_PASSWORD: test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gartenverein"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   web:
     build:
       context: .
