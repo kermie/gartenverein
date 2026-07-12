@@ -29,8 +29,8 @@ from httpx import AsyncClient, ASGITransport
 
 from app.database import Base, engine, AsyncSessionLocal
 from app.main import app
-from app.models import Benutzer, BenutzerRolle
-from app.auth import hash_passwort
+from app.models import User, UserRole
+from app.auth import hash_password
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
@@ -89,56 +89,56 @@ async def client():
 
 
 @pytest_asyncio.fixture
-async def admin_benutzer():
-    """Legt einen Admin-Benutzer an und gibt ihn zurück."""
+async def admin_user():
+    """Legt einen Admin-User an und gibt ihn zurück."""
     async with AsyncSessionLocal() as session:
-        benutzer = Benutzer(
+        user = User(
             email="admin@example.com",
             name="Test-Admin",
-            passwort_hash=hash_passwort("testpasswort123"),
-            rolle=BenutzerRolle.ADMIN,
+            password_hash=hash_password("testpasswort123"),
+            role=UserRole.ADMIN,
         )
-        session.add(benutzer)
+        session.add(user)
         await session.commit()
-        await session.refresh(benutzer)
-        return benutzer
+        await session.refresh(user)
+        return user
 
 
 @pytest_asyncio.fixture
-async def vorstand_benutzer():
-    """Ein zweiter Benutzer mit Vorstands-Rolle (für Vier-Augen-Prinzip-Tests)."""
+async def board_user():
+    """Ein zweiter User mit Vorstands-Rolle (für Vier-Augen-Prinzip-Tests)."""
     async with AsyncSessionLocal() as session:
-        benutzer = Benutzer(
+        user = User(
             email="vorstand@example.com",
             name="Test-Vorstand",
-            passwort_hash=hash_passwort("testpasswort123"),
-            rolle=BenutzerRolle.VORSTAND,
+            password_hash=hash_password("testpasswort123"),
+            role=UserRole.BOARD,
         )
-        session.add(benutzer)
+        session.add(user)
         await session.commit()
-        await session.refresh(benutzer)
-        return benutzer
+        await session.refresh(user)
+        return user
 
 
 @pytest_asyncio.fixture
-async def zweiter_vorstand_benutzer():
-    """Ein dritter Benutzer mit Vorstands-Rolle (für Tests, die 2 unterschiedliche Freigeber brauchen)."""
+async def second_board_user():
+    """Ein dritter User mit Vorstands-Rolle (für Tests, die 2 unterschiedliche Freigeber brauchen)."""
     async with AsyncSessionLocal() as session:
-        benutzer = Benutzer(
+        user = User(
             email="vorstand2@example.com",
             name="Test-Vorstand Zwei",
-            passwort_hash=hash_passwort("testpasswort123"),
-            rolle=BenutzerRolle.VORSTAND,
+            password_hash=hash_password("testpasswort123"),
+            role=UserRole.BOARD,
         )
-        session.add(benutzer)
+        session.add(user)
         await session.commit()
-        await session.refresh(benutzer)
-        return benutzer
+        await session.refresh(user)
+        return user
 
 
-async def login(client: AsyncClient, email: str, passwort: str = "testpasswort123") -> str:
-    """Hilfsfunktion: loggt einen Benutzer ein und gibt das JWT-Access-Token zurück."""
-    response = await client.post("/api/v1/auth/login", json={"email": email, "passwort": passwort})
+async def login(client: AsyncClient, email: str, password: str = "testpasswort123") -> str:
+    """Hilfsfunktion: loggt einen User ein und gibt das JWT-Access-Token zurück."""
+    response = await client.post("/api/v1/auth/login", json={"email": email, "password": password})
     assert response.status_code == 200, response.text
     return response.json()["access_token"]
 

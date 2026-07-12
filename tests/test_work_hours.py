@@ -15,7 +15,7 @@ async def _erstelle_configuration(client, headers, year=2026, mode="PER_PARCEL")
     )
 
 
-async def test_configuration_upsert(client, admin_benutzer):
+async def test_configuration_upsert(client, admin_user):
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
@@ -24,7 +24,7 @@ async def test_configuration_upsert(client, admin_benutzer):
     assert response.json()["hours_required"] == "5.00" or float(response.json()["hours_required"]) == 5.0
 
 
-async def test_session_und_participation(client, admin_benutzer):
+async def test_session_und_participation(client, admin_user):
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
@@ -46,7 +46,7 @@ async def test_session_und_participation(client, admin_benutzer):
     assert participation.status_code == 201
 
 
-async def test_befreiung_gilt_fuer_ganze_parcel_bei_per_parcel(client, admin_benutzer):
+async def test_befreiung_gilt_fuer_ganze_parcel_bei_per_parcel(client, admin_user):
     """
     Wichtigster Regressionstest für die 'any() statt all()'-Entscheidung:
     Ist EIN Pächter einer Parcel als Vorstand befreit, muss die GANZE

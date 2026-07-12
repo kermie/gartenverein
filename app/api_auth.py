@@ -16,21 +16,21 @@ from sqlalchemy import select
 
 from app.config import settings
 from app.database import get_db
-from app.models import Benutzer, BenutzerRolle
-from app.auth import verify_passwort
+from app.models import User, UserRole
+from app.auth import verify_password
 
 JWT_ALGORITHM = "HS256"
-ACCESS_TOKEN_GUELTIG_MINUTEN = 60 * 24  # 24 Stunden
+ACCESS_TOKEN_VALID_MINUTES = 60 * 24  # 24 Stunden
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token", auto_error=False)
 
 
-def erstelle_access_token(benutzer_id: str, email: str) -> str:
-    ablauf = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_GUELTIG_MINUTEN)
+def create_access_token(user_id: str, email: str) -> str:
+    expiry = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_VALID_MINUTES)
     payload = {
-        "sub": benutzer_id,
+        "sub": user_id,
         "email": email,
-        "exp": ablauf,
+        "exp": expiry,
         "iat": datetime.now(timezone.utc),
         "type": "access",
     }
@@ -47,22 +47,22 @@ def decode_access_token(token: str) -> Optional[dict]:
         return None
 
 
-async def authenticate_benutzer(db: AsyncSession, email: str, passwort: str) -> Optional[Benutzer]:
-    result = await db.execute(select(Benutzer).where(Benutzer.email == email.lower()))
-    benutzer = result.scalar_one_or_none()
-    if not benutzer or not benutzer.passwort_hash:
+async def authenticate_user(db: AsyncSession, email: str, password: str) -> Optional[User]:
+    result = await db.execute(select(User).where(User.email == email.lower()))
+    user = result.scalar_one_or_none()
+    if not user or not user.password_hash:
         return None
-    if not verify_passwort(passwort, benutzer.passwort_hash):
+    if not verify_password(password, user.password_hash):
         return None
-    if not benutzer.ist_aktiv:
+    if not user.is_active:
         return None
-    return benutzer
+    return user
 
 
 async def get_current_api_user(
     token: Optional[str] = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
-) -> Benutzer:
+) -> User:
     """Dependency für geschützte API-Endpunkte. Erfordert gültigen Bearer-Token."""
     unauthorized = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -77,32 +77,32 @@ async def get_current_api_user(
     if not payload:
         raise unauthorized
 
-    benutzer_id = payload.get("sub")
-    result = await db.execute(select(Benutzer).where(Benutzer.id == benutzer_id))
-    benutzer = result.scalar_one_or_none()
+    user_id = payload.get("sub")
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
 
-    if not benutzer or not benutzer.ist_aktiv:
+    if not user or not user.is_active:
         raise unauthorized
 
-    return benutzer
+    return user
 
 
-def require_api_rolle(*erlaubte_rollen: BenutzerRolle):
+def require_api_role(*allowed_roles: UserRole):
     """Dependency-Factory: schränkt Endpunkte auf bestimmte Rollen ein."""
 
-    async def checker(benutzer: Benutzer = Depends(get_current_api_user)) -> Benutzer:
-        if benutzer.rolle not in erlaubte_rollen:
+    async def checker(user: User = Depends(get_current_api_user)) -> User:
+        if user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Diese Aktion erfordert eine der Rollen: {', '.join(r.value for r in erlaubte_rollen)}",
+                detail=f"Diese Aktion erfordert eine der Rollen: {', '.join(r.value for r in allowed_roles)}",
             )
-        return benutzer
+        return user
 
     return checker
 
 
 # Häufige Kombinationen als fertige Dependencies
-require_schreibzugriff = require_api_rolle(
-    BenutzerRolle.ADMIN, BenutzerRolle.VORSTAND, BenutzerRolle.KASSIERER
+require_write_access = require_api_role(
+    UserRole.ADMIN, UserRole.BOARD, UserRole.TREASURER
 )
-require_admin_api = require_api_rolle(BenutzerRolle.ADMIN, BenutzerRolle.VORSTAND)
+require_admin_api = require_api_role(UserRole.ADMIN, UserRole.BOARD)

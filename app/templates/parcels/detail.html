@@ -37,10 +37,10 @@
                         <span class="badge badge-{{ parcel.status.value|lower }}">{{ parcel.status.value|lower }}</span>
                     </dd>
 
-                    {% set kuendigung_eintrag = aenderungen | selectattr('feldname', 'eq', 'status') | selectattr('neuer_wert', 'eq', 'TERMINATED') | first %}
+                    {% set kuendigung_eintrag = aenderungen | selectattr('field_name', 'eq', 'status') | selectattr('new_value', 'eq', 'TERMINATED') | first %}
                     {% if kuendigung_eintrag %}
                     <dt class="col-sm-5 text-muted">Gekündigt am</dt>
-                    <dd class="col-sm-7">{{ kuendigung_eintrag.geaendert_am.strftime('%d.%m.%Y') }}</dd>
+                    <dd class="col-sm-7">{{ kuendigung_eintrag.changed_at.strftime('%d.%m.%Y') }}</dd>
                     {% endif %}
 
                     {% if parcel.termination_note %}
@@ -203,12 +203,12 @@
                     <tbody>
                         {% for a in aenderungen %}
                         <tr>
-                            <td class="text-muted" style="font-size: 0.82rem;">{{ a.geaendert_am.strftime('%d.%m.%Y %H:%M') }}</td>
-                            <td><code style="font-size: 0.8rem;">{{ a.feldname }}</code></td>
-                            <td class="text-muted">{{ a.alter_wert or '–' }}</td>
-                            <td class="fw-semibold">{{ a.neuer_wert or '–' }}</td>
+                            <td class="text-muted" style="font-size: 0.82rem;">{{ a.changed_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                            <td><code style="font-size: 0.8rem;">{{ a.field_name }}</code></td>
+                            <td class="text-muted">{{ a.old_value or '–' }}</td>
+                            <td class="fw-semibold">{{ a.new_value or '–' }}</td>
                             <td class="text-muted" style="font-size: 0.82rem;">
-                                {{ a.geaendert_von.name if a.geaendert_von else 'Unbekannt' }}
+                                {{ a.changed_by.name if a.changed_by else 'Unbekannt' }}
                             </td>
                         </tr>
                         {% endfor %}

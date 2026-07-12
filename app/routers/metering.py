@@ -35,15 +35,15 @@ from app.zaehler_utils import (
 )
 
 templates = Jinja2Templates(directory="app/templates")
-templates.env.filters["fmt"] = lambda wert, stellen: f"{float(wert):.{stellen}f}"
+templates.env.filters["fmt"] = lambda value, stellen: f"{float(value):.{stellen}f}"
 
 
-def _parse_zahl(wert: str, dezimalstellen: int) -> Optional[Decimal]:
-    wert = wert.strip().replace(",", ".")
-    if not wert:
+def _parse_zahl(value: str, dezimalstellen: int) -> Optional[Decimal]:
+    value = value.strip().replace(",", ".")
+    if not value:
         return None
     try:
-        zahl = Decimal(wert)
+        zahl = Decimal(value)
     except InvalidOperation:
         return None
     quant = Decimal("1") if dezimalstellen == 0 else Decimal("1." + "0" * dezimalstellen)
@@ -118,7 +118,7 @@ def erstelle_metering_router(
         year: Optional[int] = None,
         db: AsyncSession = Depends(get_db),
     ):
-        benutzer = await require_user(request, db)
+        user = await require_user(request, db)
         if not year:
             year = date.today().year
 
@@ -153,7 +153,7 @@ def erstelle_metering_router(
 
         return templates.TemplateResponse("metering/uebersicht.html", {
             **basis_context,
-            "request": request, "benutzer": benutzer, "year": year,
+            "request": request, "user": user, "year": year,
             "verfuegbare_jahre": verfuegbare_jahre,
             "anzahl_hauptzaehler": len(haupt),
             "anzahl_parzellen": len(parcels),
@@ -171,7 +171,7 @@ def erstelle_metering_router(
 
     @router.get("/metering-points", response_class=HTMLResponse)
     async def zaehlpunkte_liste(request: Request, db: AsyncSession = Depends(get_db)):
-        benutzer = await require_user(request, db)
+        user = await require_user(request, db)
         alle = await _lade_alle_zaehlpunkte(db)
 
         def sortkey(a):
@@ -185,14 +185,14 @@ def erstelle_metering_router(
 
         return templates.TemplateResponse("metering/metering_points_liste.html", {
             **basis_context,
-            "request": request, "benutzer": benutzer,
+            "request": request, "user": user,
             "metering_points": alle, "MeteringPointType": MeteringPointType,
             "year": date.today().year,
         })
 
     @router.get("/metering-points/new", response_class=HTMLResponse)
     async def zaehlpunkt_neu_seite(request: Request, db: AsyncSession = Depends(get_db)):
-        benutzer = await require_user(request, db)
+        user = await require_user(request, db)
         result = await db.execute(
             select(Parcel).where(Parcel.status == ParcelStatus.ACTIVE).order_by(Parcel.plot_number)
         )
@@ -200,7 +200,7 @@ def erstelle_metering_router(
 
         return templates.TemplateResponse("metering/metering_point_formular.html", {
             **basis_context,
-            "request": request, "benutzer": benutzer,
+            "request": request, "user": user,
             "alle_parzellen": alle_parzellen, "heute": date.today().isoformat(),
         })
 
@@ -250,7 +250,7 @@ def erstelle_metering_router(
         request: Request,
         db: AsyncSession = Depends(get_db),
     ):
-        benutzer = await require_user(request, db)
+        user = await require_user(request, db)
         metering_point = await _lade_zaehlpunkt_mit_details(db, metering_point_id)
         if not metering_point:
             raise HTTPException(status_code=404, detail=f"{medium_label}-Zählpunkt nicht gefunden")
@@ -272,7 +272,7 @@ def erstelle_metering_router(
 
         return templates.TemplateResponse("metering/metering_point_detail.html", {
             **basis_context,
-            "request": request, "benutzer": benutzer,
+            "request": request, "user": user,
             "metering_point": metering_point,
             "current_meter": current_meter,
             "former_meters": former_meters,
@@ -371,7 +371,7 @@ def erstelle_metering_router(
         rueck_url: str = Form(f"{url_prefix}/readings"),
         db: AsyncSession = Depends(get_db),
     ):
-        benutzer = await require_user(request, db)
+        user = await require_user(request, db)
         metering_point = await _lade_zaehlpunkt_mit_details(db, metering_point_id)
         if not metering_point:
             raise HTTPException(status_code=404)
@@ -393,7 +393,7 @@ def erstelle_metering_router(
             existing.reading = neuer_stand
             existing.date = date.fromisoformat(date)
             existing.note = note.strip() or None
-            existing.recorded_by_id = benutzer.id
+            existing.recorded_by_id = user.id
         else:
             db.add(MeterReading(
                 meter_id=zaehler.id,
@@ -401,7 +401,7 @@ def erstelle_metering_router(
                 date=date.fromisoformat(date),
                 reading=neuer_stand,
                 note=note.strip() or None,
-                recorded_by_id=benutzer.id,
+                recorded_by_id=user.id,
             ))
 
         await db.commit()
@@ -439,7 +439,7 @@ def erstelle_metering_router(
         fehler: Optional[str] = None,
         db: AsyncSession = Depends(get_db),
     ):
-        benutzer = await require_user(request, db)
+        user = await require_user(request, db)
         if not year:
             year = date.today().year
 
@@ -472,7 +472,7 @@ def erstelle_metering_router(
 
         return templates.TemplateResponse("metering/readings_liste.html", {
             **basis_context,
-            "request": request, "benutzer": benutzer, "year": year,
+            "request": request, "user": user, "year": year,
             "hauptzaehler_zeilen": hauptzaehler_zeilen,
             "parzellen_zeilen": parzellen_zeilen,
             "verein_zeilen": verein_zeilen,
@@ -490,7 +490,7 @@ def erstelle_metering_router(
         year: Optional[int] = None,
         db: AsyncSession = Depends(get_db),
     ):
-        benutzer = await require_user(request, db)
+        user = await require_user(request, db)
         if not year:
             year = date.today().year
 
@@ -531,7 +531,7 @@ def erstelle_metering_router(
 
         return templates.TemplateResponse("metering/evaluation.html", {
             **basis_context,
-            "request": request, "benutzer": benutzer, "year": year,
+            "request": request, "user": user, "year": year,
             "verfuegbare_jahre": verfuegbare_jahre,
             "hauptzaehler_zeilen": hauptzaehler_zeilen,
             "parzellen_zeilen": parzellen_zeilen,

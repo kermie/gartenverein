@@ -10,8 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import Benutzer, Einladung, EinladungStatus, BenutzerRolle, Vereinseinstellung
-from app.auth import require_admin, erstelle_einladungstoken, hash_passwort
+from app.models import User, Invitation, InvitationStatus, UserRole, ClubSetting
+from app.auth import require_admin, create_invitation_token, hash_password
 from app.email_service import sende_email
 from app.crypto_utils import verschluesseln
 from app.config import settings
@@ -19,40 +19,40 @@ from app.config import settings
 router = APIRouter(prefix="/admin", tags=["admin"])
 templates = Jinja2Templates(directory="app/templates")
 
-EINLADUNG_TAGE = 7
+INVITATION_DAYS = 7
 
 
 @router.get("/", response_class=HTMLResponse)
 async def admin_dashboard(request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await require_admin(request, db)
+    user = await require_admin(request, db)
 
-    benutzer_result = await db.execute(select(Benutzer).order_by(Benutzer.name))
-    alle_benutzer = benutzer_result.scalars().all()
+    user_result = await db.execute(select(User).order_by(User.name))
+    all_users = user_result.scalars().all()
 
-    einladung_result = await db.execute(
-        select(Einladung)
-        .where(Einladung.status == EinladungStatus.AUSSTEHEND)
-        .order_by(Einladung.created_at.desc())
+    invitation_result = await db.execute(
+        select(Invitation)
+        .where(Invitation.status == InvitationStatus.PENDING)
+        .order_by(Invitation.created_at.desc())
     )
-    offene_einladungen = einladung_result.scalars().all()
+    open_invitations = invitation_result.scalars().all()
 
     return templates.TemplateResponse(
         "admin/dashboard.html",
         {
             "request": request,
-            "benutzer": benutzer,
-            "alle_benutzer": alle_benutzer,
-            "offene_einladungen": offene_einladungen,
-            "BenutzerRolle": BenutzerRolle,
+            "user": user,
+            "all_users": all_users,
+            "open_invitations": open_invitations,
+            "UserRole": UserRole,
         },
     )
 
 
-@router.post("/einladen")
-async def benutzer_einladen(
+@router.post("/invite")
+async def user_invite(
     request: Request,
     email: str = Form(...),
-    rolle: str = Form("lesend"),
+    role: str = Form("readonly"),
     db: AsyncSession = Depends(get_db),
 ):
     admin = await require_admin(request, db)
@@ -60,24 +60,24 @@ async def benutzer_einladen(
     email = email.strip().lower()
 
     # Bereits registriert?
-    existing = await db.execute(select(Benutzer).where(Benutzer.email == email))
+    existing = await db.execute(select(User).where(User.email == email))
     if existing.scalar_one_or_none():
         return RedirectResponse("/admin/?fehler=E-Mail+bereits+registriert", status_code=302)
 
-    if rolle not in [r.value for r in BenutzerRolle]:
-        rolle = "lesend"
+    if role not in [r.value for r in UserRole]:
+        role = "readonly"
 
-    token = erstelle_einladungstoken(email)
-    gueltig_bis = datetime.now(timezone.utc) + timedelta(days=EINLADUNG_TAGE)
+    token = create_invitation_token(email)
+    expires_at = datetime.now(timezone.utc) + timedelta(days=INVITATION_DAYS)
 
-    einladung = Einladung(
+    invitation = Invitation(
         email=email,
         token=token,
-        rolle=BenutzerRolle(rolle),
-        eingeladen_von_id=admin.id,
-        gueltig_bis=gueltig_bis,
+        role=UserRole(role),
+        invited_by_id=admin.id,
+        expires_at=expires_at,
     )
-    db.add(einladung)
+    db.add(invitation)
     await db.commit()
 
     # Link zusammenbauen
@@ -95,7 +95,7 @@ async def benutzer_einladen(
            text-decoration: none; border-radius: 4px;">Einladung annehmen</a>
     </p>
     <p style="color: #666; font-size: 0.9em;">
-        Dieser Link ist {EINLADUNG_TAGE} Tage gültig.<br>
+        Dieser Link ist {INVITATION_DAYS} Tage gültig.<br>
         Falls der Button nicht funktioniert: {einladungslink}
     </p>
     </body></html>
@@ -112,21 +112,21 @@ async def benutzer_einladen(
     return RedirectResponse("/admin/?erfolg=Einladung+gesendet", status_code=302)
 
 
-@router.post("/benutzer/{benutzer_id}/deaktivieren")
-async def benutzer_deaktivieren(
-    benutzer_id: str,
+@router.post("/users/{user_id}/deactivate")
+async def user_deactivate(
+    user_id: str,
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     admin = await require_admin(request, db)
 
-    if benutzer_id == admin.id:
+    if user_id == admin.id:
         return RedirectResponse("/admin/?fehler=Eigenes+Konto+nicht+deaktivierbar", status_code=302)
 
-    result = await db.execute(select(Benutzer).where(Benutzer.id == benutzer_id))
-    ziel = result.scalar_one_or_none()
-    if ziel:
-        ziel.ist_aktiv = not ziel.ist_aktiv
+    result = await db.execute(select(User).where(User.id == user_id))
+    target = result.scalar_one_or_none()
+    if target:
+        target.is_active = not target.is_active
         await db.commit()
 
     return RedirectResponse("/admin/", status_code=302)
@@ -136,7 +136,7 @@ async def benutzer_deaktivieren(
 # Vereinseinstellungen
 # ---------------------------------------------------------------------------
 
-EINSTELLUNGEN_FELDER = [
+SETTINGS_FIELDS = [
     ("verein_name", "Name des Vereins"),
     ("verein_strasse", "Straße"),
     ("verein_plz", "PLZ"),
@@ -163,7 +163,7 @@ EINSTELLUNGEN_FELDER = [
 ]
 
 # Optionale Funktionsbereiche, die sich pro Verein ein-/ausschalten lassen.
-# Schlüssel folgen der Konvention "modul_<name>" (siehe app/module_flags.py).
+# Schlüssel folgen der Konvention "modul_<n>" (siehe app/module_flags.py).
 MODULE_FELDER = [
     ("modul_work_hours", "Pflichtstunden-Verwaltung",
      "Arbeitseinsätze, Patenschaften, Vereinsrollen und Jahresauswertung. "
@@ -186,26 +186,26 @@ MODULE_FELDER = [
 ]
 
 
-@router.get("/einstellungen", response_class=HTMLResponse)
+@router.get("/settings", response_class=HTMLResponse)
 async def einstellungen_seite(request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await require_admin(request, db)
+    user = await require_admin(request, db)
 
-    result = await db.execute(select(Vereinseinstellung))
-    einstellungen = {e.schluessel: e.wert for e in result.scalars().all()}
+    result = await db.execute(select(ClubSetting))
+    settings_map = {e.key: e.value for e in result.scalars().all()}
 
     return templates.TemplateResponse(
         "admin/einstellungen.html",
         {
             "request": request,
-            "benutzer": benutzer,
-            "einstellungen": einstellungen,
-            "felder": EINSTELLUNGEN_FELDER,
+            "user": user,
+            "einstellungen": settings_map,
+            "felder": SETTINGS_FIELDS,
             "module_felder": MODULE_FELDER,
         },
     )
 
 
-@router.post("/einstellungen")
+@router.post("/settings")
 async def einstellungen_speichern(
     request: Request,
     db: AsyncSession = Depends(get_db),
@@ -213,50 +213,50 @@ async def einstellungen_speichern(
     await require_admin(request, db)
     form = await request.form()
 
-    for schluessel, beschreibung in EINSTELLUNGEN_FELDER:
-        wert = form.get(schluessel, "").strip() or None
+    for key, description in SETTINGS_FIELDS:
+        value = form.get(key, "").strip() or None
 
         result = await db.execute(
-            select(Vereinseinstellung).where(Vereinseinstellung.schluessel == schluessel)
+            select(ClubSetting).where(ClubSetting.key == key)
         )
-        eintrag = result.scalar_one_or_none()
+        entry = result.scalar_one_or_none()
 
-        if schluessel.endswith("_password") or schluessel.endswith("_api_key"):
+        if key.endswith("_password") or key.endswith("_api_key"):
             # Leeres Feld = "unverändert lassen" (wie im Platzhaltertext
             # versprochen), damit man nicht bei jedem Speichern das
             # Passwort neu eintippen muss. Nur ein NEUER Wert wird
             # verschlüsselt gespeichert.
-            if not wert:
+            if not value:
                 continue
-            wert = verschluesseln(wert)
+            value = verschluesseln(value)
 
-        if eintrag:
-            eintrag.wert = wert
+        if entry:
+            entry.value = value
         else:
-            db.add(Vereinseinstellung(
-                schluessel=schluessel,
-                wert=wert,
-                beschreibung=beschreibung,
+            db.add(ClubSetting(
+                key=key,
+                value=value,
+                description=description,
             ))
 
     # Modul-Umschalter: Checkboxen senden bei "aus" gar keinen Wert im
     # Formular, daher explizit "true"/"false" statt nur form.get(...).
-    for schluessel, beschreibung, _hinweis in MODULE_FELDER:
-        wert = "true" if schluessel in form else "false"
+    for key, description, _hinweis in MODULE_FELDER:
+        value = "true" if key in form else "false"
 
         result = await db.execute(
-            select(Vereinseinstellung).where(Vereinseinstellung.schluessel == schluessel)
+            select(ClubSetting).where(ClubSetting.key == key)
         )
-        eintrag = result.scalar_one_or_none()
+        entry = result.scalar_one_or_none()
 
-        if eintrag:
-            eintrag.wert = wert
+        if entry:
+            entry.value = value
         else:
-            db.add(Vereinseinstellung(
-                schluessel=schluessel,
-                wert=wert,
-                beschreibung=beschreibung,
+            db.add(ClubSetting(
+                key=key,
+                value=value,
+                description=description,
             ))
 
     await db.commit()
-    return RedirectResponse("/admin/einstellungen?erfolg=1", status_code=302)
+    return RedirectResponse("/admin/settings?erfolg=1", status_code=302)

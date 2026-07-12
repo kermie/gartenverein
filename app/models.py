@@ -40,35 +40,35 @@ class ParcelStatus(str, enum.Enum):
     DELETED = "DELETED"
 
 
-class BenutzerRolle(str, enum.Enum):
+class UserRole(str, enum.Enum):
     ADMIN = "admin"
-    VORSTAND = "vorstand"
-    KASSIERER = "kassierer"
-    LESEND = "lesend"
+    BOARD = "board"
+    TREASURER = "treasurer"
+    READONLY = "readonly"
 
 
-class EinladungStatus(str, enum.Enum):
-    AUSSTEHEND = "ausstehend"
-    ANGENOMMEN = "angenommen"
-    ABGELAUFEN = "abgelaufen"
+class InvitationStatus(str, enum.Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    EXPIRED = "expired"
 
 
 # ---------------------------------------------------------------------------
 # Systembenutzer (Anwendungsnutzer, nicht Vereinsmitglieder)
 # ---------------------------------------------------------------------------
 
-class Benutzer(Base):
-    __tablename__ = "benutzer"
+class User(Base):
+    __tablename__ = "users"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    passwort_hash: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    rolle: Mapped[BenutzerRolle] = mapped_column(
-        SAEnum(BenutzerRolle), default=BenutzerRolle.LESEND, nullable=False
+    password_hash: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    role: Mapped[UserRole] = mapped_column(
+        SAEnum(UserRole), default=UserRole.READONLY, nullable=False
     )
-    ist_aktiv: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    letzter_login: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    last_login: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -77,33 +77,33 @@ class Benutzer(Base):
     )
 
     # Beziehungen
-    einladungen: Mapped[List["Einladung"]] = relationship("Einladung", back_populates="eingeladen_von")
+    invitations: Mapped[List["Invitation"]] = relationship("Invitation", back_populates="invited_by")
 
     def __repr__(self) -> str:
-        return f"<Benutzer {self.email} ({self.rolle})>"
+        return f"<User {self.email} ({self.role})>"
 
 
-class Einladung(Base):
-    __tablename__ = "einladungen"
+class Invitation(Base):
+    __tablename__ = "invitations"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
     email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     token: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
-    rolle: Mapped[BenutzerRolle] = mapped_column(
-        SAEnum(BenutzerRolle), default=BenutzerRolle.LESEND, nullable=False
+    role: Mapped[UserRole] = mapped_column(
+        SAEnum(UserRole), default=UserRole.READONLY, nullable=False
     )
-    status: Mapped[EinladungStatus] = mapped_column(
-        SAEnum(EinladungStatus), default=EinladungStatus.AUSSTEHEND, nullable=False
+    status: Mapped[InvitationStatus] = mapped_column(
+        SAEnum(InvitationStatus), default=InvitationStatus.PENDING, nullable=False
     )
-    eingeladen_von_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("benutzer.id", ondelete="SET NULL"), nullable=True
+    invited_by_id: Mapped[Optional[str]] = mapped_column(
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
-    gueltig_bis: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    eingeladen_von: Mapped[Optional["Benutzer"]] = relationship("Benutzer", back_populates="einladungen")
+    invited_by: Mapped[Optional["User"]] = relationship("User", back_populates="invitations")
 
 
 # ---------------------------------------------------------------------------
@@ -293,16 +293,16 @@ class MemberParcel(Base):
 # Vereinseinstellungen (Key-Value für Flexibilität)
 # ---------------------------------------------------------------------------
 
-class Vereinseinstellung(Base):
+class ClubSetting(Base):
     """
     Flexible Einstellungstabelle für Vereins-Stammdaten.
     Ermöglicht spätere Erweiterung ohne Schemaänderung.
     """
-    __tablename__ = "vereinseinstellungen"
+    __tablename__ = "club_settings"
 
-    schluessel: Mapped[str] = mapped_column(String(100), primary_key=True)
-    wert: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    beschreibung: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    key: Mapped[str] = mapped_column(String(100), primary_key=True)
+    value: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
@@ -363,7 +363,7 @@ class ExemptionReason(str, enum.Enum):
 class ClubRole(Base):
     """
     Rollen im Verein (Vorstand, erweiterter Vorstand, Beisitzer etc.).
-    Getrennt vom App-Benutzersystem (BenutzerRolle) – hier geht es um
+    Getrennt vom App-Benutzersystem (UserRole) – hier geht es um
     Vereinsämter, nicht um Zugriffsrechte.
     """
     __tablename__ = "club_roles"
@@ -490,7 +490,7 @@ class WorkSession(Base):
         comment="Standardwert; kann pro Teilnahme überschrieben werden"
     )
     created_by_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("benutzer.id", ondelete="SET NULL"), nullable=True
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -502,7 +502,7 @@ class WorkSession(Base):
     participations: Mapped[List["SessionParticipation"]] = relationship(
         "SessionParticipation", back_populates="session", cascade="all, delete-orphan"
     )
-    created_by: Mapped[Optional["Benutzer"]] = relationship("Benutzer")
+    created_by: Mapped[Optional["User"]] = relationship("User")
 
     @property
     def available_spots(self) -> Optional[int]:
@@ -554,31 +554,31 @@ class SessionParticipation(Base):
 # Änderungshistorie (generisches Audit-Log für Feldänderungen)
 # ---------------------------------------------------------------------------
 
-class Aenderungshistorie(Base):
+class ChangeHistory(Base):
     """
     Generisches Audit-Log: protokolliert Feldänderungen an beliebigen
     Entitäten (z.B. Parcel.area_sqm). Ermöglicht Nachvollziehbarkeit
     ohne für jede Tabelle eine eigene Historie-Tabelle zu brauchen.
     """
-    __tablename__ = "aenderungshistorie"
+    __tablename__ = "change_history"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
-    entitaet_typ: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
-    entitaet_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
-    feldname: Mapped[str] = mapped_column(String(100), nullable=False)
-    alter_wert: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    neuer_wert: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    geaendert_von_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("benutzer.id", ondelete="SET NULL"), nullable=True
+    entity_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    entity_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    field_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    old_value: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    new_value: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    changed_by_id: Mapped[Optional[str]] = mapped_column(
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
-    geaendert_am: Mapped[datetime] = mapped_column(
+    changed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False, index=True
     )
 
-    geaendert_von: Mapped[Optional["Benutzer"]] = relationship("Benutzer")
+    changed_by: Mapped[Optional["User"]] = relationship("User")
 
     def __repr__(self) -> str:
-        return f"<Aenderungshistorie {self.entitaet_typ}:{self.entitaet_id} {self.feldname}>"
+        return f"<ChangeHistory {self.entity_type}:{self.entity_id} {self.field_name}>"
 
 
 
@@ -704,7 +704,7 @@ class MeterReading(Base):
     date: Mapped[date] = mapped_column(Date, nullable=False)
     reading: Mapped[float] = mapped_column(Numeric(12, 1), nullable=False)
     recorded_by_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("benutzer.id", ondelete="SET NULL"), nullable=True
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -712,7 +712,7 @@ class MeterReading(Base):
     )
 
     meter: Mapped["Meter"] = relationship("Meter", back_populates="readings")
-    recorded_by: Mapped[Optional["Benutzer"]] = relationship("Benutzer")
+    recorded_by: Mapped[Optional["User"]] = relationship("User")
 
     __table_args__ = (
         UniqueConstraint("meter_id", "year", name="uq_meter_year"),
@@ -879,7 +879,7 @@ class Ticket(Base):
         SAEnum(TicketStatus), default=TicketStatus.UNASSIGNED, nullable=False, index=True
     )
     assigned_to_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("benutzer.id", ondelete="SET NULL"), nullable=True, index=True
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
     )
     deferred_until: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
@@ -908,7 +908,7 @@ class Ticket(Base):
     )
     closed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    assigned_to: Mapped[Optional["Benutzer"]] = relationship("Benutzer")
+    assigned_to: Mapped[Optional["User"]] = relationship("User")
     member: Mapped[Optional["Member"]] = relationship("Member")
     messages: Mapped[List["TicketMessage"]] = relationship(
         "TicketMessage", back_populates="ticket", cascade="all, delete-orphan",
@@ -938,7 +938,7 @@ class TicketMessage(Base):
     direction: Mapped[MessageDirection] = mapped_column(SAEnum(MessageDirection), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     authored_by_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("benutzer.id", ondelete="SET NULL"), nullable=True
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     # Für E-Mail-Threading (Etappe 2): Message-ID dieser Nachricht bzw. der
     # Message-ID, auf die sie antwortet. Ermöglicht, eingehende Antworten
@@ -950,7 +950,7 @@ class TicketMessage(Base):
     )
 
     ticket: Mapped["Ticket"] = relationship("Ticket", back_populates="messages")
-    authored_by: Mapped[Optional["Benutzer"]] = relationship("Benutzer")
+    authored_by: Mapped[Optional["User"]] = relationship("User")
 
     def __repr__(self) -> str:
         return f"<TicketMessage {self.direction.value} @ {self.ticket_id}>"
@@ -988,13 +988,13 @@ class PurchaseRequest(Base):
     # externe Person ohne Login (requester_name/-email), z.B. wenn der
     # Vorstand stellvertretend für jemanden einen Antrag anlegt.
     requested_by_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("benutzer.id", ondelete="SET NULL"), nullable=True
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     requester_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     requester_email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     created_by_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("benutzer.id", ondelete="SET NULL"), nullable=True
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
 
     # Deep-Link-Bestätigung durch den (externen) Antragsteller
@@ -1004,7 +1004,7 @@ class PurchaseRequest(Base):
 
     rejection_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     rejected_by_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("benutzer.id", ondelete="SET NULL"), nullable=True
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     rejected_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -1016,9 +1016,9 @@ class PurchaseRequest(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    requested_by: Mapped[Optional["Benutzer"]] = relationship("Benutzer", foreign_keys=[requested_by_id])
-    created_by: Mapped[Optional["Benutzer"]] = relationship("Benutzer", foreign_keys=[created_by_id])
-    rejected_by: Mapped[Optional["Benutzer"]] = relationship("Benutzer", foreign_keys=[rejected_by_id])
+    requested_by: Mapped[Optional["User"]] = relationship("User", foreign_keys=[requested_by_id])
+    created_by: Mapped[Optional["User"]] = relationship("User", foreign_keys=[created_by_id])
+    rejected_by: Mapped[Optional["User"]] = relationship("User", foreign_keys=[rejected_by_id])
     approvals: Mapped[List["PurchaseRequestApproval"]] = relationship(
         "PurchaseRequestApproval", back_populates="purchase_request", cascade="all, delete-orphan"
     )
@@ -1046,14 +1046,14 @@ class PurchaseRequestApproval(Base):
         String(36), ForeignKey("purchase_requests.id", ondelete="CASCADE"), nullable=False, index=True
     )
     user_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("benutzer.id", ondelete="CASCADE"), nullable=False, index=True
+        String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     approved_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
     purchase_request: Mapped["PurchaseRequest"] = relationship("PurchaseRequest", back_populates="approvals")
-    user: Mapped["Benutzer"] = relationship("Benutzer")
+    user: Mapped["User"] = relationship("User")
 
     __table_args__ = (
         UniqueConstraint("purchase_request_id", "user_id", name="uq_purchase_request_approval"),

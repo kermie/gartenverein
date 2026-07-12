@@ -15,7 +15,7 @@ Hooks, Sandboxing) – was für ein einzelnes Team ohne Security-Review-Prozess
 ein unnötiges Risiko wäre – gibt es ein leichtgewichtiges Feature-Flag-System:
 
 - Jedes Modul hat einen Schlüssel `modul_<name>` in der
-  `vereinseinstellungen`-Tabelle (Boolean als String `"true"`/`"false"`)
+  `club_settings`-Tabelle (Boolean als String `"true"`/`"false"`)
 - `app/module_flags.py` lädt diese Flags **einmal pro Request** über eine
   Middleware und legt sie unter `request.state.module_flags` ab
 - Router-Dependencies (`require_modul("<name>")`) sperren ganze Router,

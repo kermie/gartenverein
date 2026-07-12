@@ -15,10 +15,10 @@ from sqlalchemy.orm import selectinload
 
 from app.database import get_db, active_member_filter
 from app.models import (
-    Parcel, ParcelStatus, MemberParcel, Member, Aenderungshistorie
+    Parcel, ParcelStatus, MemberParcel, Member, ChangeHistory
 )
 from app.auth import require_user
-from app.aenderungstracker import AenderungsTracker
+from app.change_tracker import ChangeTracker
 
 router = APIRouter(prefix="/parcels", tags=["parcels"])
 templates = Jinja2Templates(directory="app/templates")
@@ -42,7 +42,7 @@ async def parzellen_liste(
     status_filter: str = "",
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     query = (
         select(Parcel)
@@ -65,7 +65,7 @@ async def parzellen_liste(
         "parcels/liste.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "parcels": parcels,
             "suche": suche,
             "status_filter": status_filter,
@@ -76,10 +76,10 @@ async def parzellen_liste(
 
 @router.get("/neu", response_class=HTMLResponse)
 async def parzelle_neu_seite(request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     return templates.TemplateResponse(
         "parcels/formular.html",
-        {"request": request, "benutzer": benutzer, "parcel": None},
+        {"request": request, "user": user, "parcel": None},
     )
 
 
@@ -98,12 +98,12 @@ async def parzelle_erstellen(
         select(Parcel).where(Parcel.plot_number == plot_number.strip().upper())
     )
     if existing.scalar_one_or_none():
-        benutzer_result = await require_user(request, db)
+        user_result = await require_user(request, db)
         return templates.TemplateResponse(
             "parcels/formular.html",
             {
                 "request": request,
-                "benutzer": benutzer_result,
+                "user": user_result,
                 "parcel": None,
                 "fehler": f"Gartennummer '{plot_number}' existiert bereits.",
             },
@@ -134,7 +134,7 @@ async def parzelle_detail(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     parcel = await _get_parcel_mit_details(db, parcel_id)
 
     if not parcel:
@@ -150,13 +150,13 @@ async def parzelle_detail(
 
     # Änderungshistorie der Feldwerte
     aenderungen_result = await db.execute(
-        select(Aenderungshistorie)
-        .options(selectinload(Aenderungshistorie.geaendert_von))
+        select(ChangeHistory)
+        .options(selectinload(ChangeHistory.changed_by))
         .where(
-            Aenderungshistorie.entitaet_typ == "Parcel",
-            Aenderungshistorie.entitaet_id == parcel_id,
+            ChangeHistory.entity_type == "Parcel",
+            ChangeHistory.entity_id == parcel_id,
         )
-        .order_by(Aenderungshistorie.geaendert_am.desc())
+        .order_by(ChangeHistory.changed_at.desc())
     )
     aenderungen = aenderungen_result.scalars().all()
 
@@ -164,7 +164,7 @@ async def parzelle_detail(
         "parcels/detail.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "parcel": parcel,
             "alle_mitglieder": alle_mitglieder,
             "aenderungen": aenderungen,
@@ -179,7 +179,7 @@ async def parzelle_bearbeiten_seite(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     parcel = await _get_parcel_mit_details(db, parcel_id)
 
     if not parcel:
@@ -187,7 +187,7 @@ async def parzelle_bearbeiten_seite(
 
     return templates.TemplateResponse(
         "parcels/formular.html",
-        {"request": request, "benutzer": benutzer, "parcel": parcel},
+        {"request": request, "user": user, "parcel": parcel},
     )
 
 
@@ -202,13 +202,13 @@ async def parzelle_aktualisieren(
     notes: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     parcel = await _get_parcel_mit_details(db, parcel_id)
 
     if not parcel:
         raise HTTPException(status_code=404)
 
-    tracker = AenderungsTracker(
+    tracker = ChangeTracker(
         parcel, "Parcel",
         ["plot_number", "area_sqm", "status", "termination_note", "notes"]
     )
@@ -229,7 +229,7 @@ async def parzelle_aktualisieren(
 
     parcel.termination_note = termination_note.strip() or None
 
-    await tracker.commit(db, benutzer.id)
+    await tracker.commit(db, user.id)
     await db.commit()
     return RedirectResponse(f"/parcels/{parcel_id}", status_code=302)
 
@@ -311,7 +311,7 @@ async def mitglied_zuordnung_bearbeiten_seite(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     result = await db.execute(
         select(MemberParcel)
@@ -328,7 +328,7 @@ async def mitglied_zuordnung_bearbeiten_seite(
         "parcels/zuordnung_formular.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "zuordnung": zuordnung,
             "parcel": parcel,
         },

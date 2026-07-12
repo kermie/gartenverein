@@ -28,7 +28,7 @@
         <div class="card">
             <div class="card-header"><i class="bi bi-envelope-plus me-2"></i>Benutzer einladen</div>
             <div class="card-body">
-                <form method="post" action="/admin/einladen">
+                <form method="post" action="/admin/invite">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">E-Mail-Adresse</label>
                         <input type="email" name="email" class="form-control"
@@ -36,10 +36,10 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Rolle</label>
-                        <select name="rolle" class="form-select">
-                            <option value="lesend">Lesend (nur anschauen)</option>
-                            <option value="kassierer">Kassierer</option>
-                            <option value="vorstand">Vorstand</option>
+                        <select name="role" class="form-select">
+                            <option value="readonly">Lesend (nur anschauen)</option>
+                            <option value="treasurer">Kassierer</option>
+                            <option value="board">Vorstand</option>
                             <option value="admin">Administrator</option>
                         </select>
                     </div>
@@ -51,15 +51,15 @@
         </div>
 
         <!-- Offene Einladungen -->
-        {% if offene_einladungen %}
+        {% if open_invitations %}
         <div class="card mt-3">
             <div class="card-header"><i class="bi bi-clock-history me-2"></i>Ausstehende Einladungen</div>
             <ul class="list-group list-group-flush">
-                {% for e in offene_einladungen %}
+                {% for e in open_invitations %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
                         <div>{{ e.email }}</div>
-                        <small class="text-muted">{{ e.rolle.value }} · Gültig bis {{ e.gueltig_bis.strftime('%d.%m.%Y') }}</small>
+                        <small class="text-muted">{{ e.role.value }} · Gültig bis {{ e.expires_at.strftime('%d.%m.%Y') }}</small>
                     </div>
                     <span class="badge" style="background: #fef3c7; color: #92400e;">ausstehend</span>
                 </li>
@@ -85,28 +85,28 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for b in alle_benutzer %}
+                        {% for b in all_users %}
                         <tr>
                             <td class="fw-semibold">{{ b.name }}</td>
                             <td class="text-muted">{{ b.email }}</td>
                             <td>
                                 <span class="badge" style="background: var(--gv-gruen-blass); color: var(--gv-gruen);">
-                                    {{ b.rolle.value }}
+                                    {{ b.role.value }}
                                 </span>
                             </td>
                             <td>
-                                {% if b.ist_aktiv %}
+                                {% if b.is_active %}
                                 <span class="badge badge-aktiv">aktiv</span>
                                 {% else %}
                                 <span class="badge" style="background: #fee2e2; color: #991b1b;">inaktiv</span>
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                {% if b.id != benutzer.id %}
-                                <form method="post" action="/admin/benutzer/{{ b.id }}/deaktivieren" class="d-inline">
+                                {% if b.id != user.id %}
+                                <form method="post" action="/admin/users/{{ b.id }}/deactivate" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-secondary"
-                                            title="{{ 'Deaktivieren' if b.ist_aktiv else 'Aktivieren' }}">
-                                        <i class="bi bi-{{ 'toggle-on' if b.ist_aktiv else 'toggle-off' }}"></i>
+                                            title="{{ 'Deaktivieren' if b.is_active else 'Aktivieren' }}">
+                                        <i class="bi bi-{{ 'toggle-on' if b.is_active else 'toggle-off' }}"></i>
                                     </button>
                                 </form>
                                 {% else %}

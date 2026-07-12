@@ -1,7 +1,7 @@
 """
 E-Mail-Versand via SMTP (aiosmtplib).
 
-Die SMTP-Konfiguration kommt primär aus der Datenbank (Vereinseinstellungen,
+Die SMTP-Konfiguration kommt primär aus der Datenbank (ClubSettings,
 editierbar unter /admin/einstellungen). Fehlt dort ein Wert (z.B. bei einer
 frischen Installation, bevor jemand die Oberfläche genutzt hat), wird auf
 die .env-Datei zurückgegriffen – so funktioniert der Versand auch ganz ohne
@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.config import settings
-from app.models import Vereinseinstellung
+from app.models import ClubSetting
 from app.crypto_utils import entschluesseln
 
 logger = logging.getLogger(__name__)
@@ -29,18 +29,18 @@ async def lade_smtp_konfiguration(db: AsyncSession) -> dict:
     Werte werden aus der .env-Datei (app.config.settings) ergänzt.
     """
     result = await db.execute(
-        select(Vereinseinstellung).where(
-            Vereinseinstellung.schluessel.in_(
+        select(ClubSetting).where(
+            ClubSetting.key.in_(
                 ["smtp_host", "smtp_port", "smtp_user", "smtp_password", "smtp_from", "smtp_tls"]
             )
         )
     )
-    gespeichert = {e.schluessel: e.wert for e in result.scalars().all() if e.wert}
+    gespeichert = {e.key: e.value for e in result.scalars().all() if e.value}
 
-    def _bool(wert) -> bool:
-        if isinstance(wert, bool):
-            return wert
-        return str(wert).strip().lower() in ("true", "1", "ja", "an")
+    def _bool(value) -> bool:
+        if isinstance(value, bool):
+            return value
+        return str(value).strip().lower() in ("true", "1", "ja", "an")
 
     port_wert = gespeichert.get("smtp_port")
     try:
@@ -114,12 +114,12 @@ async def sende_email(
         return False
 
 
-async def sende_einladung(email: str, einladungslink: str, eingeladen_von: str, db: Optional[AsyncSession] = None) -> bool:
+async def sende_einladung(email: str, einladungslink: str, invited_by: str, db: Optional[AsyncSession] = None) -> bool:
     betreff = f"Einladung zur {settings.app_name}"
     html = f"""
     <html><body>
     <h2>Einladung</h2>
-    <p>Sie wurden von <strong>{eingeladen_von}</strong> zur <strong>{settings.app_name}</strong> eingeladen.</p>
+    <p>Sie wurden von <strong>{invited_by}</strong> zur <strong>{settings.app_name}</strong> eingeladen.</p>
     <p>Klicken Sie auf den folgenden Link, um Ihr Konto einzurichten:</p>
     <p><a href="{einladungslink}">Einladung annehmen</a></p>
     <p>Dieser Link ist 7 Tage gültig.</p>

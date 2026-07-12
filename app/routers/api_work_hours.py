@@ -16,9 +16,9 @@ from app.models import (
     WorkHoursConfiguration, WorkHoursMode,
     ClubRole, MemberClubRole, ExemptionReason,
     WorkSession, SessionParticipation, SessionType, ParticipationStatus,
-    Sponsorship, Member, Parcel, ParcelStatus, MemberParcel, Benutzer,
+    Sponsorship, Member, Parcel, ParcelStatus, MemberParcel, User,
 )
-from app.api_auth import get_current_api_user, require_schreibzugriff
+from app.api_auth import get_current_api_user, require_write_access
 from app.module_flags import require_modul
 from app.schemas import (
     WorkHoursConfigurationOut, WorkHoursConfigurationCreate,
@@ -44,7 +44,7 @@ router = APIRouter(
 @router.get("/configuration", response_model=List[WorkHoursConfigurationOut], summary="Konfigurationen auflisten")
 async def konfigurationen_auflisten(
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     result = await db.execute(
         select(WorkHoursConfiguration).order_by(WorkHoursConfiguration.year.desc())
@@ -56,7 +56,7 @@ async def konfigurationen_auflisten(
 async def konfiguration_abrufen(
     year: int,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     result = await db.execute(
         select(WorkHoursConfiguration).where(WorkHoursConfiguration.year == year)
@@ -76,7 +76,7 @@ async def konfiguration_setzen(
     year: int,
     daten: WorkHoursConfigurationCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(
         select(WorkHoursConfiguration).where(WorkHoursConfiguration.year == year)
@@ -110,7 +110,7 @@ async def konfiguration_setzen(
 @router.get("/club-roles", response_model=List[ClubRoleOut], summary="ClubRolen auflisten")
 async def vereinsrollen_auflisten(
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     result = await db.execute(select(ClubRole).order_by(ClubRole.name))
     return result.scalars().all()
@@ -123,7 +123,7 @@ async def vereinsrollen_auflisten(
 async def vereinsrolle_erstellen(
     daten: ClubRoleCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     role = ClubRole(
         name=daten.name,
@@ -142,7 +142,7 @@ async def vereinsrolle_aktualisieren(
     role_id: str,
     daten: ClubRoleCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(ClubRole).where(ClubRole.id == role_id))
     role = result.scalar_one_or_none()
@@ -167,7 +167,7 @@ async def vereinsrolle_aktualisieren(
 async def vereinsrolle_loeschen(
     role_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(ClubRole).where(ClubRole.id == role_id))
     role = result.scalar_one_or_none()
@@ -184,7 +184,7 @@ async def zuordnungen_auflisten(
     year: Optional[int] = Query(None),
     member_id: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     query = select(MemberClubRole)
     if year:
@@ -202,7 +202,7 @@ async def zuordnungen_auflisten(
 async def zuordnung_erstellen(
     daten: MemberClubRoleCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     assignment = MemberClubRole(**daten.model_dump())
     db.add(assignment)
@@ -218,7 +218,7 @@ async def zuordnung_erstellen(
 async def zuordnung_loeschen(
     assignment_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(MemberClubRole).where(MemberClubRole.id == assignment_id))
     assignment = result.scalar_one_or_none()
@@ -236,7 +236,7 @@ async def einsaetze_auflisten(
     year: Optional[int] = Query(None, description="Nach Jahr filtern"),
     type: Optional[str] = Query(None, description="STANDARD oder BESONDERS"),
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     query = select(WorkSession).order_by(WorkSession.date.desc())
     if year:
@@ -252,7 +252,7 @@ async def einsaetze_auflisten(
 async def einsatz_abrufen(
     session_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     result = await db.execute(select(WorkSession).where(WorkSession.id == session_id))
     session = result.scalar_one_or_none()
@@ -268,13 +268,13 @@ async def einsatz_abrufen(
 async def einsatz_erstellen(
     daten: WorkSessionCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     session = WorkSession(
         title=daten.title, description=daten.description, type=SessionType(daten.type),
         date=daten.date, time_from=daten.time_from, time_until=daten.time_until,
         max_participants=daten.max_participants, hours_per_participant=daten.hours_per_participant,
-        created_by_id=benutzer.id,
+        created_by_id=user.id,
     )
     db.add(session)
     await db.commit()
@@ -287,7 +287,7 @@ async def einsatz_aktualisieren(
     session_id: str,
     daten: WorkSessionUpdate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(WorkSession).where(WorkSession.id == session_id))
     session = result.scalar_one_or_none()
@@ -297,8 +297,8 @@ async def einsatz_aktualisieren(
     update_daten = daten.model_dump(exclude_unset=True)
     if "type" in update_daten:
         update_daten["type"] = SessionType(update_daten["type"])
-    for feld, wert in update_daten.items():
-        setattr(session, feld, wert)
+    for feld, value in update_daten.items():
+        setattr(session, feld, value)
 
     await db.commit()
     await db.refresh(session)
@@ -312,7 +312,7 @@ async def einsatz_aktualisieren(
 async def einsatz_loeschen(
     session_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(WorkSession).where(WorkSession.id == session_id))
     session = result.scalar_one_or_none()
@@ -332,7 +332,7 @@ async def einsatz_loeschen(
 async def teilnahmen_auflisten(
     session_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     result = await db.execute(
         select(SessionParticipation).where(SessionParticipation.session_id == session_id)
@@ -348,7 +348,7 @@ async def teilnahme_erstellen(
     session_id: str,
     daten: SessionParticipationCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     existing = await db.execute(
         select(SessionParticipation).where(
@@ -378,7 +378,7 @@ async def teilnahme_aktualisieren(
     participation_id: str,
     daten: SessionParticipationUpdate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(
         select(SessionParticipation).where(
@@ -392,8 +392,8 @@ async def teilnahme_aktualisieren(
     update_daten = daten.model_dump(exclude_unset=True)
     if "status" in update_daten:
         update_daten["status"] = ParticipationStatus(update_daten["status"])
-    for feld, wert in update_daten.items():
-        setattr(participation, feld, wert)
+    for feld, value in update_daten.items():
+        setattr(participation, feld, value)
 
     await db.commit()
     await db.refresh(participation)
@@ -408,7 +408,7 @@ async def teilnahme_loeschen(
     session_id: str,
     participation_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(
         select(SessionParticipation).where(
@@ -429,7 +429,7 @@ async def teilnahme_loeschen(
 async def patenschaften_auflisten(
     year: Optional[int] = Query(None, description="Nur Sponsorshipen, die in diesem Jahr aktiv waren"),
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     query = select(Sponsorship).order_by(Sponsorship.area)
     if year:
@@ -449,7 +449,7 @@ async def patenschaften_auflisten(
 async def patenschaft_erstellen(
     daten: SponsorshipCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     sponsorship = Sponsorship(**daten.model_dump())
     db.add(sponsorship)
@@ -463,15 +463,15 @@ async def patenschaft_aktualisieren(
     sponsorship_id: str,
     daten: SponsorshipUpdate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(Sponsorship).where(Sponsorship.id == sponsorship_id))
     sponsorship = result.scalar_one_or_none()
     if not sponsorship:
         raise HTTPException(status_code=404, detail="Sponsorship nicht gefunden")
 
-    for feld, wert in daten.model_dump(exclude_unset=True).items():
-        setattr(sponsorship, feld, wert)
+    for feld, value in daten.model_dump(exclude_unset=True).items():
+        setattr(sponsorship, feld, value)
 
     await db.commit()
     await db.refresh(sponsorship)
@@ -485,7 +485,7 @@ async def patenschaft_aktualisieren(
 async def patenschaft_loeschen(
     sponsorship_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(Sponsorship).where(Sponsorship.id == sponsorship_id))
     sponsorship = result.scalar_one_or_none()
@@ -510,7 +510,7 @@ async def patenschaft_loeschen(
 async def auswertung_abrufen(
     year: int,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     from app.routers.work_hours import (
         _get_config_for_year, _calculate_hours_for_member, _is_exempt

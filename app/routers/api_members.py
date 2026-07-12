@@ -10,13 +10,13 @@ from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.models import Member, MemberPhone, MemberEmail, MemberParcel
-from app.api_auth import get_current_api_user, require_schreibzugriff
+from app.api_auth import get_current_api_user, require_write_access
 from app.schemas import (
     MemberOut, MemberDetailOut, MemberCreate, MemberUpdate,
     PhoneOut, PhoneCreate, EmailAddressOut, EmailAddressCreate,
     PaginierteAntwort, MemberAssignmentBrief,
 )
-from app.models import Benutzer
+from app.models import User
 
 router = APIRouter(prefix="/api/v1/members", tags=["API: Members"])
 
@@ -66,7 +66,7 @@ async def mitglieder_auflisten(
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     query = (
         select(Member)
@@ -103,7 +103,7 @@ async def mitglieder_auflisten(
 async def mitglied_abrufen(
     member_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     member = await _hole_member_oder_404(db, member_id, mit_details=True)
     return _zu_detail_schema(member)
@@ -118,7 +118,7 @@ async def mitglied_abrufen(
 async def mitglied_erstellen(
     daten: MemberCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     member = Member(**daten.model_dump())
     db.add(member)
@@ -137,12 +137,12 @@ async def mitglied_aktualisieren(
     member_id: str,
     daten: MemberUpdate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     member = await _hole_member_oder_404(db, member_id)
 
-    for feld, wert in daten.model_dump(exclude_unset=True).items():
-        setattr(member, feld, wert)
+    for feld, value in daten.model_dump(exclude_unset=True).items():
+        setattr(member, feld, value)
 
     await db.commit()
     await db.refresh(member, attribute_names=["phone_numbers", "email_addresses"])
@@ -158,7 +158,7 @@ async def mitglied_aktualisieren(
 async def mitglied_loeschen(
     member_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     from datetime import datetime, timezone
 
@@ -181,7 +181,7 @@ async def telefon_hinzufuegen(
     member_id: str,
     daten: PhoneCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     await _hole_member_oder_404(db, member_id)
     telefon = MemberPhone(member_id=member_id, **daten.model_dump())
@@ -200,7 +200,7 @@ async def telefon_entfernen(
     member_id: str,
     telefon_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(
         select(MemberPhone).where(
@@ -228,7 +228,7 @@ async def email_hinzufuegen(
     member_id: str,
     daten: EmailAddressCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     await _hole_member_oder_404(db, member_id)
     email_obj = MemberEmail(
@@ -252,7 +252,7 @@ async def email_entfernen(
     member_id: str,
     email_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(
         select(MemberEmail).where(

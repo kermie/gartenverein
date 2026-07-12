@@ -2,7 +2,7 @@
 from tests.conftest import login, auth_header
 
 
-async def test_mitglied_anlegen_und_abrufen(client, admin_benutzer):
+async def test_mitglied_anlegen_und_abrufen(client, admin_user):
     token = await login(client, "admin@example.com")
 
     response = await client.post(
@@ -19,7 +19,7 @@ async def test_mitglied_anlegen_und_abrufen(client, admin_benutzer):
     assert response.json()["last_name"] == "Musterfrau"
 
 
-async def test_parcel_anlegen_doppelte_plot_number_abgelehnt(client, admin_benutzer):
+async def test_parcel_anlegen_doppelte_plot_number_abgelehnt(client, admin_user):
     token = await login(client, "admin@example.com")
 
     response = await client.post(
@@ -33,7 +33,7 @@ async def test_parcel_anlegen_doppelte_plot_number_abgelehnt(client, admin_benut
     assert response.status_code == 409  # Groß-/Kleinschreibung wird normalisiert (G001 == g001)
 
 
-async def test_mitglied_parzelle_zuordnung_und_doppelgarten(client, admin_benutzer):
+async def test_mitglied_parzelle_zuordnung_und_doppelgarten(client, admin_user):
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
 

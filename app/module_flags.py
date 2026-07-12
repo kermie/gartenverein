@@ -3,7 +3,7 @@ Modul-Flags: Ein-/Ausblenden optionaler Funktionsbereiche.
 
 Konzept:
 - Jedes optionale Modul hat einen Schlüssel "modul_<name>" in der
-  Vereinseinstellungen-Tabelle (z.B. "modul_work_hours").
+  ClubSettings-Tabelle (z.B. "modul_work_hours").
 - Fehlt der Schlüssel (z.B. bei bestehenden Installationen ohne
   explizite Einstellung), gilt der Default in MODULE_DEFAULTS
   (bewusst True, damit bestehende Nutzer nichts verlieren).
@@ -23,7 +23,7 @@ from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.models import Vereinseinstellung
+from app.models import ClubSetting
 
 # Default-Zustand pro Modul, falls kein expliziter Wert in der DB steht.
 # Bewusst True für bestehende Module, damit ein Update nichts "kaputt macht".
@@ -37,22 +37,22 @@ MODULE_DEFAULTS: Dict[str, bool] = {
 }
 
 
-def _wert_zu_bool(wert: str) -> bool:
-    return wert.strip().lower() in ("true", "1", "ja", "an")
+def _wert_zu_bool(value: str) -> bool:
+    return value.strip().lower() in ("true", "1", "ja", "an")
 
 
 async def lade_modul_flags(db: AsyncSession) -> Dict[str, bool]:
     """Lädt alle Modul-Flags aus der Datenbank, ergänzt um Defaults."""
     result = await db.execute(
-        select(Vereinseinstellung).where(Vereinseinstellung.schluessel.like("modul_%"))
+        select(ClubSetting).where(ClubSetting.key.like("modul_%"))
     )
-    gespeichert = {e.schluessel: e.wert for e in result.scalars().all()}
+    gespeichert = {e.key: e.value for e in result.scalars().all()}
 
     flags = dict(MODULE_DEFAULTS)
     for name in MODULE_DEFAULTS:
-        wert = gespeichert.get(f"modul_{name}")
-        if wert is not None:
-            flags[name] = _wert_zu_bool(wert)
+        value = gespeichert.get(f"modul_{name}")
+        if value is not None:
+            flags[name] = _wert_zu_bool(value)
     return flags
 
 

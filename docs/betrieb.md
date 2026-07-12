@@ -51,7 +51,7 @@ docker compose exec db psql -U gartenverein -c "UPDATE alembic_version SET versi
 
 ## SMTP-Einrichtung
 
-SMTP-Zugangsdaten können unter `/admin/einstellungen` eingetragen werden
+SMTP-Zugangsdaten können unter `/admin/settings` eingetragen werden
 (Datenbank hat Vorrang) oder per `.env`-Datei (Fallback, falls DB-Werte
 fehlen):
 

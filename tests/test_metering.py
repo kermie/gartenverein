@@ -6,7 +6,7 @@ Verbrauchsberechnung.
 from tests.conftest import login, auth_header
 
 
-async def test_metering_point_anlegen_und_ablesung(client, admin_benutzer):
+async def test_metering_point_anlegen_und_ablesung(client, admin_user):
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
@@ -32,7 +32,7 @@ async def test_metering_point_anlegen_und_ablesung(client, admin_benutzer):
     assert entry.status_code == 201
 
 
-async def test_zaehlerstand_darf_nicht_sinken(client, admin_benutzer):
+async def test_zaehlerstand_darf_nicht_sinken(client, admin_user):
     """
     Kernregel der Plausibilitätsprüfung: ein neuer Zählerstand muss
     mindestens so hoch sein wie der vorherige derselben Wasseruhr.
@@ -70,7 +70,7 @@ async def test_zaehlerstand_darf_nicht_sinken(client, admin_benutzer):
     assert r3.status_code == 201
 
 
-async def test_verbrauchsberechnung(client, admin_benutzer):
+async def test_verbrauchsberechnung(client, admin_user):
     """Verbrauch = aktueller Stand minus letzter Stand (oder Anfangsstand)."""
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
@@ -92,7 +92,7 @@ async def test_verbrauchsberechnung(client, admin_benutzer):
     assert float(zeile["consumption"]) == 50.0  # 150 - Anfangsstand 100
 
 
-async def test_strom_und_wasser_getrennt(client, admin_benutzer):
+async def test_strom_und_wasser_getrennt(client, admin_user):
     """Wasser- und Strom-MeteringPointe müssen unabhängige, getrennte Listen sein."""
     token = await login(client, "admin@example.com")
     headers = auth_header(token)

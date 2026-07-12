@@ -10,8 +10,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.models import PurchaseRequest, PurchaseRequestApproval, PurchaseRequestStatus, Benutzer, BenutzerRolle
-from app.api_auth import get_current_api_user, require_api_rolle
+from app.models import PurchaseRequest, PurchaseRequestApproval, PurchaseRequestStatus, User, UserRole
+from app.api_auth import get_current_api_user, require_api_role
 from app.module_flags import require_modul
 from app.schemas import (
     PurchaseRequestCreate, PurchaseRequestOut, PurchaseRequestDetailOut, PurchaseRequestRejectRequest,
@@ -24,7 +24,7 @@ router = APIRouter(
 )
 
 _REQUIRED_APPROVALS = 2
-require_vorstand_api = require_api_rolle(BenutzerRolle.ADMIN, BenutzerRolle.VORSTAND)
+require_vorstand_api = require_api_role(UserRole.ADMIN, UserRole.BOARD)
 
 
 async def _load_with_details(db: AsyncSession, request_id: str) -> Optional[PurchaseRequest]:
@@ -40,7 +40,7 @@ async def _load_with_details(db: AsyncSession, request_id: str) -> Optional[Purc
 async def purchase_requests_list(
     status_filter: Optional[str] = Query(None, alias="status"),
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     query = select(PurchaseRequest).order_by(PurchaseRequest.created_at.desc())
     if status_filter:
@@ -56,7 +56,7 @@ async def purchase_requests_list(
 async def purchase_request_get(
     request_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     pr = await _load_with_details(db, request_id)
     if not pr:
@@ -74,12 +74,12 @@ async def purchase_request_get(
 async def purchase_request_create(
     daten: PurchaseRequestCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     pr = PurchaseRequest(
         title=daten.title, justification=daten.justification, link=daten.link,
         estimated_cost_eur=daten.estimated_cost_eur,
-        created_by_id=benutzer.id,
+        created_by_id=user.id,
     )
 
     if daten.requester_email:
@@ -88,7 +88,7 @@ async def purchase_request_create(
         pr.requester_email = str(daten.requester_email).lower()
         pr.confirmation_token = serializer.dumps(str(daten.requester_email).lower(), salt="purchase_request")
     else:
-        pr.requested_by_id = benutzer.id
+        pr.requested_by_id = user.id
 
     db.add(pr)
     await db.commit()
@@ -100,7 +100,7 @@ async def purchase_request_create(
         betreff = f"Bitte bestätigen: Einkaufswunsch „{pr.title}“"
         html = (
             f"<html><body><p>Hallo {pr.requester_name or ''},</p>"
-            f"<p>{benutzer.name} hat in Ihrem Namen einen Einkaufswunsch im {settings.app_name} erfasst: "
+            f"<p>{user.name} hat in Ihrem Namen einen Einkaufswunsch im {settings.app_name} erfasst: "
             f"<strong>{pr.title}</strong></p>"
             f"<p>Bitte melden Sie sich, um die Angaben zu prüfen.</p></body></html>"
         )
@@ -118,7 +118,7 @@ async def purchase_request_create(
 async def purchase_request_approve(
     request_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_vorstand_api),
+    user: User = Depends(require_vorstand_api),
 ):
     pr = await _load_with_details(db, request_id)
     if not pr:
@@ -127,16 +127,16 @@ async def purchase_request_approve(
     if pr.status != PurchaseRequestStatus.OPEN:
         raise HTTPException(status_code=409, detail=f"Einkaufswunsch ist bereits {pr.status.value}")
 
-    if benutzer.id in (pr.requested_by_id, pr.created_by_id):
+    if user.id in (pr.requested_by_id, pr.created_by_id):
         raise HTTPException(
             status_code=403,
             detail="Der Antragsteller darf seinen eigenen Einkaufswunsch nicht mitfreigeben (Vier-Augen-Prinzip)."
         )
 
-    if any(a.user_id == benutzer.id for a in pr.approvals):
+    if any(a.user_id == user.id for a in pr.approvals):
         raise HTTPException(status_code=409, detail="Sie haben bereits freigegeben.")
 
-    db.add(PurchaseRequestApproval(purchase_request_id=request_id, user_id=benutzer.id))
+    db.add(PurchaseRequestApproval(purchase_request_id=request_id, user_id=user.id))
     await db.flush()
 
     if len(pr.approvals) + 1 >= _REQUIRED_APPROVALS:
@@ -156,7 +156,7 @@ async def purchase_request_reject(
     request_id: str,
     daten: PurchaseRequestRejectRequest,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_vorstand_api),
+    user: User = Depends(require_vorstand_api),
 ):
     pr = await _load_with_details(db, request_id)
     if not pr:
@@ -167,7 +167,7 @@ async def purchase_request_reject(
 
     pr.status = PurchaseRequestStatus.REJECTED
     pr.rejection_reason = daten.rejection_reason
-    pr.rejected_by_id = benutzer.id
+    pr.rejected_by_id = user.id
     pr.rejected_at = datetime.now(timezone.utc)
 
     await db.commit()

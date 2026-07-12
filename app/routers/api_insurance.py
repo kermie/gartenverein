@@ -12,9 +12,9 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.models import (
     PropertyInsurancePackage, InsuranceConfiguration, ParcelInsurance,
-    AccidentInsuranceAdditionalPerson, Parcel, Benutzer,
+    AccidentInsuranceAdditionalPerson, Parcel, User,
 )
-from app.api_auth import get_current_api_user, require_schreibzugriff
+from app.api_auth import get_current_api_user, require_write_access
 from app.module_flags import require_modul
 from app.insurance_utils import calculate_insurance_cost
 from app.schemas import (
@@ -38,7 +38,7 @@ router = APIRouter(
 async def packages_list(
     year: Optional[int] = Query(None),
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     query = select(PropertyInsurancePackage).order_by(PropertyInsurancePackage.year.desc(), PropertyInsurancePackage.sort_order)
     if year:
@@ -54,7 +54,7 @@ async def packages_list(
 async def package_create(
     daten: PropertyInsurancePackageCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     package = PropertyInsurancePackage(**daten.model_dump())
     db.add(package)
@@ -68,15 +68,15 @@ async def package_update(
     package_id: str,
     daten: PropertyInsurancePackageCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(PropertyInsurancePackage).where(PropertyInsurancePackage.id == package_id))
     package = result.scalar_one_or_none()
     if not package:
         raise HTTPException(status_code=404, detail="Paket nicht gefunden")
 
-    for feld, wert in daten.model_dump().items():
-        setattr(package, feld, wert)
+    for feld, value in daten.model_dump().items():
+        setattr(package, feld, value)
 
     await db.commit()
     await db.refresh(package)
@@ -87,7 +87,7 @@ async def package_update(
 async def package_delete(
     package_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(PropertyInsurancePackage).where(PropertyInsurancePackage.id == package_id))
     package = result.scalar_one_or_none()
@@ -107,7 +107,7 @@ async def package_delete(
 async def configuration_get(
     year: int,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     result = await db.execute(select(InsuranceConfiguration).where(InsuranceConfiguration.year == year))
     config = result.scalar_one_or_none()
@@ -124,7 +124,7 @@ async def configuration_set(
     year: int,
     daten: InsuranceConfigurationCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(InsuranceConfiguration).where(InsuranceConfiguration.year == year))
     config = result.scalar_one_or_none()
@@ -187,7 +187,7 @@ async def insurance_get(
     parcel_id: str,
     year: int,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     pi = await _load_pi(db, parcel_id, year)
     if not pi:
@@ -208,7 +208,7 @@ async def insurance_set(
     year: int,
     daten: ParcelInsuranceUpdate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     parcel_result = await db.execute(select(Parcel).where(Parcel.id == parcel_id))
     if not parcel_result.scalar_one_or_none():
@@ -265,7 +265,7 @@ async def insurance_set(
 async def evaluation(
     year: int,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     config_result = await db.execute(select(InsuranceConfiguration).where(InsuranceConfiguration.year == year))
     config = config_result.scalar_one_or_none()

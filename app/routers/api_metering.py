@@ -13,8 +13,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.models import MeteringPoint, MeteringPointType, MeteringMedium, Meter, MeterReading, Benutzer
-from app.api_auth import get_current_api_user, require_schreibzugriff
+from app.models import MeteringPoint, MeteringPointType, MeteringMedium, Meter, MeterReading, User
+from app.api_auth import get_current_api_user, require_write_access
 from app.module_flags import require_modul
 from app.zaehler_utils import calculate_consumption, check_monotonicity, total_consumption_for_type
 from app.schemas import (
@@ -45,7 +45,7 @@ def erstelle_metering_api_router(
     async def zaehlpunkte_auflisten(
         type: Optional[str] = Query(None, description="MAIN_METER, PARCEL oder CLUB"),
         db: AsyncSession = Depends(get_db),
-        benutzer: Benutzer = Depends(get_current_api_user),
+        user: User = Depends(get_current_api_user),
     ):
         query = select(MeteringPoint).where(MeteringPoint.medium == medium)
         if type:
@@ -60,7 +60,7 @@ def erstelle_metering_api_router(
     async def zaehlpunkt_abrufen(
         metering_point_id: str,
         db: AsyncSession = Depends(get_db),
-        benutzer: Benutzer = Depends(get_current_api_user),
+        user: User = Depends(get_current_api_user),
     ):
         zp = await _lade_zaehlpunkt(db, metering_point_id)
         if not zp:
@@ -78,7 +78,7 @@ def erstelle_metering_api_router(
     async def zaehlpunkt_erstellen(
         daten: MeteringPointCreate,
         db: AsyncSession = Depends(get_db),
-        benutzer: Benutzer = Depends(require_schreibzugriff),
+        user: User = Depends(require_write_access),
     ):
         zp = MeteringPoint(
             medium=medium, type=MeteringPointType(daten.type),
@@ -106,7 +106,7 @@ def erstelle_metering_api_router(
         metering_point_id: str,
         daten: MeteringPointUpdate,
         db: AsyncSession = Depends(get_db),
-        benutzer: Benutzer = Depends(require_schreibzugriff),
+        user: User = Depends(require_write_access),
     ):
         result = await db.execute(
             select(MeteringPoint).where(MeteringPoint.id == metering_point_id, MeteringPoint.medium == medium)
@@ -115,8 +115,8 @@ def erstelle_metering_api_router(
         if not zp:
             raise HTTPException(status_code=404, detail="Zählpunkt nicht gefunden")
 
-        for feld, wert in daten.model_dump(exclude_unset=True).items():
-            setattr(zp, feld, wert)
+        for feld, value in daten.model_dump(exclude_unset=True).items():
+            setattr(zp, feld, value)
 
         await db.commit()
         await db.refresh(zp)
@@ -129,7 +129,7 @@ def erstelle_metering_api_router(
     async def zaehlpunkt_loeschen(
         metering_point_id: str,
         db: AsyncSession = Depends(get_db),
-        benutzer: Benutzer = Depends(require_schreibzugriff),
+        user: User = Depends(require_write_access),
     ):
         result = await db.execute(
             select(MeteringPoint).where(MeteringPoint.id == metering_point_id, MeteringPoint.medium == medium)
@@ -148,7 +148,7 @@ def erstelle_metering_api_router(
         metering_point_id: str,
         daten: MeterTauschRequest,
         db: AsyncSession = Depends(get_db),
-        benutzer: Benutzer = Depends(require_schreibzugriff),
+        user: User = Depends(require_write_access),
     ):
         zp = await _lade_zaehlpunkt(db, metering_point_id)
         if not zp:
@@ -176,7 +176,7 @@ def erstelle_metering_api_router(
     async def zaehlerstaende_auflisten(
         metering_point_id: str,
         db: AsyncSession = Depends(get_db),
-        benutzer: Benutzer = Depends(get_current_api_user),
+        user: User = Depends(get_current_api_user),
     ):
         zp = await _lade_zaehlpunkt(db, metering_point_id)
         if not zp:
@@ -196,7 +196,7 @@ def erstelle_metering_api_router(
         metering_point_id: str,
         daten: MeterReadingCreate,
         db: AsyncSession = Depends(get_db),
-        benutzer: Benutzer = Depends(require_schreibzugriff),
+        user: User = Depends(require_write_access),
     ):
         zp = await _lade_zaehlpunkt(db, metering_point_id)
         if not zp:
@@ -214,14 +214,14 @@ def erstelle_metering_api_router(
             existing.reading = daten.reading
             existing.date = daten.date
             existing.note = daten.note
-            existing.recorded_by_id = benutzer.id
+            existing.recorded_by_id = user.id
             await db.commit()
             await db.refresh(existing)
             return existing
 
         neuer_stand = MeterReading(
             meter_id=zaehler.id, year=daten.year, date=daten.date,
-            reading=daten.reading, note=daten.note, recorded_by_id=benutzer.id,
+            reading=daten.reading, note=daten.note, recorded_by_id=user.id,
         )
         db.add(neuer_stand)
         await db.commit()
@@ -235,7 +235,7 @@ def erstelle_metering_api_router(
     async def zaehlerstand_loeschen(
         reading_id: str,
         db: AsyncSession = Depends(get_db),
-        benutzer: Benutzer = Depends(require_schreibzugriff),
+        user: User = Depends(require_write_access),
     ):
         result = await db.execute(select(MeterReading).where(MeterReading.id == reading_id))
         zs = result.scalar_one_or_none()
@@ -251,7 +251,7 @@ def erstelle_metering_api_router(
         year: int,
         type: Optional[str] = Query(None, description="Nach MAIN_METER, PARCEL oder CLUB filtern"),
         db: AsyncSession = Depends(get_db),
-        benutzer: Benutzer = Depends(get_current_api_user),
+        user: User = Depends(get_current_api_user),
     ):
         query = (
             select(MeteringPoint)

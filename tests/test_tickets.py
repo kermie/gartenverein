@@ -8,7 +8,7 @@ Begründung dieser Grenze).
 from tests.conftest import login, auth_header
 
 
-async def test_ticket_anlegen_und_automatischer_mitglied_abgleich(client, admin_benutzer):
+async def test_ticket_anlegen_und_automatischer_mitglied_abgleich(client, admin_user):
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
@@ -35,7 +35,7 @@ async def test_ticket_anlegen_und_automatischer_mitglied_abgleich(client, admin_
     assert len(ticket["messages"]) == 1
 
 
-async def test_ticket_zuweisung_aendert_status(client, admin_benutzer):
+async def test_ticket_zuweisung_aendert_status(client, admin_user):
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
@@ -47,11 +47,11 @@ async def test_ticket_zuweisung_aendert_status(client, admin_benutzer):
 
     zugewiesen = (await client.put(
         f"/api/v1/tickets/{ticket['id']}/assignment",
-        json={"assigned_to_id": admin_benutzer.id},
+        json={"assigned_to_id": admin_user.id},
         headers=headers,
     )).json()
     assert zugewiesen["status"] == "ASSIGNED"
-    assert zugewiesen["assigned_to_id"] == admin_benutzer.id
+    assert zugewiesen["assigned_to_id"] == admin_user.id
 
     aufgehoben = (await client.put(
         f"/api/v1/tickets/{ticket['id']}/assignment",
@@ -61,7 +61,7 @@ async def test_ticket_zuweisung_aendert_status(client, admin_benutzer):
     assert aufgehoben["status"] == "UNASSIGNED"
 
 
-async def test_ticket_status_zurueckgestellt_erfordert_datum(client, admin_benutzer):
+async def test_ticket_status_zurueckgestellt_erfordert_datum(client, admin_user):
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
 

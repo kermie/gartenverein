@@ -16,14 +16,14 @@ from sqlalchemy.orm import selectinload
 
 from app.config import settings
 from app.database import get_db, AsyncSessionLocal, active_member_filter
-from app.models import Benutzer, BenutzerRolle, Member, Parcel, ParcelStatus, MemberParcel
-from app.auth import hash_passwort, get_current_user
+from app.models import User, UserRole, Member, Parcel, ParcelStatus, MemberParcel
+from app.auth import hash_password, get_current_user
 from app.module_flags import lade_modul_flags
 from app.ticket_mailer import process_incoming_mails
 from app.routers import auth, members, parcels, admin as admin_router, work_hours, insurance, tickets, purchase_requests
 from app.routers.metering import erstelle_metering_router
 from app.models import MeteringMedium
-from app.routers import api_auth, api_members, api_parcels, api_einstellungen, api_stats
+from app.routers import api_auth, api_members, api_parcels, api_club_settings, api_stats
 from app.routers import api_work_hours, api_insurance, api_tickets, api_purchase_requests
 from app.routers.api_metering import erstelle_metering_api_router
 
@@ -54,13 +54,13 @@ async def _ticket_inbox_polling_loop():
 async def lifespan(app: FastAPI):
     """Startup: ersten Admin anlegen falls die Benutzertabelle leer ist."""
     async with AsyncSessionLocal() as db:
-        anzahl_benutzer = await db.scalar(select(func.count()).select_from(Benutzer))
-        if not anzahl_benutzer:
-            erster_admin = Benutzer(
+        user_count = await db.scalar(select(func.count()).select_from(User))
+        if not user_count:
+            erster_admin = User(
                 email="admin@gartenverein.local",
                 name="Administrator",
-                passwort_hash=hash_passwort("admin1234"),
-                rolle=BenutzerRolle.ADMIN,
+                password_hash=hash_password("admin1234"),
+                role=UserRole.ADMIN,
             )
             db.add(erster_admin)
             await db.commit()
@@ -135,7 +135,7 @@ app.include_router(electricity_router)
 app.include_router(api_auth.router)
 app.include_router(api_members.router)
 app.include_router(api_parcels.router)
-app.include_router(api_einstellungen.router)
+app.include_router(api_club_settings.router)
 app.include_router(api_stats.router)
 app.include_router(api_work_hours.router)
 app.include_router(api_insurance.router)
@@ -153,9 +153,9 @@ templates = Jinja2Templates(directory="app/templates")
 @app.get("/", response_class=HTMLResponse)
 async def startseite(request: Request):
     async with AsyncSessionLocal() as db:
-        benutzer = await get_current_user(request, db)
+        user = await get_current_user(request, db)
 
-        if not benutzer:
+        if not user:
             return RedirectResponse("/auth/login", status_code=302)
 
         members_total = await db.scalar(
@@ -205,7 +205,7 @@ async def startseite(request: Request):
         "dashboard.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "stats": stats,
             "neueste_mitglieder": recent_members,
         },
@@ -215,10 +215,10 @@ async def startseite(request: Request):
 @app.exception_handler(403)
 async def forbidden_handler(request: Request, exc):
     async with AsyncSessionLocal() as db:
-        benutzer = await get_current_user(request, db)
+        user = await get_current_user(request, db)
     return templates.TemplateResponse(
         "fehler.html",
-        {"request": request, "benutzer": benutzer, "code": 403, "meldung": "Keine Berechtigung"},
+        {"request": request, "user": user, "code": 403, "meldung": "Keine Berechtigung"},
         status_code=403,
     )
 
@@ -226,9 +226,9 @@ async def forbidden_handler(request: Request, exc):
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
     async with AsyncSessionLocal() as db:
-        benutzer = await get_current_user(request, db)
+        user = await get_current_user(request, db)
     return templates.TemplateResponse(
         "fehler.html",
-        {"request": request, "benutzer": benutzer, "code": 404, "meldung": "Seite nicht gefunden"},
+        {"request": request, "user": user, "code": 404, "meldung": "Seite nicht gefunden"},
         status_code=404,
     )

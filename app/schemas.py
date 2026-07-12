@@ -11,7 +11,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
-from app.models import ParcelStatus, BenutzerRolle
+from app.models import ParcelStatus, UserRole
 
 
 # ---------------------------------------------------------------------------
@@ -21,21 +21,21 @@ from app.models import ParcelStatus, BenutzerRolle
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    expires_in_minuten: int
+    expires_in_minutes: int
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
-    passwort: str
+    password: str
 
 
-class BenutzerOut(BaseModel):
+class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str
     email: str
     name: str
-    rolle: BenutzerRolle
-    ist_aktiv: bool
+    role: UserRole
+    is_active: bool
 
 
 # ---------------------------------------------------------------------------
@@ -201,18 +201,18 @@ class AssignmentOut(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Vereinseinstellung
+# ClubSetting
 # ---------------------------------------------------------------------------
 
-class VereinseinstellungOut(BaseModel):
+class ClubSettingOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    schluessel: str
-    wert: Optional[str] = None
-    beschreibung: Optional[str] = None
+    key: str
+    value: Optional[str] = None
+    description: Optional[str] = None
 
 
-class VereinseinstellungUpdate(BaseModel):
-    wert: Optional[str] = None
+class ClubSettingUpdate(BaseModel):
+    value: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------

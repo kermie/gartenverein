@@ -36,7 +36,7 @@ Mitglieder relevant sind (Dropdowns, Auswertungen, Zuordnungen). Die
 Mitgliederliste selbst zeigt standardmäßig nur Aktive, mit einer Checkbox
 "Inaktive anzeigen" für die Historie (z.B. verstorbene Mitglieder).
 
-**Änderungshistorie (Aenderungshistorie).** Ein generisches Audit-Log
+**Änderungshistorie (ChangeHistory).** Ein generisches Audit-Log
 (`app/aenderungstracker.py`), das Feldänderungen an beliebigen Entitäten
 protokolliert (aktuell für Parzellen genutzt: Fläche, Status, Gartennummer
 etc.). Statt für jede Tabelle eine eigene Historie-Tabelle zu bauen, gibt

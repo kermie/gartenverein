@@ -33,7 +33,7 @@ import aiosmtplib
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.models import Vereinseinstellung, Ticket, TicketMessage, TicketStatus, MessageDirection
+from app.models import ClubSetting, Ticket, TicketMessage, TicketStatus, MessageDirection
 from app.email_service import lade_smtp_konfiguration
 from app.ticket_utils import find_members_by_email
 from app.spam_filter import pruefe_auf_spam
@@ -47,18 +47,18 @@ _KEY_LAST_ERROR = "ticket_imap_letzter_fehler"
 
 
 async def _read_setting(db: AsyncSession, key: str) -> Optional[str]:
-    result = await db.execute(select(Vereinseinstellung).where(Vereinseinstellung.schluessel == key))
+    result = await db.execute(select(ClubSetting).where(ClubSetting.key == key))
     entry = result.scalar_one_or_none()
-    return entry.wert if entry else None
+    return entry.value if entry else None
 
 
 async def _write_setting(db: AsyncSession, key: str, value: Optional[str]) -> None:
-    result = await db.execute(select(Vereinseinstellung).where(Vereinseinstellung.schluessel == key))
+    result = await db.execute(select(ClubSetting).where(ClubSetting.key == key))
     entry = result.scalar_one_or_none()
     if entry:
-        entry.wert = value
+        entry.value = value
     else:
-        db.add(Vereinseinstellung(schluessel=key, wert=value))
+        db.add(ClubSetting(key=key, value=value))
 
 
 async def load_inbox_configuration(db: AsyncSession) -> Dict[str, Any]:
@@ -71,11 +71,11 @@ async def load_inbox_configuration(db: AsyncSession) -> Dict[str, Any]:
     smtp_config = await lade_smtp_konfiguration(db)
 
     result = await db.execute(
-        select(Vereinseinstellung).where(
-            Vereinseinstellung.schluessel.in_(["imap_host", "imap_port", "imap_ssl"])
+        select(ClubSetting).where(
+            ClubSetting.key.in_(["imap_host", "imap_port", "imap_ssl"])
         )
     )
-    stored = {e.schluessel: e.wert for e in result.scalars().all() if e.wert}
+    stored = {e.key: e.value for e in result.scalars().all() if e.value}
 
     def _bool(value, default=True) -> bool:
         if value is None:

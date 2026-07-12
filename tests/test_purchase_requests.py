@@ -8,7 +8,7 @@ from tests.conftest import login, auth_header
 
 
 async def test_zwei_unterschiedliche_freigaben_fuehren_zu_genehmigt(
-    client, admin_benutzer, vorstand_benutzer, zweiter_vorstand_benutzer
+    client, admin_user, board_user, second_board_user
 ):
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
@@ -35,7 +35,7 @@ async def test_zwei_unterschiedliche_freigaben_fuehren_zu_genehmigt(
     assert r2.json()["status"] == "APPROVED"  # jetzt 2 von 2
 
 
-async def test_antragsteller_darf_nicht_selbst_freigeben(client, admin_benutzer, vorstand_benutzer):
+async def test_antragsteller_darf_nicht_selbst_freigeben(client, admin_user, board_user):
     """Kernschutz des Vier-Augen-Prinzips: wer beantragt, darf nicht mitgenehmigen."""
     token = await login(client, "vorstand@example.com")
     headers = auth_header(token)
@@ -52,7 +52,7 @@ async def test_antragsteller_darf_nicht_selbst_freigeben(client, admin_benutzer,
 
 
 async def test_gleiche_person_kann_nicht_doppelt_freigeben(
-    client, admin_benutzer, vorstand_benutzer, zweiter_vorstand_benutzer
+    client, admin_user, board_user, second_board_user
 ):
     """Zwei Freigaben müssen von ZWEI UNTERSCHIEDLICHEN Personen kommen."""
     token = await login(client, "admin@example.com")
@@ -78,7 +78,7 @@ async def test_gleiche_person_kann_nicht_doppelt_freigeben(
     assert aktuell["status"] == "OPEN"
 
 
-async def test_ablehnung_durch_eine_person_genuegt(client, admin_benutzer, vorstand_benutzer):
+async def test_ablehnung_durch_eine_person_genuegt(client, admin_user, board_user):
     """Veto-Prinzip: eine einzelne Ablehnung stoppt den Antrag sofort."""
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
@@ -100,16 +100,16 @@ async def test_ablehnung_durch_eine_person_genuegt(client, admin_benutzer, vorst
     assert r.json()["rejection_reason"] == "Nicht notwendig"
 
 
-async def test_normale_mitglieder_koennen_nicht_freigeben(client, admin_benutzer):
+async def test_normale_mitglieder_koennen_nicht_freigeben(client, admin_user):
     """Nur Vorstand/Admin dürfen freigeben – einfache Mitglieder nicht."""
-    from app.models import Benutzer, BenutzerRolle
-    from app.auth import hash_passwort
+    from app.models import User, UserRole
+    from app.auth import hash_password
     from app.database import AsyncSessionLocal
 
     async with AsyncSessionLocal() as session:
-        einfaches_mitglied = Benutzer(
+        einfaches_mitglied = User(
             email="mitglied@example.com", name="Normales Member",
-            passwort_hash=hash_passwort("testpasswort123"), rolle=BenutzerRolle.LESEND,
+            password_hash=hash_password("testpasswort123"), role=UserRole.READONLY,
         )
         session.add(einfaches_mitglied)
         await session.commit()

@@ -98,7 +98,7 @@ async def insurance_overview(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     if not year:
         year = date.today().year
 
@@ -130,7 +130,7 @@ async def insurance_overview(
         available_years.insert(0, year)
 
     return templates.TemplateResponse("insurance/overview.html", {
-        "request": request, "benutzer": benutzer, "year": year,
+        "request": request, "user": user, "year": year,
         "available_years": available_years,
         "configuration": configuration, "packages": packages,
         "count_property": count_property, "count_accident": count_accident,
@@ -149,7 +149,7 @@ async def configuration_page(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     if not year:
         year = date.today().year
 
@@ -164,7 +164,7 @@ async def configuration_page(
         available_years.insert(0, year)
 
     return templates.TemplateResponse("insurance/configuration.html", {
-        "request": request, "benutzer": benutzer, "year": year,
+        "request": request, "user": user, "year": year,
         "available_years": available_years,
         "configuration": configuration, "packages": packages,
         "current_year": date.today().year,
@@ -268,7 +268,7 @@ async def insurance_parcels_list(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     if not year:
         year = date.today().year
 
@@ -297,7 +297,7 @@ async def insurance_parcels_list(
         rows.append({"parcel": p, "pi": pi, "cost": cost})
 
     return templates.TemplateResponse("insurance/parcels_list.html", {
-        "request": request, "benutzer": benutzer, "year": year,
+        "request": request, "user": user, "year": year,
         "rows": rows,
     })
 
@@ -309,7 +309,7 @@ async def insurance_detail(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     if not year:
         year = date.today().year
 
@@ -331,7 +331,7 @@ async def insurance_detail(
     cost = calculate_insurance_cost(pi, configuration)
 
     return templates.TemplateResponse("insurance/detail.html", {
-        "request": request, "benutzer": benutzer, "year": year,
+        "request": request, "user": user, "year": year,
         "parcel": parcel, "pi": pi, "configuration": configuration, "packages": packages,
         "household": grouping["household"], "external": grouping["external"],
         "additional_ids": additional_ids, "cost": cost,
@@ -383,7 +383,7 @@ async def insurance_evaluation(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     if not year:
         year = date.today().year
 
@@ -420,7 +420,7 @@ async def insurance_evaluation(
         available_years.insert(0, year)
 
     return templates.TemplateResponse("insurance/evaluation.html", {
-        "request": request, "benutzer": benutzer, "year": year,
+        "request": request, "user": user, "year": year,
         "available_years": available_years,
         "rows": rows, "total_overall": total_overall,
     })

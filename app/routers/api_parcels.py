@@ -9,12 +9,12 @@ from sqlalchemy import select
 
 from app.database import get_db
 from app.models import Parcel, ParcelStatus, MemberParcel, Member
-from app.api_auth import get_current_api_user, require_schreibzugriff
+from app.api_auth import get_current_api_user, require_write_access
 from app.schemas import (
     ParcelOut, ParcelDetailOut, ParcelCreate, ParcelUpdate, ParcelAssignmentBrief,
     AssignmentCreate, AssignmentOut,
 )
-from app.models import Benutzer
+from app.models import User
 from sqlalchemy.orm import selectinload
 
 router = APIRouter(prefix="/api/v1/parcels", tags=["API: Parcels"])
@@ -57,7 +57,7 @@ async def parzellen_auflisten(
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     query = select(Parcel).order_by(Parcel.plot_number).limit(limit).offset(offset)
 
@@ -79,7 +79,7 @@ async def parzellen_auflisten(
 async def parzelle_abrufen(
     parcel_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     parzelle = await _hole_parcel_oder_404(db, parcel_id, mit_details=True)
     return _zu_detail_schema(parzelle)
@@ -94,7 +94,7 @@ async def parzelle_abrufen(
 async def parzelle_erstellen(
     daten: ParcelCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     plot_number = daten.plot_number.strip().upper()
 
@@ -126,7 +126,7 @@ async def parzelle_aktualisieren(
     parcel_id: str,
     daten: ParcelUpdate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     parzelle = await _hole_parcel_oder_404(db, parcel_id)
 
@@ -145,8 +145,8 @@ async def parzelle_aktualisieren(
                 )
         update_daten["plot_number"] = neue_nummer
 
-    for feld, wert in update_daten.items():
-        setattr(parzelle, feld, wert)
+    for feld, value in update_daten.items():
+        setattr(parzelle, feld, value)
 
     await db.commit()
     await db.refresh(parzelle)
@@ -162,7 +162,7 @@ async def parzelle_aktualisieren(
 async def parzelle_loeschen(
     parcel_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     parzelle = await _hole_parcel_oder_404(db, parcel_id)
     parzelle.status = ParcelStatus.DELETED
@@ -184,7 +184,7 @@ async def member_zuordnen(
     parcel_id: str,
     daten: AssignmentCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     if daten.parcel_id != parcel_id:
         raise HTTPException(status_code=400, detail="parcel_id im Body muss mit URL übereinstimmen")
@@ -228,7 +228,7 @@ async def assignment_entfernen(
     parcel_id: str,
     assignment_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(
         select(MemberParcel).where(

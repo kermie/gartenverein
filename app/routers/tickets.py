@@ -18,11 +18,11 @@ from sqlalchemy.orm import selectinload
 
 from app.database import get_db, active_member_filter
 from app.models import (
-    Ticket, TicketMessage, TicketStatus, MessageDirection, Benutzer, Member,
+    Ticket, TicketMessage, TicketStatus, MessageDirection, User, Member,
 )
 from app.auth import require_user
 from app.module_flags import require_modul
-from app.aenderungstracker import AenderungsTracker
+from app.change_tracker import ChangeTracker
 from app.ticket_utils import find_members_by_email
 from app.ticket_mailer import send_ticket_reply, process_incoming_mails
 from app.email_service import sende_email
@@ -60,7 +60,7 @@ async def tickets_overview(
     search: str = "",
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     query = (
         select(Ticket)
@@ -72,7 +72,7 @@ async def tickets_overview(
         query = query.where(Ticket.status != TicketStatus.CLOSED, Ticket.spam_suspected == False)
     elif filter == "mir":
         query = query.where(
-            Ticket.assigned_to_id == benutzer.id, Ticket.status != TicketStatus.CLOSED
+            Ticket.assigned_to_id == user.id, Ticket.status != TicketStatus.CLOSED
         )
     elif filter == "geschlossen":
         query = query.where(Ticket.status == TicketStatus.CLOSED)
@@ -102,7 +102,7 @@ async def tickets_overview(
     spam_count = len(spam_count_result.scalars().all())
 
     return templates.TemplateResponse("tickets/overview.html", {
-        "request": request, "benutzer": benutzer,
+        "request": request, "user": user,
         "tickets": tickets, "filter": filter, "search": search,
         "due_count": due_count, "spam_count": spam_count,
         "TicketStatus": TicketStatus,
@@ -115,8 +115,8 @@ async def tickets_overview(
 
 @router.get("/new", response_class=HTMLResponse)
 async def ticket_new_page(request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await require_user(request, db)
-    return templates.TemplateResponse("tickets/form.html", {"request": request, "benutzer": benutzer})
+    user = await require_user(request, db)
+    return templates.TemplateResponse("tickets/form.html", {"request": request, "user": user})
 
 
 @router.post("/new")
@@ -128,7 +128,7 @@ async def ticket_create(
     message: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     sender_email = sender_email.strip().lower()
     matches = await find_members_by_email(db, sender_email)
@@ -162,7 +162,7 @@ async def ticket_detail(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     ticket = await _load_ticket_with_details(db, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket nicht gefunden")
@@ -171,12 +171,12 @@ async def ticket_detail(
     # oder noch keinem zugeordnet ist)
     candidates = await find_members_by_email(db, ticket.sender_email)
 
-    benutzer_result = await db.execute(select(Benutzer).where(Benutzer.ist_aktiv == True).order_by(Benutzer.name))
-    alle_benutzer = benutzer_result.scalars().all()
+    user_result = await db.execute(select(User).where(User.is_active == True).order_by(User.name))
+    all_users = user_result.scalars().all()
 
     return templates.TemplateResponse("tickets/detail.html", {
-        "request": request, "benutzer": benutzer, "ticket": ticket,
-        "candidates": candidates, "alle_benutzer": alle_benutzer,
+        "request": request, "user": user, "ticket": ticket,
+        "candidates": candidates, "all_users": all_users,
         "TicketStatus": TicketStatus, "MessageDirection": MessageDirection,
         "heute": date.today().isoformat(),
     })
@@ -190,18 +190,18 @@ async def ticket_detail(
 async def ticket_assign(
     ticket_id: str,
     request: Request,
-    benutzer_id: str = Form(""),
+    user_id: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    aktueller_benutzer = await require_user(request, db)
+    current_user = await require_user(request, db)
     ticket = await _load_ticket_with_details(db, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404)
 
-    tracker = AenderungsTracker(ticket, "Ticket", ["status", "assigned_to_id"])
+    tracker = ChangeTracker(ticket, "Ticket", ["status", "assigned_to_id"])
 
-    if benutzer_id.strip():
-        result = await db.execute(select(Benutzer).where(Benutzer.id == benutzer_id))
+    if user_id.strip():
+        result = await db.execute(select(User).where(User.id == user_id))
         assignee = result.scalar_one_or_none()
         if not assignee:
             raise HTTPException(status_code=404, detail="Benutzer nicht gefunden")
@@ -209,7 +209,7 @@ async def ticket_assign(
         ticket.assigned_to_id = assignee.id
         ticket.status = TicketStatus.ASSIGNED
 
-        await tracker.commit(db, aktueller_benutzer.id)
+        await tracker.commit(db, current_user.id)
         await db.commit()
 
         # Benachrichtigung per E-Mail (nutzt bestehende Vereins-SMTP-Konfiguration)
@@ -226,7 +226,7 @@ async def ticket_assign(
     else:
         ticket.assigned_to_id = None
         ticket.status = TicketStatus.UNASSIGNED
-        await tracker.commit(db, aktueller_benutzer.id)
+        await tracker.commit(db, current_user.id)
         await db.commit()
 
     return RedirectResponse(f"/tickets/{ticket_id}", status_code=302)
@@ -244,12 +244,12 @@ async def ticket_status_update(
     deferred_until: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    aktueller_benutzer = await require_user(request, db)
+    current_user = await require_user(request, db)
     ticket = await _load_ticket_with_details(db, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404)
 
-    tracker = AenderungsTracker(ticket, "Ticket", ["status", "deferred_until", "closed_at"])
+    tracker = ChangeTracker(ticket, "Ticket", ["status", "deferred_until", "closed_at"])
 
     neuer_status = TicketStatus(status_neu)
     ticket.status = neuer_status
@@ -269,7 +269,7 @@ async def ticket_status_update(
     if neuer_status == TicketStatus.UNASSIGNED:
         ticket.assigned_to_id = None
 
-    await tracker.commit(db, aktueller_benutzer.id)
+    await tracker.commit(db, current_user.id)
     await db.commit()
     return RedirectResponse(f"/tickets/{ticket_id}", status_code=302)
 
@@ -329,7 +329,7 @@ async def message_add(
     direction: str = Form("OUTGOING"),
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     ticket = await _load_ticket_with_details(db, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404)
@@ -344,7 +344,7 @@ async def message_add(
         ticket_id=ticket_id,
         direction=direction_enum,
         content=content.strip(),
-        authored_by_id=benutzer.id,
+        authored_by_id=user.id,
         message_id=message_id,
     ))
     await db.commit()

@@ -10,8 +10,8 @@ from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.models import Ticket, TicketMessage, TicketStatus, MessageDirection, Benutzer
-from app.api_auth import get_current_api_user, require_schreibzugriff
+from app.models import Ticket, TicketMessage, TicketStatus, MessageDirection, User
+from app.api_auth import get_current_api_user, require_write_access
 from app.module_flags import require_modul
 from app.ticket_utils import find_members_by_email
 from app.ticket_mailer import send_ticket_reply
@@ -46,7 +46,7 @@ async def tickets_list(
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     query = select(Ticket).order_by(Ticket.created_at.desc()).limit(limit).offset(offset)
 
@@ -67,7 +67,7 @@ async def tickets_list(
 async def ticket_get(
     ticket_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     ticket = await _load_ticket(db, ticket_id)
     if not ticket:
@@ -85,7 +85,7 @@ async def ticket_get(
 async def ticket_create(
     daten: TicketCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     email = str(daten.sender_email).lower()
     matches = await find_members_by_email(db, email)
@@ -112,7 +112,7 @@ async def status_update(
     ticket_id: str,
     daten: TicketStatusUpdate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
     ticket = result.scalar_one_or_none()
@@ -143,7 +143,7 @@ async def assignment_update(
     ticket_id: str,
     daten: TicketAssignmentUpdate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
     ticket = result.scalar_one_or_none()
@@ -151,7 +151,7 @@ async def assignment_update(
         raise HTTPException(status_code=404, detail="Ticket nicht gefunden")
 
     if daten.assigned_to_id:
-        assignee_result = await db.execute(select(Benutzer).where(Benutzer.id == daten.assigned_to_id))
+        assignee_result = await db.execute(select(User).where(User.id == daten.assigned_to_id))
         assignee = assignee_result.scalar_one_or_none()
         if not assignee:
             raise HTTPException(status_code=404, detail="Benutzer nicht gefunden")
@@ -183,7 +183,7 @@ async def member_assign(
     ticket_id: str,
     daten: TicketMemberUpdate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
     ticket = result.scalar_one_or_none()
@@ -205,7 +205,7 @@ async def spam_status_update(
     ticket_id: str,
     daten: TicketSpamUpdate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
     ticket = result.scalar_one_or_none()
@@ -225,7 +225,7 @@ async def spam_status_update(
 async def messages_list(
     ticket_id: str,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(get_current_api_user),
+    user: User = Depends(get_current_api_user),
 ):
     result = await db.execute(
         select(TicketMessage).where(TicketMessage.ticket_id == ticket_id).order_by(TicketMessage.created_at)
@@ -243,7 +243,7 @@ async def message_create(
     ticket_id: str,
     daten: TicketMessageCreate,
     db: AsyncSession = Depends(get_db),
-    benutzer: Benutzer = Depends(require_schreibzugriff),
+    user: User = Depends(require_write_access),
 ):
     ticket_result = await db.execute(
         select(Ticket).options(selectinload(Ticket.messages)).where(Ticket.id == ticket_id)
@@ -259,7 +259,7 @@ async def message_create(
 
     message = TicketMessage(
         ticket_id=ticket_id, direction=direction,
-        content=daten.content, authored_by_id=benutzer.id, message_id=message_id,
+        content=daten.content, authored_by_id=user.id, message_id=message_id,
     )
     db.add(message)
     await db.commit()

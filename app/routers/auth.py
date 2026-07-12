@@ -10,10 +10,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import Benutzer, Einladung, EinladungStatus, BenutzerRolle
+from app.models import User, Invitation, InvitationStatus, UserRole
 from app.auth import (
-    verify_passwort, hash_passwort, erstelle_session_token,
-    pruefe_einladungstoken, erstelle_einladungstoken, get_current_user, require_admin
+    verify_password, hash_password, create_session_token,
+    verify_invitation_token, create_invitation_token, get_current_user, require_admin
 )
 from app.config import settings
 
@@ -23,8 +23,8 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_seite(request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await get_current_user(request, db)
-    if benutzer:
+    user = await get_current_user(request, db)
+    if user:
         return RedirectResponse("/", status_code=302)
     return templates.TemplateResponse("auth/login.html", {"request": request})
 
@@ -33,20 +33,20 @@ async def login_seite(request: Request, db: AsyncSession = Depends(get_db)):
 async def login(
     request: Request,
     email: str = Form(...),
-    passwort: str = Form(...),
+    password: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(Benutzer).where(Benutzer.email == email.lower()))
-    benutzer = result.scalar_one_or_none()
+    result = await db.execute(select(User).where(User.email == email.lower()))
+    user = result.scalar_one_or_none()
 
-    if not benutzer or not benutzer.passwort_hash or not verify_passwort(passwort, benutzer.passwort_hash):
+    if not user or not user.password_hash or not verify_password(password, user.password_hash):
         return templates.TemplateResponse(
             "auth/login.html",
             {"request": request, "fehler": "E-Mail oder Passwort falsch."},
             status_code=401,
         )
 
-    if not benutzer.ist_aktiv:
+    if not user.is_active:
         return templates.TemplateResponse(
             "auth/login.html",
             {"request": request, "fehler": "Ihr Konto ist deaktiviert."},
@@ -54,10 +54,10 @@ async def login(
         )
 
     # Letzten Login aktualisieren
-    benutzer.letzter_login = datetime.now(timezone.utc)
+    user.last_login = datetime.now(timezone.utc)
     await db.commit()
 
-    token = erstelle_session_token(benutzer.id)
+    token = create_session_token(user.id)
     response = RedirectResponse("/", status_code=302)
     response.set_cookie(
         "session",
@@ -82,83 +82,83 @@ async def logout():
 # ---------------------------------------------------------------------------
 
 @router.get("/einladung/{token}", response_class=HTMLResponse)
-async def einladung_seite(token: str, request: Request, db: AsyncSession = Depends(get_db)):
+async def invitation_page(token: str, request: Request, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
-        select(Einladung).where(
-            Einladung.token == token,
-            Einladung.status == EinladungStatus.AUSSTEHEND,
+        select(Invitation).where(
+            Invitation.token == token,
+            Invitation.status == InvitationStatus.PENDING,
         )
     )
-    einladung = result.scalar_one_or_none()
+    invitation = result.scalar_one_or_none()
 
-    if not einladung or einladung.gueltig_bis < datetime.now(timezone.utc):
+    if not invitation or invitation.expires_at < datetime.now(timezone.utc):
         return templates.TemplateResponse(
             "auth/einladung_abgelaufen.html", {"request": request}
         )
 
     return templates.TemplateResponse(
         "auth/einladung.html",
-        {"request": request, "token": token, "email": einladung.email},
+        {"request": request, "token": token, "email": invitation.email},
     )
 
 
 @router.post("/einladung/{token}")
-async def einladung_annehmen(
+async def invitation_accept(
     token: str,
     request: Request,
     name: str = Form(...),
-    passwort: str = Form(...),
-    passwort_wdh: str = Form(...),
+    password: str = Form(...),
+    password_confirm: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
-        select(Einladung).where(
-            Einladung.token == token,
-            Einladung.status == EinladungStatus.AUSSTEHEND,
+        select(Invitation).where(
+            Invitation.token == token,
+            Invitation.status == InvitationStatus.PENDING,
         )
     )
-    einladung = result.scalar_one_or_none()
+    invitation = result.scalar_one_or_none()
 
-    if not einladung or einladung.gueltig_bis < datetime.now(timezone.utc):
+    if not invitation or invitation.expires_at < datetime.now(timezone.utc):
         return templates.TemplateResponse(
             "auth/einladung_abgelaufen.html", {"request": request}
         )
 
-    if passwort != passwort_wdh:
+    if password != password_confirm:
         return templates.TemplateResponse(
             "auth/einladung.html",
             {
                 "request": request,
                 "token": token,
-                "email": einladung.email,
+                "email": invitation.email,
                 "fehler": "Passwörter stimmen nicht überein.",
             },
         )
 
-    if len(passwort) < 8:
+    if len(password) < 8:
         return templates.TemplateResponse(
             "auth/einladung.html",
             {
                 "request": request,
                 "token": token,
-                "email": einladung.email,
+                "email": invitation.email,
                 "fehler": "Passwort muss mindestens 8 Zeichen haben.",
             },
         )
 
     # Benutzer anlegen
-    benutzer = Benutzer(
-        email=einladung.email.lower(),
+    user = User(
+        email=invitation.email.lower(),
         name=name,
-        passwort_hash=hash_passwort(passwort),
-        rolle=einladung.rolle,
+        password_hash=hash_password(password),
+        role=invitation.role,
     )
-    db.add(benutzer)
+    db.add(user)
 
-    einladung.status = EinladungStatus.ANGENOMMEN
+    invitation.status = InvitationStatus.ACCEPTED
     await db.commit()
 
-    session_token = erstelle_session_token(benutzer.id)
+    session_token = create_session_token(user.id)
     response = RedirectResponse("/", status_code=302)
     response.set_cookie(
         "session",

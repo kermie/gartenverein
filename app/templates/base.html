@@ -152,7 +152,7 @@
 </head>
 <body>
 
-{% if benutzer %}
+{% if user %}
 <!-- Sidebar -->
 <nav class="sidebar">
     <div class="sidebar-brand">
@@ -256,7 +256,7 @@
         </div>
         {% endif %}
 
-        {% if benutzer.rolle.value in ['admin', 'vorstand'] %}
+        {% if user.role.value in ['admin', 'board'] %}
         <div class="nav-group" data-group="administration">
             <button class="nav-group-toggle" type="button" data-bs-toggle="collapse"
                     data-bs-target="#nav-group-administration">
@@ -266,14 +266,14 @@
             </button>
             <div class="collapse nav-group-body" id="nav-group-administration">
                 <a href="/admin/" class="{% if '/admin/' == request.url.path %}aktiv{% endif %}">Benutzer</a>
-                <a href="/admin/einstellungen" class="{% if '/admin/einstellungen' in request.url.path %}aktiv{% endif %}">Einstellungen</a>
+                <a href="/admin/settings" class="{% if '/admin/settings' in request.url.path %}aktiv{% endif %}">Einstellungen</a>
             </div>
         </div>
         {% endif %}
     </div>
     <div class="sidebar-footer">
-        <i class="bi bi-person-circle me-1"></i> {{ benutzer.name }}<br>
-        <small>{{ benutzer.rolle.value }}</small><br>
+        <i class="bi bi-person-circle me-1"></i> {{ user.name }}<br>
+        <small>{{ user.role.value }}</small><br>
         <a href="/auth/logout" class="mt-1 d-inline-block">
             <i class="bi bi-box-arrow-left me-1"></i> Abmelden
         </a>

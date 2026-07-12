@@ -18,7 +18,7 @@ from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.models import (
-    PurchaseRequest, PurchaseRequestApproval, PurchaseRequestStatus, Benutzer, BenutzerRolle,
+    PurchaseRequest, PurchaseRequestApproval, PurchaseRequestStatus, User, UserRole,
 )
 from app.auth import require_user, require_admin, serializer
 from app.module_flags import require_modul
@@ -59,7 +59,7 @@ async def purchase_requests_overview(
     filter: str = "offen",
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     query = (
         select(PurchaseRequest)
@@ -82,7 +82,7 @@ async def purchase_requests_overview(
     purchase_requests = result.scalars().all()
 
     return templates.TemplateResponse("purchase_requests/overview.html", {
-        "request": request, "benutzer": benutzer,
+        "request": request, "user": user,
         "purchase_requests": purchase_requests, "filter": filter,
         "required_approvals": _REQUIRED_APPROVALS,
     })
@@ -94,9 +94,9 @@ async def purchase_requests_overview(
 
 @router.get("/new", response_class=HTMLResponse)
 async def purchase_request_new_page(request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     return templates.TemplateResponse("purchase_requests/form.html", {
-        "request": request, "benutzer": benutzer,
+        "request": request, "user": user,
     })
 
 
@@ -112,7 +112,7 @@ async def purchase_request_create(
     requester_email: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     kosten = None
     if estimated_cost_eur.strip():
@@ -126,7 +126,7 @@ async def purchase_request_create(
         justification=justification.strip(),
         link=link.strip() or None,
         estimated_cost_eur=kosten,
-        created_by_id=benutzer.id,
+        created_by_id=user.id,
     )
 
     if fuer_andere_person and requester_email.strip():
@@ -136,7 +136,7 @@ async def purchase_request_create(
             requester_email.strip().lower(), salt="purchase_request"
         )
     else:
-        purchase_request.requested_by_id = benutzer.id
+        purchase_request.requested_by_id = user.id
 
     db.add(purchase_request)
     await db.flush()
@@ -148,7 +148,7 @@ async def purchase_request_create(
         html = f"""
         <html><body style="font-family: sans-serif;">
         <p>Hallo {purchase_request.requester_name or ''},</p>
-        <p>{benutzer.name} hat in Ihrem Namen folgenden Einkaufswunsch im {settings.app_name} erfasst:</p>
+        <p>{user.name} hat in Ihrem Namen folgenden Einkaufswunsch im {settings.app_name} erfasst:</p>
         <p><strong>{purchase_request.title}</strong><br>{purchase_request.justification}</p>
         <p>Bitte bestätigen Sie, dass diese Angaben korrekt sind:</p>
         <p><a href="{bestaetigungslink}" style="background: #2d6a4f; color: white; padding: 10px 20px;
@@ -167,17 +167,17 @@ async def purchase_request_create(
 
 @router.get("/{request_id}", response_class=HTMLResponse)
 async def purchase_request_detail(request_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     pr = await _load_with_details(db, request_id)
     if not pr:
         raise HTTPException(status_code=404, detail="Einkaufswunsch nicht gefunden")
 
-    ist_vorstand = benutzer.rolle in (BenutzerRolle.ADMIN, BenutzerRolle.VORSTAND)
-    hat_bereits_freigegeben = any(a.user_id == benutzer.id for a in pr.approvals)
-    ist_antragsteller = pr.requested_by_id == benutzer.id or pr.created_by_id == benutzer.id
+    ist_vorstand = user.role in (UserRole.ADMIN, UserRole.BOARD)
+    hat_bereits_freigegeben = any(a.user_id == user.id for a in pr.approvals)
+    ist_antragsteller = pr.requested_by_id == user.id or pr.created_by_id == user.id
 
     return templates.TemplateResponse("purchase_requests/detail.html", {
-        "request": request, "benutzer": benutzer, "pr": pr,
+        "request": request, "user": user, "pr": pr,
         "required_approvals": _REQUIRED_APPROVALS,
         "ist_vorstand": ist_vorstand,
         "hat_bereits_freigegeben": hat_bereits_freigegeben,
@@ -192,7 +192,7 @@ async def purchase_request_detail(request_id: str, request: Request, db: AsyncSe
 
 @router.post("/{request_id}/approve")
 async def purchase_request_approve(request_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await require_admin(request, db)
+    user = await require_admin(request, db)
     pr = await _load_with_details(db, request_id)
     if not pr:
         raise HTTPException(status_code=404)
@@ -200,16 +200,16 @@ async def purchase_request_approve(request_id: str, request: Request, db: AsyncS
     if pr.status != PurchaseRequestStatus.OPEN:
         return RedirectResponse(f"/purchase-requests/{request_id}", status_code=302)
 
-    if benutzer.id in (pr.requested_by_id, pr.created_by_id):
+    if user.id in (pr.requested_by_id, pr.created_by_id):
         raise HTTPException(
             status_code=403,
             detail="Der Antragsteller darf seinen eigenen Einkaufswunsch nicht mitfreigeben (Vier-Augen-Prinzip)."
         )
 
-    if any(a.user_id == benutzer.id for a in pr.approvals):
+    if any(a.user_id == user.id for a in pr.approvals):
         return RedirectResponse(f"/purchase-requests/{request_id}", status_code=302)
 
-    db.add(PurchaseRequestApproval(purchase_request_id=request_id, user_id=benutzer.id))
+    db.add(PurchaseRequestApproval(purchase_request_id=request_id, user_id=user.id))
     await db.flush()
 
     neue_anzahl = len(pr.approvals) + 1  # +1 da noch nicht neu geladen
@@ -228,7 +228,7 @@ async def purchase_request_reject(
     rejection_reason: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_admin(request, db)
+    user = await require_admin(request, db)
     pr = await _load_with_details(db, request_id)
     if not pr:
         raise HTTPException(status_code=404)
@@ -238,7 +238,7 @@ async def purchase_request_reject(
 
     pr.status = PurchaseRequestStatus.REJECTED
     pr.rejection_reason = rejection_reason.strip()
-    pr.rejected_by_id = benutzer.id
+    pr.rejected_by_id = user.id
     pr.rejected_at = datetime.now(timezone.utc)
 
     await db.commit()

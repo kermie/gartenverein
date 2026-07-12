@@ -22,7 +22,7 @@ import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.models import Vereinseinstellung
+from app.models import ClubSetting
 from app.crypto_utils import entschluesseln
 
 logger = logging.getLogger(__name__)
@@ -37,10 +37,10 @@ class SpamPruefungsErgebnis:
     begruendung: Optional[str] = None
 
 
-def _liste_aus_kommagetrennt(wert: Optional[str]) -> List[str]:
-    if not wert:
+def _liste_aus_kommagetrennt(value: Optional[str]) -> List[str]:
+    if not value:
         return []
-    return [teil.strip().lower() for teil in wert.split(",") if teil.strip()]
+    return [teil.strip().lower() for teil in value.split(",") if teil.strip()]
 
 
 async def _lade_konfiguration(db: AsyncSession) -> dict:
@@ -49,9 +49,9 @@ async def _lade_konfiguration(db: AsyncSession) -> dict:
         "spam_api_url", "spam_api_key",
     ]
     result = await db.execute(
-        select(Vereinseinstellung).where(Vereinseinstellung.schluessel.in_(schluessel_liste))
+        select(ClubSetting).where(ClubSetting.key.in_(schluessel_liste))
     )
-    gespeichert = {e.schluessel: e.wert for e in result.scalars().all() if e.wert}
+    gespeichert = {e.key: e.value for e in result.scalars().all() if e.value}
 
     try:
         schwellenwert = float(gespeichert.get("spam_schwellenwert", _STANDARD_SCHWELLENWERT))

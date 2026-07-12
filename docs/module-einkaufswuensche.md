@@ -60,7 +60,7 @@ Datenmodell statt später nachzurüsten.
 
 Vollständig von Anfang an (`/api/v1/purchase-requests`), analog zu den
 anderen Modulen. Bemerkenswert: `approve` und `reject` nutzen
-`require_api_rolle(BenutzerRolle.ADMIN, BenutzerRolle.VORSTAND)` statt des
+`require_api_role(UserRole.ADMIN, UserRole.BOARD)` statt des
 generischen `require_schreibzugriff` (der auch Kassierer einschließt) –
 die Freigabeberechtigung ist hier bewusst enger gefasst als üblicher
 Schreibzugriff.

@@ -12,26 +12,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.config import settings
-from app.models import Benutzer
+from app.models import User
 
 serializer = URLSafeTimedSerializer(settings.secret_key)
 
-EINLADUNG_GUELTIG_TAGE = 7
+INVITATION_VALID_DAYS = 7
 
 
-def hash_passwort(passwort: str) -> str:
-    return bcrypt.hashpw(passwort.encode(), bcrypt.gensalt()).decode()
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
-def verify_passwort(passwort: str, hashed: str) -> bool:
-    return bcrypt.checkpw(passwort.encode(), hashed.encode())
+def verify_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode(), hashed.encode())
 
 
-def erstelle_einladungstoken(email: str) -> str:
+def create_invitation_token(email: str) -> str:
     return serializer.dumps(email, salt="einladung")
 
 
-def pruefe_einladungstoken(token: str, max_age: int = EINLADUNG_GUELTIG_TAGE * 86400) -> Optional[str]:
+def verify_invitation_token(token: str, max_age: int = INVITATION_VALID_DAYS * 86400) -> Optional[str]:
     try:
         email = serializer.loads(token, salt="einladung", max_age=max_age)
         return email
@@ -39,47 +39,47 @@ def pruefe_einladungstoken(token: str, max_age: int = EINLADUNG_GUELTIG_TAGE * 8
         return None
 
 
-def erstelle_session_token(benutzer_id: str) -> str:
-    return serializer.dumps(benutzer_id, salt="session")
+def create_session_token(user_id: str) -> str:
+    return serializer.dumps(user_id, salt="session")
 
 
-def pruefe_session_token(token: str) -> Optional[str]:
+def verify_session_token(token: str) -> Optional[str]:
     try:
-        benutzer_id = serializer.loads(
+        user_id = serializer.loads(
             token, salt="session", max_age=settings.session_max_age
         )
-        return benutzer_id
+        return user_id
     except (BadSignature, SignatureExpired):
         return None
 
 
-async def get_current_user(request: Request, db: AsyncSession) -> Optional[Benutzer]:
+async def get_current_user(request: Request, db: AsyncSession) -> Optional[User]:
     token = request.cookies.get("session")
     if not token:
         return None
-    benutzer_id = pruefe_session_token(token)
-    if not benutzer_id:
+    user_id = verify_session_token(token)
+    if not user_id:
         return None
-    result = await db.execute(select(Benutzer).where(Benutzer.id == benutzer_id))
-    benutzer = result.scalar_one_or_none()
-    if benutzer and not benutzer.ist_aktiv:
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if user and not user.is_active:
         return None
-    return benutzer
+    return user
 
 
-async def require_user(request: Request, db: AsyncSession) -> Benutzer:
-    benutzer = await get_current_user(request, db)
-    if not benutzer:
+async def require_user(request: Request, db: AsyncSession) -> User:
+    user = await get_current_user(request, db)
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_303_SEE_OTHER,
             headers={"Location": "/auth/login"}
         )
-    return benutzer
+    return user
 
 
-async def require_admin(request: Request, db: AsyncSession) -> Benutzer:
-    from app.models import BenutzerRolle
-    benutzer = await require_user(request, db)
-    if benutzer.rolle not in (BenutzerRolle.ADMIN, BenutzerRolle.VORSTAND):
+async def require_admin(request: Request, db: AsyncSession) -> User:
+    from app.models import UserRole
+    user = await require_user(request, db)
+    if user.role not in (UserRole.ADMIN, UserRole.BOARD):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Keine Berechtigung")
-    return benutzer
+    return user

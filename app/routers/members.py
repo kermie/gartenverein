@@ -41,7 +41,7 @@ async def mitglieder_liste(
     auch_inaktive: bool = False,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     query = (
         select(Member)
@@ -74,7 +74,7 @@ async def mitglieder_liste(
         "members/liste.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "members": members,
             "suche": suche,
             "auch_inaktive": auch_inaktive,
@@ -84,10 +84,10 @@ async def mitglieder_liste(
 
 @router.get("/neu", response_class=HTMLResponse)
 async def mitglied_neu_seite(request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     return templates.TemplateResponse(
         "members/formular.html",
-        {"request": request, "benutzer": benutzer, "member": None},
+        {"request": request, "user": user, "member": None},
     )
 
 
@@ -107,7 +107,7 @@ async def mitglied_erstellen(
     notes: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     def parse_datum(s: str) -> Optional[date]:
         if s:
@@ -142,7 +142,7 @@ async def mitglied_detail(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     member = await _get_member_mit_details(db, member_id)
 
     if not member:
@@ -158,7 +158,7 @@ async def mitglied_detail(
         "members/detail.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "member": member,
             "alle_parzellen": alle_parzellen,
         },
@@ -171,7 +171,7 @@ async def mitglied_bearbeiten_seite(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     member = await _get_member_mit_details(db, member_id)
 
     if not member:
@@ -179,7 +179,7 @@ async def mitglied_bearbeiten_seite(
 
     return templates.TemplateResponse(
         "members/formular.html",
-        {"request": request, "benutzer": benutzer, "member": member},
+        {"request": request, "user": user, "member": member},
     )
 
 

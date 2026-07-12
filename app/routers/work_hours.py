@@ -100,7 +100,7 @@ async def pflichtstunden_uebersicht(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     if not year:
         year = date.today().year
@@ -126,7 +126,7 @@ async def pflichtstunden_uebersicht(
         "work_hours/uebersicht.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "year": year,
             "config": config,
             "einsaetze": einsaetze,
@@ -143,7 +143,7 @@ async def pflichtstunden_uebersicht(
 
 @router.get("/configuration", response_class=HTMLResponse)
 async def konfiguration_seite(request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     result = await db.execute(
         select(WorkHoursConfiguration).order_by(WorkHoursConfiguration.year.desc())
@@ -154,7 +154,7 @@ async def konfiguration_seite(request: Request, db: AsyncSession = Depends(get_d
         "work_hours/configuration.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "konfigurationen": konfigurationen,
             "WorkHoursMode": WorkHoursMode,
             "aktuelles_jahr": date.today().year,
@@ -168,7 +168,7 @@ async def konfiguration_bearbeiten_seite(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     result = await db.execute(
         select(WorkHoursConfiguration).where(WorkHoursConfiguration.id == configuration_id)
@@ -181,7 +181,7 @@ async def konfiguration_bearbeiten_seite(
         "work_hours/configuration_formular.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "configuration": configuration,
             "WorkHoursMode": WorkHoursMode,
         },
@@ -284,12 +284,12 @@ async def konfiguration_erstellen(
 
 @router.get("/sessions/new", response_class=HTMLResponse)
 async def einsatz_neu_seite(request: Request, db: AsyncSession = Depends(get_db)):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
     return templates.TemplateResponse(
         "work_hours/einsatz_formular.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "session": None,
             "SessionType": SessionType,
         },
@@ -309,7 +309,7 @@ async def einsatz_erstellen(
     hours_per_participant: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     session = WorkSession(
         title=title.strip(),
@@ -320,7 +320,7 @@ async def einsatz_erstellen(
         time_until=time_until.strip() or None,
         max_participants=int(max_participants) if max_participants.strip() else None,
         hours_per_participant=float(hours_per_participant.replace(",", ".")) if hours_per_participant.strip() else None,
-        created_by_id=benutzer.id,
+        created_by_id=user.id,
     )
     db.add(session)
     await db.commit()
@@ -333,7 +333,7 @@ async def einsatz_bearbeiten_seite(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     result = await db.execute(select(WorkSession).where(WorkSession.id == session_id))
     session = result.scalar_one_or_none()
@@ -344,7 +344,7 @@ async def einsatz_bearbeiten_seite(
         "work_hours/einsatz_formular.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "session": session,
             "SessionType": SessionType,
         },
@@ -412,7 +412,7 @@ async def einsatz_detail(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     result = await db.execute(
         select(WorkSession)
@@ -438,7 +438,7 @@ async def einsatz_detail(
         "work_hours/einsatz_detail.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "session": session,
             "alle_mitglieder": alle_mitglieder,
             "bereits_eingetragen": bereits_eingetragen,
@@ -536,7 +536,7 @@ async def vereinsrollen_seite(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     if not year:
         year = date.today().year
@@ -568,7 +568,7 @@ async def vereinsrollen_seite(
         "work_hours/club-roles.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "rollen": rollen,
             "assignments": assignments,
             "alle_mitglieder": alle_mitglieder,
@@ -620,7 +620,7 @@ async def mitglied_vereinsrolle_bearbeiten_seite(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     result = await db.execute(
         select(MemberClubRole)
@@ -648,7 +648,7 @@ async def mitglied_vereinsrolle_bearbeiten_seite(
         "work_hours/mitglied_vereinsrolle_formular.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "assignment": assignment,
             "alle_mitglieder": alle_mitglieder,
             "alle_rollen": alle_rollen,
@@ -737,7 +737,7 @@ async def vereinsrolle_bearbeiten_seite(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     result = await db.execute(select(ClubRole).where(ClubRole.id == role_id))
     role = result.scalar_one_or_none()
@@ -748,7 +748,7 @@ async def vereinsrolle_bearbeiten_seite(
         "work_hours/vereinsrolle_formular.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "role": role,
         },
     )
@@ -803,7 +803,7 @@ async def patenschaften_seite(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     if not year:
         year = date.today().year
@@ -847,7 +847,7 @@ async def patenschaften_seite(
         "work_hours/sponsorships.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "patenschaften": patenschaften,
             "bereiche_gruppiert": bereiche_gruppiert,
             "alle_bereiche": alle_bereiche,
@@ -890,7 +890,7 @@ async def patenschaft_bearbeiten_seite(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     result = await db.execute(
         select(Sponsorship)
@@ -917,7 +917,7 @@ async def patenschaft_bearbeiten_seite(
         "work_hours/patenschaft_formular.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "sponsorship": sponsorship,
             "alle_mitglieder": alle_mitglieder,
             "alle_bereiche": alle_bereiche,
@@ -982,7 +982,7 @@ async def auswertung(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    benutzer = await require_user(request, db)
+    user = await require_user(request, db)
 
     if not year:
         year = date.today().year
@@ -999,7 +999,7 @@ async def auswertung(
             "work_hours/evaluation.html",
             {
                 "request": request,
-                "benutzer": benutzer,
+                "user": user,
                 "year": year,
                 "config": None,
                 "zeilen": [],
@@ -1100,7 +1100,7 @@ async def auswertung(
         "work_hours/evaluation.html",
         {
             "request": request,
-            "benutzer": benutzer,
+            "user": user,
             "year": year,
             "config": config,
             "zeilen": zeilen,

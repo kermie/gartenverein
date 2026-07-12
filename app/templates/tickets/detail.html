@@ -128,9 +128,9 @@
             <div class="card-header"><i class="bi bi-person-check me-2"></i>Zuweisung</div>
             <div class="card-body">
                 <form method="post" action="/tickets/{{ ticket.id }}/assign">
-                    <select name="benutzer_id" class="form-select form-select-sm mb-2">
+                    <select name="user_id" class="form-select form-select-sm mb-2">
                         <option value="">– nicht zugewiesen –</option>
-                        {% for b in alle_benutzer %}
+                        {% for b in all_users %}
                         <option value="{{ b.id }}" {% if ticket.assigned_to_id == b.id %}selected{% endif %}>
                             {{ b.name }}
                         </option>

@@ -14,7 +14,7 @@ Modul-Flag: `tickets`
    Hintergrund-Polling (alle 2 Min.), eingehende Mails werden zu
    Tickets/Nachrichten, ausgehende Antworten werden per SMTP versendet.
 3. **Spam-Schnittstelle** (fertig) – eingebaute Heuristiken plus optionale
-   externe API, konfigurierbar unter `/admin/einstellungen`.
+   externe API, konfigurierbar unter `/admin/settings`.
 
 ## Etappe 3: Spam-Filter
 
@@ -53,7 +53,7 @@ nur `restart`.
 
 **Ein Postfach für IMAP-Abruf und SMTP-Versand**, getrennt von der
 allgemeinen Vereins-SMTP-Konfiguration (die nur für Einladungs-E-Mails
-dient). Konfiguration unter `/admin/einstellungen`, Karte
+dient). Konfiguration unter `/admin/settings`, Karte
 "Ticket-Postfach (IMAP/SMTP)". Beide Passwörter werden verschlüsselt
 gespeichert (siehe `app/crypto_utils.py`) – die Passwort-Sonderbehandlung
 beim Speichern (leer = unverändert lassen) wurde dafür generalisiert
@@ -140,7 +140,7 @@ ticket_messages     – Der Gesprächsverlauf eines Tickets (eingehend/
 
 ## Wichtige Entscheidungen
 
-**Zugriffsrecht über bestehende `BenutzerRolle`**, nicht über ein neues,
+**Zugriffsrecht über bestehende `UserRole`**, nicht über ein neues,
 unabhängiges Berechtigungssystem – der Verein plant, die Rollen später
 ohnehin zu erweitern (z.B. um eine echte "erweiterter Vorstand"-Rolle).
 Ein separates Ticket-Zugriffsrecht hätte diese Erweiterung nur verkompliziert.
