@@ -9,7 +9,7 @@ from tests.conftest import login, auth_header
 
 
 async def test_ticket_anlegen_und_automatischer_mitglied_abgleich(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     mitglied = (await client.post(
@@ -36,7 +36,7 @@ async def test_ticket_anlegen_und_automatischer_mitglied_abgleich(client, admin_
 
 
 async def test_ticket_zuweisung_aendert_status(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     ticket = (await client.post(
@@ -62,7 +62,7 @@ async def test_ticket_zuweisung_aendert_status(client, admin_benutzer):
 
 
 async def test_ticket_status_zurueckgestellt_erfordert_datum(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     ticket = (await client.post(

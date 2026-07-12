@@ -24,8 +24,6 @@ os.environ.setdefault(
 os.environ.setdefault("SECRET_KEY", "test-secret-key-nur-fuer-tests")
 os.environ.setdefault("ENVIRONMENT", "development")
 
-import asyncio
-import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 
@@ -47,7 +45,28 @@ async def _tabellen_erstellen():
 
 
 @pytest_asyncio.fixture(autouse=True)
-async def _tabellen_leeren():
+async def _frische_verbindung():
+    """
+    Verwirft den Connection-Pool VOR jedem einzelnen Test.
+
+    Nötig, weil pytest-asyncio jeder Testfunktion einen eigenen Event-Loop
+    gibt, unsere Datenbank-Engine (app.database.engine) aber ein Singleton
+    ist. Ohne dies würde die Engine versuchen, eine Verbindung aus einem
+    bereits beendeten Loop (vom vorherigen Test) wiederzuverwenden – das
+    äußert sich als "attached to a different loop"-Fehler. Durch das
+    Verwerfen entstehen neue Verbindungen automatisch im aktuell laufenden
+    Loop, sobald sie das nächste Mal gebraucht werden.
+
+    Dieser Ansatz ist absichtlich unabhängig von pytest-asyncios eigener
+    Loop-Scope-Konfiguration – die hat sich zwischen Versionen mehrfach
+    geändert (siehe docs/testing.md) und war keine verlässliche Basis.
+    """
+    await engine.dispose()
+    yield
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def _tabellen_leeren(_frische_verbindung):
     """
     Leert vor JEDEM einzelnen Test alle Tabellen. Einfacher und robuster
     als verschachtelte Transaktionen/Savepoints – funktioniert zuverlässig
@@ -74,7 +93,7 @@ async def admin_benutzer():
     """Legt einen Admin-Benutzer an und gibt ihn zurück."""
     async with AsyncSessionLocal() as session:
         benutzer = Benutzer(
-            email="admin@test.local",
+            email="admin@example.com",
             name="Test-Admin",
             passwort_hash=hash_passwort("testpasswort123"),
             rolle=BenutzerRolle.ADMIN,
@@ -90,7 +109,7 @@ async def vorstand_benutzer():
     """Ein zweiter Benutzer mit Vorstands-Rolle (für Vier-Augen-Prinzip-Tests)."""
     async with AsyncSessionLocal() as session:
         benutzer = Benutzer(
-            email="vorstand@test.local",
+            email="vorstand@example.com",
             name="Test-Vorstand",
             passwort_hash=hash_passwort("testpasswort123"),
             rolle=BenutzerRolle.VORSTAND,
@@ -106,7 +125,7 @@ async def zweiter_vorstand_benutzer():
     """Ein dritter Benutzer mit Vorstands-Rolle (für Tests, die 2 unterschiedliche Freigeber brauchen)."""
     async with AsyncSessionLocal() as session:
         benutzer = Benutzer(
-            email="vorstand2@test.local",
+            email="vorstand2@example.com",
             name="Test-Vorstand Zwei",
             passwort_hash=hash_passwort("testpasswort123"),
             rolle=BenutzerRolle.VORSTAND,

@@ -162,12 +162,19 @@ async def _lade_pv(db: AsyncSession, parzelle_id: str, jahr: int) -> Optional[Pa
 
 def _zu_kosten_schema(pv: ParzelleVersicherung, konfig: Optional[VersicherungsKonfiguration]) -> ParzelleVersicherungKostenOut:
     kosten = berechne_versicherungskosten(pv, konfig)
-    out = ParzelleVersicherungKostenOut.model_validate(pv)
-    out.zusatzpersonen_mitglied_ids = [z.mitglied_id for z in pv.zusatzpersonen]
-    out.sach_kosten_eur = kosten["sach_kosten"]
-    out.unfall_kosten_eur = kosten["unfall_kosten"]
-    out.gesamt_kosten_eur = kosten["gesamt"]
-    return out
+    # Erst das Basis-Schema (nur echte ORM-Spalten) validieren, dann die
+    # berechneten Felder ergänzen – model_validate(pv) direkt auf das
+    # Zielschema würde fehlschlagen, da sach_kosten_eur/unfall_kosten_eur/
+    # gesamt_kosten_eur keine echten Attribute auf pv sind, sondern erst
+    # berechnet werden müssen.
+    basis = ParzelleVersicherungOut.model_validate(pv)
+    return ParzelleVersicherungKostenOut(
+        **basis.model_dump(),
+        zusatzpersonen_mitglied_ids=[z.mitglied_id for z in pv.zusatzpersonen],
+        sach_kosten_eur=kosten["sach_kosten"],
+        unfall_kosten_eur=kosten["unfall_kosten"],
+        gesamt_kosten_eur=kosten["gesamt"],
+    )
 
 
 @router.get(
@@ -211,7 +218,13 @@ async def versicherung_setzen(
     if not pv:
         pv = ParzelleVersicherung(parzelle_id=parzelle_id, jahr=jahr)
         db.add(pv)
-        await db.flush()
+        await db.commit()
+        # Frisch angelegte Zeile mit eager-geladenen Beziehungen neu laden –
+        # sonst löst der Zugriff auf pv.zusatzpersonen weiter unten einen
+        # synchronen Lazy-Load aus, der mit dem asynchronen Datenbanktreiber
+        # zu "MissingGreenlet" führt (siehe docs/module-tickets.md für das
+        # gleiche Muster im Ticketsystem).
+        pv = await _lade_pv(db, parzelle_id, jahr)
 
     pv.hat_sachversicherung = daten.hat_sachversicherung
     pv.sach_paket_id = daten.sach_paket_id if daten.hat_sachversicherung else None

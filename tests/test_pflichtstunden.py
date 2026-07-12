@@ -6,7 +6,7 @@ statt all() – siehe Architektur-Entscheidungen) und die Jahresauswertung.
 from tests.conftest import login, auth_header
 
 
-async def _erstelle_konfiguration(client, headers, jahr=2026, modus="PRO_PACHTVERTRAG"):
+async def _erstelle_konfiguration(client, headers, jahr=2026, modus="pro_pachtvertrag"):
     return await client.put(
         f"/api/v1/pflichtstunden/konfiguration/{jahr}",
         json={"jahr": jahr, "stunden_gesamt": "5.0", "stundensatz_eur": "25.00", "modus": modus},
@@ -15,7 +15,7 @@ async def _erstelle_konfiguration(client, headers, jahr=2026, modus="PRO_PACHTVE
 
 
 async def test_konfiguration_upsert(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     response = await _erstelle_konfiguration(client, headers)
@@ -24,7 +24,7 @@ async def test_konfiguration_upsert(client, admin_benutzer):
 
 
 async def test_arbeitseinsatz_und_teilnahme(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     mitglied = (await client.post(
@@ -51,10 +51,10 @@ async def test_befreiung_gilt_fuer_ganze_parzelle_bei_pro_pachtvertrag(client, a
     Ist EIN Pächter einer Parzelle als Vorstand befreit, muss die GANZE
     Parzelle als befreit gelten – auch der andere (nicht befreite) Pächter.
     """
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
-    await _erstelle_konfiguration(client, headers, jahr=2026, modus="PRO_PACHTVERTRAG")
+    await _erstelle_konfiguration(client, headers, jahr=2026, modus="pro_pachtvertrag")
 
     befreiter = (await client.post(
         "/api/v1/mitglieder", json={"vorname": "Christian", "nachname": "Vorstand"}, headers=headers

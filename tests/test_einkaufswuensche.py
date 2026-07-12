@@ -10,7 +10,7 @@ from tests.conftest import login, auth_header
 async def test_zwei_unterschiedliche_freigaben_fuehren_zu_genehmigt(
     client, admin_benutzer, vorstand_benutzer, zweiter_vorstand_benutzer
 ):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     ew = (await client.post(
@@ -20,14 +20,14 @@ async def test_zwei_unterschiedliche_freigaben_fuehren_zu_genehmigt(
     )).json()
     assert ew["status"] == "OFFEN"
 
-    token_v1 = await login(client, "vorstand@test.local")
+    token_v1 = await login(client, "vorstand@example.com")
     r1 = await client.post(
         f"/api/v1/einkaufswuensche/{ew['id']}/freigeben", headers=auth_header(token_v1)
     )
     assert r1.status_code == 200
     assert r1.json()["status"] == "OFFEN"  # erst 1 von 2
 
-    token_v2 = await login(client, "vorstand2@test.local")
+    token_v2 = await login(client, "vorstand2@example.com")
     r2 = await client.post(
         f"/api/v1/einkaufswuensche/{ew['id']}/freigeben", headers=auth_header(token_v2)
     )
@@ -37,7 +37,7 @@ async def test_zwei_unterschiedliche_freigaben_fuehren_zu_genehmigt(
 
 async def test_antragsteller_darf_nicht_selbst_freigeben(client, admin_benutzer, vorstand_benutzer):
     """Kernschutz des Vier-Augen-Prinzips: wer beantragt, darf nicht mitgenehmigen."""
-    token = await login(client, "vorstand@test.local")
+    token = await login(client, "vorstand@example.com")
     headers = auth_header(token)
 
     ew = (await client.post(
@@ -55,7 +55,7 @@ async def test_gleiche_person_kann_nicht_doppelt_freigeben(
     client, admin_benutzer, vorstand_benutzer, zweiter_vorstand_benutzer
 ):
     """Zwei Freigaben müssen von ZWEI UNTERSCHIEDLICHEN Personen kommen."""
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     ew = (await client.post(
@@ -64,7 +64,7 @@ async def test_gleiche_person_kann_nicht_doppelt_freigeben(
         headers=headers,
     )).json()
 
-    token_v1 = await login(client, "vorstand@test.local")
+    token_v1 = await login(client, "vorstand@example.com")
     await client.post(f"/api/v1/einkaufswuensche/{ew['id']}/freigeben", headers=auth_header(token_v1))
 
     # Dieselbe Person versucht ein zweites Mal freizugeben
@@ -80,7 +80,7 @@ async def test_gleiche_person_kann_nicht_doppelt_freigeben(
 
 async def test_ablehnung_durch_eine_person_genuegt(client, admin_benutzer, vorstand_benutzer):
     """Veto-Prinzip: eine einzelne Ablehnung stoppt den Antrag sofort."""
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     ew = (await client.post(
@@ -89,7 +89,7 @@ async def test_ablehnung_durch_eine_person_genuegt(client, admin_benutzer, vorst
         headers=headers,
     )).json()
 
-    token_v1 = await login(client, "vorstand@test.local")
+    token_v1 = await login(client, "vorstand@example.com")
     r = await client.post(
         f"/api/v1/einkaufswuensche/{ew['id']}/ablehnen",
         json={"ablehnungsgrund": "Nicht notwendig"},
@@ -108,20 +108,20 @@ async def test_normale_mitglieder_koennen_nicht_freigeben(client, admin_benutzer
 
     async with AsyncSessionLocal() as session:
         einfaches_mitglied = Benutzer(
-            email="mitglied@test.local", name="Normales Mitglied",
+            email="mitglied@example.com", name="Normales Mitglied",
             passwort_hash=hash_passwort("testpasswort123"), rolle=BenutzerRolle.LESEND,
         )
         session.add(einfaches_mitglied)
         await session.commit()
 
-    token_admin = await login(client, "admin@test.local")
+    token_admin = await login(client, "admin@example.com")
     ew = (await client.post(
         "/api/v1/einkaufswuensche",
         json={"titel": "Test", "begruendung": "Test"},
         headers=auth_header(token_admin),
     )).json()
 
-    token_mitglied = await login(client, "mitglied@test.local")
+    token_mitglied = await login(client, "mitglied@example.com")
     response = await client.post(
         f"/api/v1/einkaufswuensche/{ew['id']}/freigeben", headers=auth_header(token_mitglied)
     )

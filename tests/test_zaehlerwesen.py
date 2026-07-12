@@ -7,7 +7,7 @@ from tests.conftest import login, auth_header
 
 
 async def test_zaehlpunkt_anlegen_und_ablesung(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     parzelle = (await client.post(
@@ -37,7 +37,7 @@ async def test_zaehlerstand_darf_nicht_sinken(client, admin_benutzer):
     Kernregel der Plausibilitätsprüfung: ein neuer Zählerstand muss
     mindestens so hoch sein wie der vorherige derselben Wasseruhr.
     """
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     zaehlpunkt = (await client.post(
@@ -72,7 +72,7 @@ async def test_zaehlerstand_darf_nicht_sinken(client, admin_benutzer):
 
 async def test_verbrauchsberechnung(client, admin_benutzer):
     """Verbrauch = aktueller Stand minus letzter Stand (oder Anfangsstand)."""
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     zaehlpunkt = (await client.post(
@@ -94,7 +94,7 @@ async def test_verbrauchsberechnung(client, admin_benutzer):
 
 async def test_strom_und_wasser_getrennt(client, admin_benutzer):
     """Wasser- und Strom-Zaehlpunkte müssen unabhängige, getrennte Listen sein."""
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     await client.post(

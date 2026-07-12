@@ -535,18 +535,21 @@ async def auswertung_abrufen(
             if not paechter:
                 continue
             gesamt = Decimal("0")
-            alle_befreit = True
+            # Vier-Augen-freundliche Regel: EIN befreiter Pächter genügt, um
+            # die gesamte Parzelle zu befreien (any(), nicht all() – siehe
+            # docs/architektur-entscheidungen.md).
+            ist_befreit = False
             for m in paechter:
                 stand = await _berechne_stunden_fuer_mitglied(db, m.id, jahr)
                 gesamt += Decimal(str(stand["gesamt"]))
-                if not await _ist_befreit(db, m.id, jahr):
-                    alle_befreit = False
-            offen = max(Decimal("0"), pflicht - gesamt) if not alle_befreit else Decimal("0")
+                if await _ist_befreit(db, m.id, jahr):
+                    ist_befreit = True
+            offen = max(Decimal("0"), pflicht - gesamt) if not ist_befreit else Decimal("0")
             zeilen.append(AuswertungZeileOut(
                 bezeichnung=parzelle.gartennummer,
                 pflicht_stunden=pflicht, geleistete_stunden=gesamt, offen_stunden=offen,
                 schuldbetrag_eur=offen * Decimal(str(config.stundensatz_eur)),
-                befreit=alle_befreit, erfuellt=alle_befreit or gesamt >= pflicht,
+                befreit=ist_befreit, erfuellt=ist_befreit or gesamt >= pflicht,
             ))
     else:
         result = await db.execute(

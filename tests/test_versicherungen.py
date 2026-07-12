@@ -3,7 +3,7 @@ from tests.conftest import login, auth_header
 
 
 async def test_paket_anlegen_und_kosten_berechnung(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     paket = (await client.post(
@@ -38,7 +38,7 @@ async def test_paket_anlegen_und_kosten_berechnung(client, admin_benutzer):
 
 
 async def test_zusatzperson_erhoeht_unfallkosten(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     await client.put(

@@ -1047,19 +1047,23 @@ async def auswertung(
             offen = max(0.0, pflicht - gesamt_stunden)
             schuldbetrag = offen * float(config.stundensatz_eur)
 
-            # Befreit wenn MINDESTENS EIN Pächter befreit (Ansatz A: Befreiung gilt für die ganze Parzelle)
-            alle_befreit = any(p["befreit"] for p in paechter_details)
+            # Befreit wenn MINDESTENS EIN Pächter befreit (any(), nicht all() –
+            # siehe docs/architektur-entscheidungen.md). Bewusst NICHT
+            # "alle_befreit" genannt, das hatte schon einmal zu einer
+            # falsch herum kopierten all()-Logik im CSV-Export und in der
+            # API geführt.
+            ist_befreit = any(p["befreit"] for p in paechter_details)
 
             zeilen.append({
                 "parzelle": parzelle,
                 "paechter_details": paechter_details,
                 "gesamt_stunden": gesamt_stunden,
                 "pflicht_stunden": pflicht,
-                "offen_stunden": offen if not alle_befreit else 0.0,
-                "schuldbetrag": schuldbetrag if not alle_befreit else 0.0,
-                "erfuellt": alle_befreit or gesamt_stunden >= pflicht,
-                "alle_befreit": alle_befreit,
-                "befreit": alle_befreit,  # einheitlicher Key für Template
+                "offen_stunden": offen if not ist_befreit else 0.0,
+                "schuldbetrag": schuldbetrag if not ist_befreit else 0.0,
+                "erfuellt": ist_befreit or gesamt_stunden >= pflicht,
+                "alle_befreit": ist_befreit,
+                "befreit": ist_befreit,  # einheitlicher Key für Template
             })
 
     else:
@@ -1147,7 +1151,10 @@ async def auswertung_export_csv(
             gesamt = 0.0
             einsatz_h = 0.0
             paten_h = 0.0
-            alle_befreit = True
+            # Vier-Augen-freundliche Regel: EIN befreiter Pächter genügt, um
+            # die gesamte Parzelle zu befreien (any(), nicht all() – siehe
+            # docs/architektur-entscheidungen.md).
+            ist_befreit = False
             namen = []
             for m in paechter:
                 stand = await _berechne_stunden_fuer_mitglied(db, m.id, jahr)
@@ -1155,11 +1162,11 @@ async def auswertung_export_csv(
                 gesamt += stand["gesamt"]
                 einsatz_h += stand["einsatz_stunden"]
                 paten_h += stand["patenschaft_stunden"]
-                if not befreit:
-                    alle_befreit = False
+                if befreit:
+                    ist_befreit = True
                 namen.append(m.vollname)
             pflicht = float(config.stunden_gesamt)
-            offen = max(0.0, pflicht - gesamt) if not alle_befreit else 0.0
+            offen = max(0.0, pflicht - gesamt) if not ist_befreit else 0.0
             schuld = offen * float(config.stundensatz_eur)
             writer.writerow([
                 parzelle.gartennummer,
@@ -1170,8 +1177,8 @@ async def auswertung_export_csv(
                 f"{gesamt:.1f}",
                 f"{offen:.1f}",
                 f"{schuld:.2f}".replace(".", ","),
-                "Ja" if alle_befreit else "Nein",
-                "Ja" if (alle_befreit or gesamt >= pflicht) else "Nein",
+                "Ja" if ist_befreit else "Nein",
+                "Ja" if (ist_befreit or gesamt >= pflicht) else "Nein",
             ])
 
     output.seek(0)

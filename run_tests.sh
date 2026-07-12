@@ -21,7 +21,7 @@ echo "Führe Tests aus..."
 set +e  # ab hier: Fehler selbst behandeln, nicht das Skript abbrechen lassen
 docker compose run --rm \
     -e DATABASE_URL=postgresql+asyncpg://gartenverein:test@db_test:5432/gartenverein_test \
-    web sh -c "pip install -r requirements-dev.txt --break-system-packages --quiet && pytest -v"
+    web sh -c "pip install -r requirements-dev.txt --break-system-packages --quiet && python -m pytest -v"
 TEST_EXIT_CODE=$?
 set -e
 

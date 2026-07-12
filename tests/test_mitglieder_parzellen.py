@@ -3,7 +3,7 @@ from tests.conftest import login, auth_header
 
 
 async def test_mitglied_anlegen_und_abrufen(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
 
     response = await client.post(
         "/api/v1/mitglieder",
@@ -20,7 +20,7 @@ async def test_mitglied_anlegen_und_abrufen(client, admin_benutzer):
 
 
 async def test_parzelle_anlegen_doppelte_gartennummer_abgelehnt(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
 
     response = await client.post(
         "/api/v1/parzellen", json={"gartennummer": "G001"}, headers=auth_header(token)
@@ -34,7 +34,7 @@ async def test_parzelle_anlegen_doppelte_gartennummer_abgelehnt(client, admin_be
 
 
 async def test_mitglied_parzelle_zuordnung_und_doppelgarten(client, admin_benutzer):
-    token = await login(client, "admin@test.local")
+    token = await login(client, "admin@example.com")
     headers = auth_header(token)
 
     m1 = (await client.post("/api/v1/mitglieder", json={"vorname": "Anna", "nachname": "Eins"}, headers=headers)).json()
