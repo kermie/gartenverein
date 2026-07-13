@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Versicherungen – Parzellen{% endblock %}
-{% block page_title %}Versicherungen – Parzellen {{ year }}{% endblock %}
+{% block title %}{{ t('insurance.parcels_list.title') }}{% endblock %}
+{% block page_title %}{{ t('insurance.parcels_list.heading', year=year) }}{% endblock %}
 
 {% block topbar_actions %}
 <a href="/insurance/" class="btn btn-sm btn-outline-secondary">
-    <i class="bi bi-arrow-left me-1"></i>Zurück
+    <i class="bi bi-arrow-left me-1"></i>{{ t('insurance.parcels_list.back') }}
 </a>
 {% endblock %}
 
@@ -15,10 +15,10 @@
 <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th>Parzelle</th>
-                        <th>Sachversicherung</th>
-                        <th>Unfallversicherung</th>
-                        <th>Kosten gesamt</th>
+                        <th>{{ t('insurance.parcels_list.col_parcel') }}</th>
+                        <th>{{ t('insurance.parcels_list.col_property') }}</th>
+                        <th>{{ t('insurance.parcels_list.col_accident') }}</th>
+                        <th>{{ t('insurance.parcels_list.col_total_cost') }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -28,7 +28,7 @@
                         <td class="fw-semibold">{{ r.parcel.plot_number }}</td>
                         <td>
                             {% if r.pi and r.pi.has_property_insurance %}
-                            <span class="badge badge-aktiv">{{ r.pi.property_package.name if r.pi.property_package else 'Ja' }}</span>
+                            <span class="badge badge-aktiv">{{ r.pi.property_package.name if r.pi.property_package else t('insurance.parcels_list.yes') }}</span>
                             {% else %}
                             <span class="text-muted">–</span>
                             {% endif %}
@@ -36,7 +36,7 @@
                         <td>
                             {% if r.pi and r.pi.has_accident_insurance %}
                             <span class="badge badge-aktiv">
-                                Ja{% if r.pi.additional_persons %} (+{{ r.pi.additional_persons | length }}){% endif %}
+                                {{ t('insurance.parcels_list.yes') }}{% if r.pi.additional_persons %} (+{{ r.pi.additional_persons | length }}){% endif %}
                             </span>
                             {% else %}
                             <span class="text-muted">–</span>
@@ -52,7 +52,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4">Keine aktiven Parzellen vorhanden.</td>
+                        <td colspan="5" class="text-center text-muted py-4">{{ t('insurance.parcels_list.empty') }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -61,7 +61,7 @@
     </div>
     {% if rows %}
     <div class="card-footer text-muted" style="font-size: 0.82rem;">
-        {{ rows | length }} Parzelle(n)
+        {{ rows | length }} {{ t('insurance.parcels_list.count_suffix') }}
     </div>
     {% endif %}
 </div>

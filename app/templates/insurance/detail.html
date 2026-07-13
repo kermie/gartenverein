@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Versicherung {{ parcel.plot_number }}{% endblock %}
-{% block page_title %}Versicherung Parzelle {{ parcel.plot_number }}{% endblock %}
+{% block title %}{{ t('insurance.detail.title', plot_number=parcel.plot_number) }}{% endblock %}
+{% block page_title %}{{ t('insurance.detail.heading', plot_number=parcel.plot_number) }}{% endblock %}
 
 {% block topbar_actions %}
 <a href="/insurance/parcels?year={{ year }}" class="btn btn-sm btn-outline-secondary">
-    <i class="bi bi-arrow-left me-1"></i>Zurück
+    <i class="bi bi-arrow-left me-1"></i>{{ t('insurance.detail.back') }}
 </a>
 {% endblock %}
 
@@ -13,8 +13,8 @@
 {% if not configuration %}
 <div class="alert alert-warning d-flex gap-2 align-items-center mb-3">
     <i class="bi bi-exclamation-triangle-fill"></i>
-    Keine Versicherungs-Konfiguration für {{ year }} vorhanden.
-    <a href="/insurance/configuration?year={{ year }}" class="alert-link ms-1">Jetzt anlegen →</a>
+    {{ t('insurance.detail.no_configuration_warning', year=year) }}
+    <a href="/insurance/configuration?year={{ year }}" class="alert-link ms-1">{{ t('insurance.detail.create_now_link') }}</a>
 </div>
 {% endif %}
 
@@ -25,19 +25,19 @@
     <!-- Sachversicherung -->
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header"><i class="bi bi-box-seam me-2"></i>Sachversicherung</div>
+            <div class="card-header"><i class="bi bi-box-seam me-2"></i>{{ t('insurance.detail.property_header') }}</div>
             <div class="card-body">
                 <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" role="switch"
                            name="has_property_insurance" id="has-property"
                            {% if pi.has_property_insurance %}checked{% endif %}
                            onchange="document.getElementById('property-package-field').style.display = this.checked ? '' : 'none';">
-                    <label class="form-check-label fw-semibold" for="has-property">Sachversicherung abgeschlossen</label>
+                    <label class="form-check-label fw-semibold" for="has-property">{{ t('insurance.detail.label_has_property') }}</label>
                 </div>
                 <div id="property-package-field" style="{% if not pi.has_property_insurance %}display: none;{% endif %}">
-                    <label class="form-label fw-semibold">Paket</label>
+                    <label class="form-label fw-semibold">{{ t('insurance.detail.label_package') }}</label>
                     <select name="property_package_id" class="form-select">
-                        <option value="">– bitte wählen –</option>
+                        <option value="">{{ t('insurance.detail.select_package_placeholder') }}</option>
                         {% for package in packages %}
                         <option value="{{ package.id }}" {% if pi.property_package_id == package.id %}selected{% endif %}>
                             {{ package.name }} ({{ "%.2f"|format(package.amount_eur|float) }} €)
@@ -46,8 +46,8 @@
                     </select>
                     {% if not packages %}
                     <div class="form-text text-warning">
-                        Keine Pakete für {{ year }} konfiguriert.
-                        <a href="/insurance/configuration?year={{ year }}">Jetzt anlegen →</a>
+                        {{ t('insurance.detail.no_packages_warning', year=year) }}
+                        <a href="/insurance/configuration?year={{ year }}">{{ t('insurance.detail.create_now_link') }}</a>
                     </div>
                     {% endif %}
                 </div>
@@ -58,19 +58,19 @@
     <!-- Unfallversicherung -->
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header"><i class="bi bi-heart-pulse me-2"></i>Unfallversicherung</div>
+            <div class="card-header"><i class="bi bi-heart-pulse me-2"></i>{{ t('insurance.detail.accident_header') }}</div>
             <div class="card-body">
                 <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" role="switch"
                            name="has_accident_insurance" id="has-accident"
                            {% if pi.has_accident_insurance %}checked{% endif %}
                            onchange="document.getElementById('accident-details').style.display = this.checked ? '' : 'none';">
-                    <label class="form-check-label fw-semibold" for="has-accident">Unfallversicherung abgeschlossen</label>
+                    <label class="form-check-label fw-semibold" for="has-accident">{{ t('insurance.detail.label_has_accident') }}</label>
                 </div>
 
                 <div id="accident-details" style="{% if not pi.has_accident_insurance %}display: none;{% endif %}">
                     <p class="text-muted mb-2" style="font-size: 0.85rem;">
-                        Automatisch mitversichert (gleiche Adresse wie Hauptpächter):
+                        {{ t('insurance.detail.auto_covered_intro') }}
                     </p>
                     <ul class="list-group list-group-flush mb-3">
                         {% for m in household %}
@@ -82,7 +82,7 @@
 
                     {% if external %}
                     <p class="text-muted mb-2" style="font-size: 0.85rem;">
-                        Weitere Parzellenmitglieder (andere Adresse) – optional gegen Aufpreis mitversicherbar:
+                        {{ t('insurance.detail.external_intro') }}
                     </p>
                     <ul class="list-group list-group-flush">
                         {% for m in external %}
@@ -103,19 +103,19 @@
     <!-- Kosten-Übersicht -->
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><i class="bi bi-calculator me-2"></i>Kosten {{ year }}</div>
+            <div class="card-header"><i class="bi bi-calculator me-2"></i>{{ t('insurance.detail.costs_header', year=year) }}</div>
             <div class="card-body">
                 <div class="row g-3 text-center">
                     <div class="col-sm-4">
-                        <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase;">Sachversicherung</div>
+                        <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase;">{{ t('insurance.detail.cost_property') }}</div>
                         <div style="font-size: 1.4rem; font-weight: 700;">{{ "%.2f"|format(cost.property_cost) }} €</div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase;">Unfallversicherung</div>
+                        <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase;">{{ t('insurance.detail.cost_accident') }}</div>
                         <div style="font-size: 1.4rem; font-weight: 700;">{{ "%.2f"|format(cost.accident_cost) }} €</div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase;">Gesamt</div>
+                        <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase;">{{ t('insurance.detail.cost_total') }}</div>
                         <div style="font-size: 1.4rem; font-weight: 700; color: var(--gv-gruen);">{{ "%.2f"|format(cost.total) }} €</div>
                     </div>
                 </div>
@@ -125,7 +125,7 @@
 
     <div class="col-12 d-flex justify-content-end">
         <button type="submit" class="btn btn-primary">
-            <i class="bi bi-check-lg me-1"></i>Speichern
+            <i class="bi bi-check-lg me-1"></i>{{ t('insurance.detail.save_button') }}
         </button>
     </div>
 

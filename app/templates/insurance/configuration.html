@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Versicherungs-Konfiguration{% endblock %}
-{% block page_title %}Versicherungs-Konfiguration {{ year }}{% endblock %}
+{% block title %}{{ t('insurance.configuration.title') }}{% endblock %}
+{% block page_title %}{{ t('insurance.configuration.heading', year=year) }}{% endblock %}
 
 {% block topbar_actions %}
 <div class="d-flex gap-2 align-items-center">
@@ -12,7 +12,7 @@
         </select>
     </form>
     <a href="/insurance/" class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Zurück
+        <i class="bi bi-arrow-left me-1"></i>{{ t('insurance.configuration.back') }}
     </a>
 </div>
 {% endblock %}
@@ -23,12 +23,12 @@
     <!-- Unfallversicherung -->
     <div class="col-lg-5">
         <div class="card">
-            <div class="card-header"><i class="bi bi-heart-pulse me-2"></i>Unfallversicherung {{ year }}</div>
+            <div class="card-header"><i class="bi bi-heart-pulse me-2"></i>{{ t('insurance.configuration.accident_header', year=year) }}</div>
             <div class="card-body">
                 <form method="post" action="/insurance/configuration/save">
                     <input type="hidden" name="year" value="{{ year }}">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Grundbetrag pro Parzelle</label>
+                        <label class="form-label fw-semibold">{{ t('insurance.configuration.label_base_amount') }}</label>
                         <div class="input-group">
                             <input type="text" name="accident_base_amount_eur" class="form-control"
                                    value="{{ '%.2f'|format(configuration.accident_base_amount_eur|float) if configuration else '3,00' }}"
@@ -36,12 +36,11 @@
                             <span class="input-group-text">€</span>
                         </div>
                         <div class="form-text">
-                            Deckt alle Mitglieder im selben Haushalt (gleiche Adresse wie
-                            Hauptpächter) automatisch mit ab.
+                            {{ t('insurance.configuration.base_amount_help') }}
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Zusatzbetrag pro weiterer Person</label>
+                        <label class="form-label fw-semibold">{{ t('insurance.configuration.label_additional_amount') }}</label>
                         <div class="input-group">
                             <input type="text" name="accident_additional_amount_eur" class="form-control"
                                    value="{{ '%.2f'|format(configuration.accident_additional_amount_eur|float) if configuration else '3,00' }}"
@@ -49,12 +48,11 @@
                             <span class="input-group-text">€</span>
                         </div>
                         <div class="form-text">
-                            Für Parzellenmitglieder, die nicht im selben Haushalt leben und
-                            optional mitversichert werden.
+                            {{ t('insurance.configuration.additional_amount_help') }}
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-check-lg me-1"></i>Speichern
+                        <i class="bi bi-check-lg me-1"></i>{{ t('insurance.configuration.save_button') }}
                     </button>
                 </form>
             </div>
@@ -64,25 +62,25 @@
     <!-- Sachversicherungs-Pakete -->
     <div class="col-lg-7">
         <div class="card mb-3">
-            <div class="card-header"><i class="bi bi-plus-lg me-2"></i>Neues Sachversicherungs-Paket</div>
+            <div class="card-header"><i class="bi bi-plus-lg me-2"></i>{{ t('insurance.configuration.new_package_header') }}</div>
             <div class="card-body">
                 <form method="post" action="/insurance/configuration/packages/new"
                       class="row g-2 align-items-end">
                     <input type="hidden" name="year" value="{{ year }}">
                     <div class="col-sm-4">
-                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Bezeichnung</label>
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('insurance.configuration.label_name') }}</label>
                         <input type="text" name="name" class="form-control form-control-sm"
-                               placeholder="z.B. Paket 1" required>
+                               placeholder="{{ t('insurance.configuration.name_placeholder') }}" required>
                     </div>
                     <div class="col-sm-3">
-                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Betrag</label>
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('insurance.configuration.label_amount') }}</label>
                         <div class="input-group input-group-sm">
                             <input type="text" name="amount_eur" class="form-control" placeholder="40,00" required>
                             <span class="input-group-text">€</span>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Reihenfolge</label>
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('insurance.configuration.label_sort_order') }}</label>
                         <input type="number" name="sort_order" class="form-control form-control-sm" value="0">
                     </div>
                     <div class="col-sm-2">
@@ -95,14 +93,14 @@
         </div>
 
         <div class="card">
-            <div class="card-header"><i class="bi bi-box-seam me-2"></i>Pakete {{ year }}</div>
+            <div class="card-header"><i class="bi bi-box-seam me-2"></i>{{ t('insurance.configuration.packages_header', year=year) }}</div>
             <div class="card-body p-0">
                 <div class="table-responsive">
 <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th>Bezeichnung</th>
-                                <th>Betrag</th>
+                                <th>{{ t('insurance.configuration.col_name') }}</th>
+                                <th>{{ t('insurance.configuration.col_amount') }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -130,7 +128,7 @@
                                     </form>
                                     <form method="post" action="/insurance/configuration/packages/{{ p.id }}/delete" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border-0"
-                                                onclick="return confirm('Paket wirklich löschen?')">
+                                                onclick="return confirm('{{ t('insurance.configuration.delete_confirm') }}')">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -139,7 +137,7 @@
                             {% else %}
                             <tr>
                                 <td colspan="3" class="text-center text-muted py-3">
-                                    Noch keine Pakete für {{ year }} angelegt.
+                                    {{ t('insurance.configuration.no_packages', year=year) }}
                                 </td>
                             </tr>
                             {% endfor %}
