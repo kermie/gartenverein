@@ -20,6 +20,7 @@ from app.models import (
     PurchaseRequest, PurchaseRequestApproval, PurchaseRequestStatus, User, UserRole,
 )
 from app.auth import require_user, require_admin, serializer
+from app.i18n import t_for
 from app.module_flags import require_modul
 from app.email_service import sende_email
 from app.config import settings
@@ -169,7 +170,7 @@ async def purchase_request_detail(request_id: str, request: Request, db: AsyncSe
     user = await require_user(request, db)
     pr = await _load_with_details(db, request_id)
     if not pr:
-        raise HTTPException(status_code=404, detail="Einkaufswunsch nicht gefunden")
+        raise HTTPException(status_code=404, detail=t_for(request, "errors.purchase_request_not_found"))
 
     ist_vorstand = user.role in (UserRole.ADMIN, UserRole.BOARD)
     hat_bereits_freigegeben = any(a.user_id == user.id for a in pr.approvals)
@@ -202,7 +203,7 @@ async def purchase_request_approve(request_id: str, request: Request, db: AsyncS
     if user.id in (pr.requested_by_id, pr.created_by_id):
         raise HTTPException(
             status_code=403,
-            detail="Der Antragsteller darf seinen eigenen Einkaufswunsch nicht mitfreigeben (Vier-Augen-Prinzip)."
+            detail=t_for(request, "errors.requester_cannot_self_approve")
         )
 
     if any(a.user_id == user.id for a in pr.approvals):

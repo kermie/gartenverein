@@ -17,7 +17,9 @@
     "password_too_short": "Passwort muss mindestens 8 Zeichen haben.",
     "email_already_registered": "E-Mail bereits registriert",
     "invitation_sent": "Einladung gesendet",
-    "own_account_cannot_deactivate": "Eigenes Konto nicht deaktivierbar"
+    "own_account_cannot_deactivate": "Eigenes Konto nicht deaktivierbar",
+    "purchase_request_not_found": "Einkaufswunsch nicht gefunden",
+    "requester_cannot_self_approve": "Der Antragsteller darf seinen eigenen Einkaufswunsch nicht mitfreigeben (Vier-Augen-Prinzip)."
   },
   "tickets": {
     "overview": {
@@ -479,6 +481,88 @@
       "col_total": "Gesamt",
       "yes": "Ja",
       "empty": "Keine versicherten Parzellen für {year}."
+    }
+  },
+  "purchase_requests": {
+    "overview": {
+      "title": "Einkaufswünsche",
+      "new_request": "Neuer Einkaufswunsch",
+      "filter_open": "Offen",
+      "filter_approved": "Genehmigt",
+      "filter_rejected": "Abgelehnt",
+      "filter_all": "Alle",
+      "col_title": "Titel",
+      "col_requester": "Antragsteller",
+      "col_estimated_cost": "Geschätzte Kosten",
+      "col_approvals": "Freigaben",
+      "col_status": "Status",
+      "status_open": "Offen",
+      "status_approved": "Genehmigt",
+      "status_rejected": "Abgelehnt",
+      "empty": "Keine Einkaufswünsche gefunden."
+    },
+    "form": {
+      "title": "Neuer Einkaufswunsch",
+      "back": "Zurück",
+      "card_header": "Einkaufswunsch",
+      "label_title": "Was soll gekauft werden?",
+      "label_justification": "Begründung",
+      "justification_placeholder": "Warum wird das benötigt?",
+      "label_link": "Link zur Einkaufsmöglichkeit",
+      "label_estimated_cost": "Geschätzte Kosten",
+      "requester_header": "Antragsteller",
+      "on_behalf_label": "Für eine andere Person anlegen (die keinen eigenen Zugang hat)",
+      "label_person_name": "Name der Person",
+      "label_person_email": "E-Mail-Adresse",
+      "person_email_help": "Die Person erhält einen Link, um die Angaben zu bestätigen.",
+      "cancel": "Abbrechen",
+      "button_create": "Einkaufswunsch anlegen"
+    },
+    "detail": {
+      "back": "Zurück",
+      "details_header": "Details",
+      "label_requester": "Antragsteller",
+      "confirmed_by_requester": "Vom Antragsteller bestätigt",
+      "confirmation_pending": "Bestätigung ausstehend",
+      "label_created_by": "Erstellt von",
+      "label_justification": "Begründung",
+      "label_link": "Link",
+      "label_estimated_cost": "Geschätzte Kosten",
+      "rejected_banner": "Abgelehnt",
+      "rejected_by": "von {name}",
+      "rejected_on": "am {date}",
+      "approved_banner": "Genehmigt",
+      "approved_on": "am {date}",
+      "approvals_header": "Freigaben ({count}/{required})",
+      "no_approvals": "Noch keine Freigaben.",
+      "requester_cannot_approve": "Als Antragsteller können Sie diesen Einkaufswunsch nicht selbst freigeben (Vier-Augen-Prinzip).",
+      "already_approved": "Sie haben bereits freigegeben.",
+      "approve_button": "Freigeben",
+      "reject_button": "Ablehnen",
+      "reject_reason_placeholder": "Begründung für die Ablehnung…",
+      "reject_confirm_button": "Endgültig ablehnen",
+      "unknown": "Unbekannt"
+    },
+    "confirm": {
+      "title": "Einkaufswunsch bestätigen",
+      "heading": "Einkaufswunsch bestätigen",
+      "intro": "Folgender Einkaufswunsch wurde in Ihrem Namen erfasst. Bitte prüfen Sie die Angaben und bestätigen Sie, falls alles korrekt ist.",
+      "label_title": "Titel",
+      "label_justification": "Begründung",
+      "label_link": "Link",
+      "label_estimated_cost": "Geschätzte Kosten",
+      "already_confirmed": "Sie haben diese Angaben bereits bestätigt.",
+      "confirm_button": "Angaben bestätigen"
+    },
+    "confirmed": {
+      "title": "Bestätigt",
+      "heading": "Vielen Dank!",
+      "message": "Ihre Bestätigung für „{title}\" wurde gespeichert."
+    },
+    "confirmation_invalid": {
+      "title": "Link ungültig",
+      "heading": "Link nicht gefunden",
+      "message": "Dieser Bestätigungslink ist ungültig oder wurde bereits verwendet."
     }
   }
 }

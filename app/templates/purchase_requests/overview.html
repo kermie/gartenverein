@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Einkaufswünsche{% endblock %}
-{% block page_title %}Einkaufswünsche{% endblock %}
+{% block title %}{{ t('purchase_requests.overview.title') }}{% endblock %}
+{% block page_title %}{{ t('purchase_requests.overview.title') }}{% endblock %}
 
 {% block topbar_actions %}
 <a href="/purchase-requests/new" class="btn btn-sm btn-primary">
-    <i class="bi bi-plus-lg me-1"></i>Neuer Einkaufswunsch
+    <i class="bi bi-plus-lg me-1"></i>{{ t('purchase_requests.overview.new_request') }}
 </a>
 {% endblock %}
 
@@ -12,10 +12,10 @@
 <div class="card mb-3">
     <div class="card-body py-2">
         <div class="btn-group btn-group-sm" role="group">
-            <a href="/purchase-requests/?filter=offen" class="btn btn-{{ 'primary' if filter == 'offen' else 'outline-secondary' }}">Offen</a>
-            <a href="/purchase-requests/?filter=genehmigt" class="btn btn-{{ 'primary' if filter == 'genehmigt' else 'outline-secondary' }}">Genehmigt</a>
-            <a href="/purchase-requests/?filter=abgelehnt" class="btn btn-{{ 'primary' if filter == 'abgelehnt' else 'outline-secondary' }}">Abgelehnt</a>
-            <a href="/purchase-requests/?filter=alle" class="btn btn-{{ 'primary' if filter == 'alle' else 'outline-secondary' }}">Alle</a>
+            <a href="/purchase-requests/?filter=offen" class="btn btn-{{ 'primary' if filter == 'offen' else 'outline-secondary' }}">{{ t('purchase_requests.overview.filter_open') }}</a>
+            <a href="/purchase-requests/?filter=genehmigt" class="btn btn-{{ 'primary' if filter == 'genehmigt' else 'outline-secondary' }}">{{ t('purchase_requests.overview.filter_approved') }}</a>
+            <a href="/purchase-requests/?filter=abgelehnt" class="btn btn-{{ 'primary' if filter == 'abgelehnt' else 'outline-secondary' }}">{{ t('purchase_requests.overview.filter_rejected') }}</a>
+            <a href="/purchase-requests/?filter=alle" class="btn btn-{{ 'primary' if filter == 'alle' else 'outline-secondary' }}">{{ t('purchase_requests.overview.filter_all') }}</a>
         </div>
     </div>
 </div>
@@ -26,11 +26,11 @@
 <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th>Titel</th>
-                        <th>Antragsteller</th>
-                        <th>Geschätzte Kosten</th>
-                        <th>Freigaben</th>
-                        <th>Status</th>
+                        <th>{{ t('purchase_requests.overview.col_title') }}</th>
+                        <th>{{ t('purchase_requests.overview.col_requester') }}</th>
+                        <th>{{ t('purchase_requests.overview.col_estimated_cost') }}</th>
+                        <th>{{ t('purchase_requests.overview.col_approvals') }}</th>
+                        <th>{{ t('purchase_requests.overview.col_status') }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -52,11 +52,11 @@
                         </td>
                         <td>
                             {% if pr.status.value == 'OPEN' %}
-                            <span class="badge" style="background: #fef3c7; color: #92400e;">Offen</span>
+                            <span class="badge" style="background: #fef3c7; color: #92400e;">{{ t('purchase_requests.overview.status_open') }}</span>
                             {% elif pr.status.value == 'APPROVED' %}
-                            <span class="badge badge-aktiv">Genehmigt</span>
+                            <span class="badge badge-aktiv">{{ t('purchase_requests.overview.status_approved') }}</span>
                             {% else %}
-                            <span class="badge" style="background: #fee2e2; color: #991b1b;">Abgelehnt</span>
+                            <span class="badge" style="background: #fee2e2; color: #991b1b;">{{ t('purchase_requests.overview.status_rejected') }}</span>
                             {% endif %}
                         </td>
                         <td class="text-end">
@@ -69,7 +69,7 @@
                     <tr>
                         <td colspan="6" class="text-center py-5 text-muted">
                             <i class="bi bi-cart d-block mb-2" style="font-size: 1.5rem;"></i>
-                            Keine Einkaufswünsche gefunden.
+                            {{ t('purchase_requests.overview.empty') }}
                         </td>
                     </tr>
                     {% endfor %}

@@ -235,9 +235,22 @@ async def startseite(request: Request):
 async def forbidden_handler(request: Request, exc):
     async with AsyncSessionLocal() as db:
         user = await get_current_user(request, db)
+    # exc.detail trägt oft eine konkrete, hilfreiche Begründung (z.B. "Der
+    # Antragsteller darf seinen eigenen Einkaufswunsch nicht mitfreigeben").
+    # Bisher wurde das hier immer verworfen und nur "Keine Berechtigung"
+    # angezeigt – das machte etliche an anderer Stelle sorgfältig formulierte
+    # (und übersetzte) Fehlermeldungen faktisch unsichtbar. Jetzt: konkrete
+    # Meldung anzeigen, falls vorhanden. Wichtig: FastAPI füllt "detail"
+    # automatisch mit der generischen englischen HTTP-Statustext-Phrase
+    # ("Forbidden"), wenn beim Auslösen kein eigener Text übergeben wurde –
+    # genau diesen Fall müssen wir erkennen und stattdessen weiter den
+    # deutschen Standardtext zeigen, statt versehentlich Englisch durchsickern
+    # zu lassen.
+    detail = getattr(exc, "detail", None)
+    meldung = detail if detail and detail != "Forbidden" else "Keine Berechtigung"
     return templates.TemplateResponse(
         "fehler.html",
-        {"request": request, "user": user, "code": 403, "meldung": "Keine Berechtigung"},
+        {"request": request, "user": user, "code": 403, "meldung": meldung},
         status_code=403,
     )
 
@@ -246,8 +259,10 @@ async def forbidden_handler(request: Request, exc):
 async def not_found_handler(request: Request, exc):
     async with AsyncSessionLocal() as db:
         user = await get_current_user(request, db)
+    detail = getattr(exc, "detail", None)
+    meldung = detail if detail and detail != "Not Found" else "Seite nicht gefunden"
     return templates.TemplateResponse(
         "fehler.html",
-        {"request": request, "user": user, "code": 404, "meldung": "Seite nicht gefunden"},
+        {"request": request, "user": user, "code": 404, "meldung": meldung},
         status_code=404,
     )

@@ -17,7 +17,9 @@
     "password_too_short": "Password must be at least 8 characters.",
     "email_already_registered": "Email already registered",
     "invitation_sent": "Invitation sent",
-    "own_account_cannot_deactivate": "Cannot deactivate your own account"
+    "own_account_cannot_deactivate": "Cannot deactivate your own account",
+    "purchase_request_not_found": "Purchase request not found",
+    "requester_cannot_self_approve": "The requester may not approve their own purchase request (two-person approval principle)."
   },
   "tickets": {
     "overview": {
@@ -479,6 +481,88 @@
       "col_total": "Total",
       "yes": "Yes",
       "empty": "No insured parcels for {year}."
+    }
+  },
+  "purchase_requests": {
+    "overview": {
+      "title": "Purchase Requests",
+      "new_request": "New purchase request",
+      "filter_open": "Open",
+      "filter_approved": "Approved",
+      "filter_rejected": "Rejected",
+      "filter_all": "All",
+      "col_title": "Title",
+      "col_requester": "Requester",
+      "col_estimated_cost": "Estimated cost",
+      "col_approvals": "Approvals",
+      "col_status": "Status",
+      "status_open": "Open",
+      "status_approved": "Approved",
+      "status_rejected": "Rejected",
+      "empty": "No purchase requests found."
+    },
+    "form": {
+      "title": "New purchase request",
+      "back": "Back",
+      "card_header": "Purchase request",
+      "label_title": "What should be purchased?",
+      "label_justification": "Justification",
+      "justification_placeholder": "Why is this needed?",
+      "label_link": "Link to where it can be purchased",
+      "label_estimated_cost": "Estimated cost",
+      "requester_header": "Requester",
+      "on_behalf_label": "Create on behalf of another person (who has no account of their own)",
+      "label_person_name": "Person's name",
+      "label_person_email": "Email address",
+      "person_email_help": "The person will receive a link to confirm the details.",
+      "cancel": "Cancel",
+      "button_create": "Create purchase request"
+    },
+    "detail": {
+      "back": "Back",
+      "details_header": "Details",
+      "label_requester": "Requester",
+      "confirmed_by_requester": "Confirmed by requester",
+      "confirmation_pending": "Confirmation pending",
+      "label_created_by": "Created by",
+      "label_justification": "Justification",
+      "label_link": "Link",
+      "label_estimated_cost": "Estimated cost",
+      "rejected_banner": "Rejected",
+      "rejected_by": "by {name}",
+      "rejected_on": "on {date}",
+      "approved_banner": "Approved",
+      "approved_on": "on {date}",
+      "approvals_header": "Approvals ({count}/{required})",
+      "no_approvals": "No approvals yet.",
+      "requester_cannot_approve": "As the requester, you cannot approve your own purchase request (two-person approval principle).",
+      "already_approved": "You have already approved this.",
+      "approve_button": "Approve",
+      "reject_button": "Reject",
+      "reject_reason_placeholder": "Reason for rejection…",
+      "reject_confirm_button": "Reject permanently",
+      "unknown": "Unknown"
+    },
+    "confirm": {
+      "title": "Confirm purchase request",
+      "heading": "Confirm purchase request",
+      "intro": "The following purchase request was entered on your behalf. Please review the details and confirm if everything is correct.",
+      "label_title": "Title",
+      "label_justification": "Justification",
+      "label_link": "Link",
+      "label_estimated_cost": "Estimated cost",
+      "already_confirmed": "You have already confirmed these details.",
+      "confirm_button": "Confirm details"
+    },
+    "confirmed": {
+      "title": "Confirmed",
+      "heading": "Thank you!",
+      "message": "Your confirmation for \"{title}\" has been saved."
+    },
+    "confirmation_invalid": {
+      "title": "Invalid link",
+      "heading": "Link not found",
+      "message": "This confirmation link is invalid or has already been used."
     }
   }
 }
