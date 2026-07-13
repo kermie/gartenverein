@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Neuer {{ medium_label }}-Zählpunkt{% endblock %}
-{% block page_title %}Neuer {{ medium_label }}-Zählpunkt{% endblock %}
+{% block title %}{{ t('metering.point_form.title_new', medium=medium_label) }}{% endblock %}
+{% block page_title %}{{ t('metering.point_form.title_new', medium=medium_label) }}{% endblock %}
 
 {% block topbar_actions %}
 <a href="{{ url_prefix }}/metering-points" class="btn btn-sm btn-outline-secondary">
-    <i class="bi bi-arrow-left me-1"></i>Zurück
+    <i class="bi bi-arrow-left me-1"></i>{{ t('metering.point_form.back') }}
 </a>
 {% endblock %}
 
@@ -14,37 +14,37 @@
 
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><i class="bi {{ icon }} me-2"></i>Zählpunkt</div>
+            <div class="card-header"><i class="bi {{ icon }} me-2"></i>{{ t('metering.point_form.card_header') }}</div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label fw-semibold">Typ <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">{{ t('metering.point_form.label_type') }} <span class="text-danger">*</span></label>
                         <select name="type" class="form-select" required
                                 onchange="
                                     document.getElementById('parcel-feld').style.display = this.value === 'PARCEL' ? '' : 'none';
                                     document.getElementById('label-feld').style.display = this.value !== 'PARCEL' ? '' : 'none';
                                 ">
-                            <option value="PARCEL">Parzelle</option>
-                            <option value="CLUB">Vereinseigene Anschlussstelle</option>
-                            <option value="MAIN_METER">Hauptzähler (Übergabe vom Versorger)</option>
+                            <option value="PARCEL">{{ t('metering.point_form.type_parcel') }}</option>
+                            <option value="CLUB">{{ t('metering.point_form.type_club') }}</option>
+                            <option value="MAIN_METER">{{ t('metering.point_form.type_main_meter') }}</option>
                         </select>
                     </div>
                     <div class="col-12" id="parcel-feld">
-                        <label class="form-label fw-semibold">Parzelle <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">{{ t('metering.point_form.label_parcel') }} <span class="text-danger">*</span></label>
                         <select name="parcel_id" class="form-select">
-                            <option value="">– bitte wählen –</option>
+                            <option value="">{{ t('metering.point_form.select_parcel_placeholder') }}</option>
                             {% for p in alle_parzellen %}
                             <option value="{{ p.id }}">{{ p.plot_number }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="col-12" id="label-feld" style="display: none;">
-                        <label class="form-label fw-semibold">Bezeichnung <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">{{ t('metering.point_form.label_label') }} <span class="text-danger">*</span></label>
                         <input type="text" name="label" class="form-control"
-                               placeholder="z.B. Vereinsheim, Waschplatz, Hauptzähler {{ medium_label }}">
+                               placeholder="{{ t('metering.point_form.label_placeholder', medium=medium_label) }}">
                     </div>
                     <div class="col-12">
-                        <label class="form-label fw-semibold">Notizen</label>
+                        <label class="form-label fw-semibold">{{ t('metering.point_form.label_notes') }}</label>
                         <textarea name="notes" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
@@ -54,25 +54,25 @@
 
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><i class="bi bi-speedometer2 me-2"></i>{{ medium_label }}zähler</div>
+            <div class="card-header"><i class="bi bi-speedometer2 me-2"></i>{{ t('metering.point_form.meter_header', medium=medium_label) }}</div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <label class="form-label fw-semibold">Nummer <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">{{ t('metering.point_form.label_number') }} <span class="text-danger">*</span></label>
                         <input type="text" name="number" class="form-control" required
-                               placeholder="z.B. 12345678">
+                               placeholder="{{ t('metering.point_form.number_placeholder') }}">
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label fw-semibold">Geeicht bis (Jahr)</label>
+                        <label class="form-label fw-semibold">{{ t('metering.point_form.label_calibrated_until') }}</label>
                         <input type="number" name="calibrated_until" class="form-control"
                                placeholder="z.B. 2032" min="2000" max="2100">
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label fw-semibold">Eingebaut am</label>
+                        <label class="form-label fw-semibold">{{ t('metering.point_form.label_installed_at') }}</label>
                         <input type="date" name="installed_at" class="form-control" value="{{ heute }}">
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label fw-semibold">Anfangsstand</label>
+                        <label class="form-label fw-semibold">{{ t('metering.point_form.label_initial_reading') }}</label>
                         <div class="input-group">
                             <input type="text" name="initial_reading" class="form-control"
                                    value="{% if dezimalstellen == 0 %}0{% else %}0,0{% endif %}">
@@ -85,9 +85,9 @@
     </div>
 
     <div class="col-12 d-flex gap-2 justify-content-end">
-        <a href="{{ url_prefix }}/metering-points" class="btn btn-outline-secondary">Abbrechen</a>
+        <a href="{{ url_prefix }}/metering-points" class="btn btn-outline-secondary">{{ t('metering.point_form.cancel') }}</a>
         <button type="submit" class="btn btn-primary">
-            <i class="bi bi-check-lg me-1"></i>Zählpunkt anlegen
+            <i class="bi bi-check-lg me-1"></i>{{ t('metering.point_form.button_create') }}
         </button>
     </div>
 

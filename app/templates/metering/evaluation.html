@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ medium_label }}-Auswertung {{ year }}{% endblock %}
-{% block page_title %}{{ medium_label }}-Auswertung {{ year }}{% endblock %}
+{% block title %}{{ medium_label }}{{ t('metering.evaluation.title_suffix') }} {{ year }}{% endblock %}
+{% block page_title %}{{ medium_label }}{{ t('metering.evaluation.title_suffix') }} {{ year }}{% endblock %}
 
 {% block topbar_actions %}
 <div class="d-flex gap-2 align-items-center">
@@ -12,10 +12,10 @@
         </select>
     </form>
     <a href="{{ url_prefix }}/evaluation/csv?year={{ year }}" class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-download me-1"></i>CSV Export
+        <i class="bi bi-download me-1"></i>{{ t('metering.evaluation.csv_export') }}
     </a>
     <a href="{{ url_prefix }}/" class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Zurück
+        <i class="bi bi-arrow-left me-1"></i>{{ t('metering.evaluation.back') }}
     </a>
 </div>
 {% endblock %}
@@ -32,19 +32,19 @@
 <div class="row g-3 mb-4">
     <div class="col-sm-4">
         <div class="card text-center p-3">
-            <div class="text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Hauptzähler</div>
+            <div class="text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">{{ t('metering.evaluation.stat_main_meter') }}</div>
             <div style="font-size: 1.8rem; font-weight: 700; color: var(--gv-gruen);">{{ summe_haupt | fmt(dezimalstellen) }} {{ unit }}</div>
         </div>
     </div>
     <div class="col-sm-4">
         <div class="card text-center p-3">
-            <div class="text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Parzellen gesamt</div>
+            <div class="text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">{{ t('metering.evaluation.stat_parcels_total') }}</div>
             <div style="font-size: 1.8rem; font-weight: 700; color: var(--gv-braun);">{{ summe_parzellen | fmt(dezimalstellen) }} {{ unit }}</div>
         </div>
     </div>
     <div class="col-sm-4">
         <div class="card text-center p-3">
-            <div class="text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Verein gesamt</div>
+            <div class="text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase;">{{ t('metering.evaluation.stat_club_total') }}</div>
             <div style="font-size: 1.8rem; font-weight: 700; color: #1e40af;">{{ summe_verein | fmt(dezimalstellen) }} {{ unit }}</div>
         </div>
     </div>
@@ -58,9 +58,9 @@
 <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th>Zählpunkt</th>
-                        <th>Zähler-Nr.</th>
-                        <th>Verbrauch ({{ unit }})</th>
+                        <th>{{ t('metering.evaluation.col_point') }}</th>
+                        <th>{{ t('metering.evaluation.col_meter_number') }}</th>
+                        <th>{{ t('metering.evaluation.col_consumption', unit=unit) }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -75,12 +75,12 @@
                             {% if z.verbrauch is not none %}
                             {{ z.verbrauch | fmt(dezimalstellen) }}
                             {% else %}
-                            <span class="text-muted">keine Ablesung</span>
+                            <span class="text-muted">{{ t('metering.evaluation.no_reading') }}</span>
                             {% endif %}
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="3" class="text-center text-muted py-3">Keine Einträge</td></tr>
+                    <tr><td colspan="3" class="text-center text-muted py-3">{{ t('metering.evaluation.no_entries') }}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -89,8 +89,8 @@
 </div>
 {% endmacro %}
 
-{{ tabelle(hauptzaehler_zeilen, "Hauptzähler") }}
-{{ tabelle(parzellen_zeilen, "Parzellen") }}
-{{ tabelle(verein_zeilen, "Vereinsanschlüsse") }}
+{{ tabelle(hauptzaehler_zeilen, t('metering.evaluation.table_main_meter')) }}
+{{ tabelle(parzellen_zeilen, t('metering.evaluation.table_parcels')) }}
+{{ tabelle(verein_zeilen, t('metering.evaluation.table_club')) }}
 
 {% endblock %}

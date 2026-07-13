@@ -4,7 +4,7 @@
 
 {% block topbar_actions %}
 <a href="{{ url_prefix }}/metering-points" class="btn btn-sm btn-outline-secondary">
-    <i class="bi bi-arrow-left me-1"></i>Zurück
+    <i class="bi bi-arrow-left me-1"></i>{{ t('metering.point_detail.back') }}
 </a>
 {% endblock %}
 
@@ -14,22 +14,22 @@
     <!-- Zählpunkt-Details -->
     <div class="col-lg-5">
         <div class="card">
-            <div class="card-header"><i class="bi {{ icon }} me-2"></i>Zählpunkt</div>
+            <div class="card-header"><i class="bi {{ icon }} me-2"></i>{{ t('metering.point_detail.point_header') }}</div>
             <div class="card-body">
                 <dl class="row mb-0">
-                    <dt class="col-sm-4 text-muted">Typ</dt>
+                    <dt class="col-sm-4 text-muted">{{ t('metering.point_detail.label_type') }}</dt>
                     <dd class="col-sm-8">
                         {% if metering_point.type.value == 'MAIN_METER' %}
-                        <span class="badge" style="background: #dbeafe; color: #1e40af;">Hauptzähler</span>
+                        <span class="badge" style="background: #dbeafe; color: #1e40af;">{{ t('metering.point_detail.type_main_meter') }}</span>
                         {% elif metering_point.type.value == 'PARCEL' %}
-                        <span class="badge" style="background: var(--gv-gruen-blass); color: var(--gv-gruen);">Parzelle</span>
+                        <span class="badge" style="background: var(--gv-gruen-blass); color: var(--gv-gruen);">{{ t('metering.point_detail.type_parcel') }}</span>
                         {% else %}
-                        <span class="badge" style="background: #f5ede8; color: var(--gv-braun);">Verein</span>
+                        <span class="badge" style="background: #f5ede8; color: var(--gv-braun);">{{ t('metering.point_detail.type_club') }}</span>
                         {% endif %}
                     </dd>
 
                     {% if metering_point.parcel %}
-                    <dt class="col-sm-4 text-muted">Parzelle</dt>
+                    <dt class="col-sm-4 text-muted">{{ t('metering.point_detail.label_parcel') }}</dt>
                     <dd class="col-sm-8">
                         <a href="/parcels/{{ metering_point.parcel.id }}" class="text-decoration-none"
                            style="color: var(--gv-gruen);">{{ metering_point.parcel.plot_number }}</a>
@@ -37,21 +37,21 @@
                     {% endif %}
 
                     {% if metering_point.notes %}
-                    <dt class="col-sm-4 text-muted">Notizen</dt>
+                    <dt class="col-sm-4 text-muted">{{ t('metering.point_detail.label_notes') }}</dt>
                     <dd class="col-sm-8">{{ metering_point.notes }}</dd>
                     {% endif %}
                 </dl>
 
                 <hr>
                 <form method="post" action="{{ url_prefix }}/metering-points/{{ metering_point.id }}/edit">
-                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">Bezeichnung</label>
+                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('metering.point_detail.label_label') }}</label>
                     <input type="text" name="label" class="form-control form-control-sm mb-2"
                            value="{{ metering_point.label or '' }}"
-                           {% if metering_point.type.value == 'PARCEL' %}placeholder="Optional, z.B. „Ost-Zugang“"{% endif %}>
-                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">Notizen</label>
+                           {% if metering_point.type.value == 'PARCEL' %}placeholder="{{ t('metering.point_detail.label_placeholder') }}"{% endif %}>
+                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('metering.point_detail.label_notes') }}</label>
                     <textarea name="notes" class="form-control form-control-sm mb-2" rows="2">{{ metering_point.notes or '' }}</textarea>
                     <button type="submit" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-check-lg me-1"></i>Speichern
+                        <i class="bi bi-check-lg me-1"></i>{{ t('metering.point_detail.save_button') }}
                     </button>
                 </form>
             </div>
@@ -61,34 +61,34 @@
     <!-- Aktueller Zähler -->
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header"><i class="bi bi-speedometer2 me-2"></i>Aktueller {{ medium_label }}zähler</div>
+            <div class="card-header"><i class="bi bi-speedometer2 me-2"></i>{{ t('metering.point_detail.current_meter_header', medium=medium_label) }}</div>
             <div class="card-body">
                 {% if current_meter %}
                 <dl class="row mb-0">
-                    <dt class="col-sm-4 text-muted">Nummer</dt>
+                    <dt class="col-sm-4 text-muted">{{ t('metering.point_detail.label_number') }}</dt>
                     <dd class="col-sm-8"><code>{{ current_meter.number }}</code></dd>
 
-                    <dt class="col-sm-4 text-muted">Eingebaut am</dt>
+                    <dt class="col-sm-4 text-muted">{{ t('metering.point_detail.label_installed_at') }}</dt>
                     <dd class="col-sm-8">{{ current_meter.installed_at.strftime('%d.%m.%Y') if current_meter.installed_at else '–' }}</dd>
 
-                    <dt class="col-sm-4 text-muted">Geeicht bis</dt>
+                    <dt class="col-sm-4 text-muted">{{ t('metering.point_detail.label_calibrated_until') }}</dt>
                     <dd class="col-sm-8">
                         {% if current_meter.calibrated_until %}
                         {{ current_meter.calibrated_until }}
                         {% if current_meter.calibrated_until <= aktuelles_jahr %}
-                        <span class="badge ms-1" style="background: #fef3c7; color: #92400e;">Eichung abgelaufen</span>
+                        <span class="badge ms-1" style="background: #fef3c7; color: #92400e;">{{ t('metering.point_detail.calibration_expired') }}</span>
                         {% endif %}
                         {% else %}–{% endif %}
                     </dd>
 
-                    <dt class="col-sm-4 text-muted">Anfangsstand</dt>
+                    <dt class="col-sm-4 text-muted">{{ t('metering.point_detail.label_initial_reading') }}</dt>
                     <dd class="col-sm-8">{{ current_meter.initial_reading | fmt(dezimalstellen) }} {{ unit }}</dd>
                 </dl>
 
                 <hr>
                 <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="collapse"
                         data-bs-target="#tausch-formular">
-                    <i class="bi bi-arrow-repeat me-1"></i>Zähler tauschen
+                    <i class="bi bi-arrow-repeat me-1"></i>{{ t('metering.point_detail.exchange_meter_button') }}
                 </button>
 
                 <div class="collapse mt-3" id="tausch-formular">
@@ -96,33 +96,33 @@
                         <form method="post" action="{{ url_prefix }}/metering-points/{{ metering_point.id }}/meter/exchange">
                             <div class="row g-2">
                                 <div class="col-sm-6">
-                                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">Alter Zähler ausgebaut am</label>
+                                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('metering.point_detail.exchange_old_removed_label') }}</label>
                                     <input type="date" name="removed_at" class="form-control form-control-sm"
                                            value="{{ heute }}" required>
                                 </div>
                                 <div class="col-sm-6">
-                                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">Neuer Zähler eingebaut am</label>
+                                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('metering.point_detail.exchange_new_installed_label') }}</label>
                                     <input type="date" name="installed_at" class="form-control form-control-sm"
                                            value="{{ heute }}" required>
                                 </div>
                                 <div class="col-sm-6">
-                                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">Neue Nummer <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('metering.point_detail.exchange_new_number_label') }} <span class="text-danger">*</span></label>
                                     <input type="text" name="neue_nummer" class="form-control form-control-sm" required>
                                 </div>
                                 <div class="col-sm-6">
-                                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">Geeicht bis</label>
+                                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('metering.point_detail.exchange_calibrated_until_label') }}</label>
                                     <input type="number" name="calibrated_until" class="form-control form-control-sm"
                                            placeholder="z.B. 2032">
                                 </div>
                                 <div class="col-sm-6">
-                                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">Anfangsstand</label>
+                                    <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('metering.point_detail.exchange_initial_reading_label') }}</label>
                                     <input type="text" name="initial_reading" class="form-control form-control-sm"
                                            value="{% if dezimalstellen == 0 %}0{% else %}0,0{% endif %}">
                                 </div>
                                 <div class="col-sm-6 d-flex align-items-end">
                                     <button type="submit" class="btn btn-sm btn-warning w-100"
-                                            onclick="return confirm('Zähler wirklich tauschen? Der alte Zähler wird deaktiviert.')">
-                                        <i class="bi bi-check-lg me-1"></i>Tauschen
+                                            onclick="return confirm('{{ t('metering.point_detail.exchange_confirm') }}')">
+                                        <i class="bi bi-check-lg me-1"></i>{{ t('metering.point_detail.exchange_button') }}
                                     </button>
                                 </div>
                             </div>
@@ -130,7 +130,7 @@
                     </div>
                 </div>
                 {% else %}
-                <p class="text-muted mb-0">Kein aktiver Zähler für diesen Zählpunkt.</p>
+                <p class="text-muted mb-0">{{ t('metering.point_detail.no_active_meter') }}</p>
                 {% endif %}
             </div>
         </div>
@@ -140,17 +140,17 @@
     {% if current_meter %}
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><i class="bi bi-clipboard-data me-2"></i>Ablesungen</div>
+            <div class="card-header"><i class="bi bi-clipboard-data me-2"></i>{{ t('metering.point_detail.readings_header') }}</div>
             <div class="card-body p-0">
                 <div class="table-responsive">
 <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th>Jahr</th>
-                                <th>Datum</th>
-                                <th>Stand ({{ unit }})</th>
-                                <th>Verbrauch ({{ unit }})</th>
-                                <th>Notiz</th>
+                                <th>{{ t('metering.point_detail.col_year') }}</th>
+                                <th>{{ t('metering.point_detail.col_date') }}</th>
+                                <th>{{ t('metering.point_detail.col_reading', unit=unit) }}</th>
+                                <th>{{ t('metering.point_detail.col_consumption', unit=unit) }}</th>
+                                <th>{{ t('metering.point_detail.col_note') }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -169,7 +169,7 @@
                                 <td class="text-end">
                                     <form method="post" action="{{ url_prefix }}/readings/{{ eintrag.reading.id }}/delete">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border-0"
-                                                onclick="return confirm('Ablesung wirklich löschen?')">
+                                                onclick="return confirm('{{ t('metering.point_detail.delete_confirm') }}')">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -177,7 +177,7 @@
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-3">Noch keine Ablesungen erfasst.</td>
+                                <td colspan="6" class="text-center text-muted py-3">{{ t('metering.point_detail.no_readings') }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -189,25 +189,25 @@
                       class="d-flex gap-2 flex-wrap align-items-end">
                     <input type="hidden" name="rueck_url" value="{{ url_prefix }}/metering-points/{{ metering_point.id }}">
                     <div>
-                        <label class="form-label small mb-0">Jahr</label>
+                        <label class="form-label small mb-0">{{ t('metering.point_detail.label_year') }}</label>
                         <input type="number" name="year" class="form-control form-control-sm" style="width: 100px;"
                                value="{{ aktuelles_jahr }}" required>
                     </div>
                     <div>
-                        <label class="form-label small mb-0">Datum</label>
+                        <label class="form-label small mb-0">{{ t('metering.point_detail.label_date') }}</label>
                         <input type="date" name="date" class="form-control form-control-sm" value="{{ heute }}" required>
                     </div>
                     <div>
-                        <label class="form-label small mb-0">Zählerstand ({{ unit }})</label>
+                        <label class="form-label small mb-0">{{ t('metering.point_detail.label_reading', unit=unit) }}</label>
                         <input type="text" name="reading" class="form-control form-control-sm" style="width: 130px;"
                                placeholder="{% if dezimalstellen == 0 %}0{% else %}0,0{% endif %}" required>
                     </div>
                     <div>
-                        <label class="form-label small mb-0">Notiz</label>
+                        <label class="form-label small mb-0">{{ t('metering.point_detail.label_note') }}</label>
                         <input type="text" name="note" class="form-control form-control-sm" style="width: 160px;">
                     </div>
                     <button type="submit" class="btn btn-sm btn-primary">
-                        <i class="bi bi-plus-lg me-1"></i>Ablesung erfassen
+                        <i class="bi bi-plus-lg me-1"></i>{{ t('metering.point_detail.record_reading_button') }}
                     </button>
                 </form>
             </div>
@@ -219,16 +219,16 @@
     {% if former_meters %}
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><i class="bi bi-clock-history me-2"></i>Frühere Zähler</div>
+            <div class="card-header"><i class="bi bi-clock-history me-2"></i>{{ t('metering.point_detail.former_meters_header') }}</div>
             <div class="card-body p-0">
                 <div class="table-responsive">
 <table class="table table-sm mb-0">
                         <thead>
                             <tr>
-                                <th>Nummer</th>
-                                <th>Eingebaut</th>
-                                <th>Ausgebaut</th>
-                                <th>Letzter Stand</th>
+                                <th>{{ t('metering.point_detail.col_number') }}</th>
+                                <th>{{ t('metering.point_detail.col_installed') }}</th>
+                                <th>{{ t('metering.point_detail.col_removed') }}</th>
+                                <th>{{ t('metering.point_detail.col_last_reading') }}</th>
                             </tr>
                         </thead>
                         <tbody>

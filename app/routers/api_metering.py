@@ -16,7 +16,7 @@ from app.database import get_db
 from app.models import MeteringPoint, MeteringPointType, MeteringMedium, Meter, MeterReading, User
 from app.api_auth import get_current_api_user, require_write_access
 from app.module_flags import require_modul
-from app.zaehler_utils import calculate_consumption, check_monotonicity, total_consumption_for_type
+from app.zaehler_utils import calculate_consumption, check_monotonicity, format_monotonicity_error_de, total_consumption_for_type
 from app.schemas import (
     MeteringPointOut, MeteringPointDetailOut, MeteringPointCreate, MeteringPointUpdate,
     MeterOut, MeterTauschRequest, MeterReadingCreate, MeterReadingOut,
@@ -207,7 +207,7 @@ def erstelle_metering_api_router(
 
         fehler = check_monotonicity(zaehler, daten.year, daten.reading)
         if fehler:
-            raise HTTPException(status_code=422, detail=fehler)
+            raise HTTPException(status_code=422, detail=format_monotonicity_error_de(*fehler))
 
         existing = next((z for z in zaehler.readings if z.year == daten.year), None)
         if existing:

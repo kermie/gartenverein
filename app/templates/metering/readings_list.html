@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ medium_label }}-Ablesung {{ year }}{% endblock %}
-{% block page_title %}{{ medium_label }}-Ablesung {{ year }}{% endblock %}
+{% block title %}{{ medium_label }}{{ t('metering.readings_list.title_suffix') }} {{ year }}{% endblock %}
+{% block page_title %}{{ medium_label }}{{ t('metering.readings_list.title_suffix') }} {{ year }}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -26,7 +26,7 @@
         </select>
     </form>
     <a href="{{ url_prefix }}/" class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Zurück
+        <i class="bi bi-arrow-left me-1"></i>{{ t('metering.readings_list.back') }}
     </a>
 </div>
 {% endblock %}
@@ -45,7 +45,7 @@
     <div style="min-width: 160px; flex: 1;">
         <div class="fw-semibold">{{ z.metering_point.display_name }}</div>
         <div class="text-muted" style="font-size: 0.78rem;">
-            <code>{{ z.zaehler.number }}</code> · Vorjahr: {{ z.vorjahreswert | fmt(dezimalstellen) }} {{ unit }}
+            <code>{{ z.zaehler.number }}</code> · {{ t('metering.readings_list.previous_year_label') }}: {{ z.vorjahreswert | fmt(dezimalstellen) }} {{ unit }}
         </div>
     </div>
     {% if z.entry %}
@@ -53,7 +53,7 @@
         <span class="badge badge-aktiv" style="font-size: 0.9rem;">
             {{ z.entry.reading | fmt(dezimalstellen) }} {{ unit }}
         </span>
-        <span class="text-muted" style="font-size: 0.8rem;">erfasst</span>
+        <span class="text-muted" style="font-size: 0.8rem;">{{ t('metering.readings_list.recorded_label') }}</span>
     </div>
     {% else %}
     <form method="post" action="{{ url_prefix }}/metering-points/{{ z.metering_point.id }}/readings/new"
@@ -75,7 +75,7 @@
 {% if hauptzaehler_zeilen %}
 <div class="card mb-3">
     <div class="card-header" style="background: #dbeafe; color: #1e40af;">
-        <i class="bi {{ icon }} me-2"></i>Hauptzähler
+        <i class="bi {{ icon }} me-2"></i>{{ t('metering.readings_list.main_meter_header') }}
     </div>
     <div class="card-body p-0">
         {% for z in hauptzaehler_zeilen %}{{ zeile(z, year, heute) }}{% endfor %}
@@ -84,11 +84,11 @@
 {% endif %}
 
 <div class="card mb-3">
-    <div class="card-header"><i class="bi bi-grid-3x3 me-2"></i>Parzellen</div>
+    <div class="card-header"><i class="bi bi-grid-3x3 me-2"></i>{{ t('metering.readings_list.parcels_header') }}</div>
     <div class="card-body p-0">
         {% for z in parzellen_zeilen %}{{ zeile(z, year, heute) }}{% endfor %}
         {% if not parzellen_zeilen %}
-        <div class="text-center text-muted py-3">Keine Parzellen-Zählpunkte vorhanden.</div>
+        <div class="text-center text-muted py-3">{{ t('metering.readings_list.no_parcel_points') }}</div>
         {% endif %}
     </div>
 </div>
@@ -96,7 +96,7 @@
 {% if verein_zeilen %}
 <div class="card mb-3">
     <div class="card-header" style="background: #f5ede8; color: var(--gv-braun);">
-        <i class="bi bi-building me-2"></i>Vereinsanschlüsse
+        <i class="bi bi-building me-2"></i>{{ t('metering.readings_list.club_header') }}
     </div>
     <div class="card-body p-0">
         {% for z in verein_zeilen %}{{ zeile(z, year, heute) }}{% endfor %}

@@ -56,27 +56,45 @@ def calculate_consumption(meter: Meter, year: int) -> Optional[Decimal]:
 
 def check_monotonicity(
     meter: Meter, year: int, neuer_stand: Decimal, exclude_id: Optional[str] = None
-) -> Optional[str]:
+) -> Optional[tuple]:
     """
     Plausibilitätsprüfung: der Zählerstand eines Zählers darf über die
-    Zeit nicht sinken. Gibt eine Fehlermeldung zurück, falls die Prüfung
-    fehlschlägt, sonst None.
+    Zeit nicht sinken. Gibt bei einem Fehlschlag ein Tupel
+    (Übersetzungsschlüssel, Formatierungsparameter) zurück, sonst None.
+
+    Ein Tupel statt einer fertig formatierten deutschen Zeichenkette,
+    damit sowohl die (weiterhin deutsche) REST-API als auch die
+    (übersetzbare) Web-Oberfläche denselben Prüfcode nutzen können –
+    siehe format_monotonicity_error_de() für die API-Seite und
+    app.i18n.translate() für die Web-Seite.
     """
     vorwert = reading_before_year(meter, year, exclude_id=exclude_id)
     if neuer_stand < vorwert:
-        return (
-            f"Der Zählerstand ({neuer_stand}) darf nicht kleiner sein als der "
-            f"vorherige Stand ({vorwert}) desselben Zählers."
-        )
+        return ("metering.errors.reading_below_previous", {"new_value": neuer_stand, "previous_value": vorwert})
 
     nachwert = reading_after_year(meter, year, exclude_id=exclude_id)
     if nachwert is not None and neuer_stand > nachwert:
-        return (
-            f"Der Zählerstand ({neuer_stand}) darf nicht größer sein als der "
-            f"bereits erfasste spätere Stand ({nachwert}) desselben Zählers."
-        )
+        return ("metering.errors.reading_above_later", {"new_value": neuer_stand, "later_value": nachwert})
 
     return None
+
+
+_MONOTONICITY_MESSAGES_DE = {
+    "metering.errors.reading_below_previous": (
+        "Der Zählerstand ({new_value}) darf nicht kleiner sein als der "
+        "vorherige Stand ({previous_value}) desselben Zählers."
+    ),
+    "metering.errors.reading_above_later": (
+        "Der Zählerstand ({new_value}) darf nicht größer sein als der "
+        "bereits erfasste spätere Stand ({later_value}) desselben Zählers."
+    ),
+}
+
+
+def format_monotonicity_error_de(key: str, params: dict) -> str:
+    """Formatiert das Ergebnis von check_monotonicity() auf Deutsch – für
+    die REST-API, die (wie der Rest der API-Oberfläche) nicht übersetzt wird."""
+    return _MONOTONICITY_MESSAGES_DE[key].format(**params)
 
 
 def total_consumption_for_type(metering_points: List, year: int) -> Decimal:

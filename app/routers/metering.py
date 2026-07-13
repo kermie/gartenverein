@@ -28,6 +28,7 @@ from app.models import (
     Parcel, ParcelStatus,
 )
 from app.auth import require_user
+from app.i18n import t_for, translate, DEFAULT_LANGUAGE
 from app.module_flags import require_modul
 from app.zaehler_utils import (
     calculate_consumption, check_monotonicity, total_consumption_for_type, reading_before_year
@@ -53,7 +54,7 @@ def erstelle_metering_router(
     medium: MeteringMedium,
     url_prefix: str,
     modul_name: str,
-    medium_label: str,
+    medium_label_key: str,
     unit: str,
     icon: str,
     dezimalstellen: int,
@@ -63,9 +64,15 @@ def erstelle_metering_router(
 
     Args:
         medium: MeteringMedium.WATER oder MeteringMedium.ELECTRICITY
-        url_prefix: z.B. "/wasser" oder "/strom"
-        modul_name: Schlüssel für das Modul-Flag, z.B. "wasser"/"strom"
-        medium_label: Anzeigename, z.B. "Wasser"/"Strom"
+        url_prefix: z.B. "/water" oder "/electricity"
+        modul_name: Schlüssel für das Modul-Flag, z.B. "water"/"electricity"
+        medium_label_key: Übersetzungsschlüssel für den Anzeigenamen, z.B.
+            "metering.medium.water"/"metering.medium.electricity" – ein
+            Schlüssel statt eines fertigen Strings, weil der Router einmal
+            beim Start instanziiert wird, die Anzeigesprache sich aber pro
+            Request ändern kann (siehe app/i18n.py). Für die (bewusst
+            weiterhin deutsche) CSV-Auswertung wird trotzdem ein fixer
+            deutscher Text verwendet, siehe medium_label_de weiter unten.
         unit: z.B. "m³"/"kWh"
         icon: Bootstrap-Icon-Klasse, z.B. "bi-droplet"/"bi-lightning-charge"
         dezimalstellen: Anzahl Nachkommastellen bei Anzeige/Eingabe
@@ -76,14 +83,25 @@ def erstelle_metering_router(
         dependencies=[Depends(require_modul(modul_name))],
     )
 
-    basis_context = {
+    # Deutscher Anzeigename, ausschließlich für die (weiterhin deutsche)
+    # CSV-Auswertung – siehe medium_label_key oben für die Erklärung, warum
+    # der übersetzte Anzeigename NICHT hier, sondern erst pro Request
+    # aufgelöst wird.
+    medium_label_de = translate(medium_label_key, DEFAULT_LANGUAGE)
+
+    def medium_label(request: Request) -> str:
+        return t_for(request, medium_label_key)
+
+    basis_context_ohne_label = {
         "medium": medium.value,
-        "medium_label": medium_label,
         "unit": unit,
         "icon": icon,
         "url_prefix": url_prefix,
         "dezimalstellen": dezimalstellen,
     }
+
+    def basis_context(request: Request) -> dict:
+        return {**basis_context_ohne_label, "medium_label": medium_label(request)}
 
     async def _lade_zaehlpunkt_mit_details(db: AsyncSession, metering_point_id: str) -> Optional[MeteringPoint]:
         result = await db.execute(
@@ -132,10 +150,9 @@ def erstelle_metering_router(
 
         warnung = None
         if v_haupt > 0 and (v_parzellen + v_verein) > v_haupt:
-            warnung = (
-                f"Die Summe aus Parzellen- ({v_parzellen} {unit}) und Vereinsverbrauch "
-                f"({v_verein} {unit}) übersteigt den Hauptzähler-Verbrauch ({v_haupt} {unit}) "
-                f"für {year}. Bitte Zählerstände prüfen."
+            warnung = t_for(
+                request, "metering.errors.overall_plausibility_overview",
+                parcels=v_parzellen, club=v_verein, main=v_haupt, unit=unit, year=year,
             )
 
         offene = 0
@@ -151,7 +168,7 @@ def erstelle_metering_router(
             verfuegbare_jahre.insert(0, year)
 
         return templates.TemplateResponse("metering/overview.html", {
-            **basis_context,
+            **basis_context(request),
             "request": request, "user": user, "year": year,
             "verfuegbare_jahre": verfuegbare_jahre,
             "anzahl_hauptzaehler": len(haupt),
@@ -183,7 +200,7 @@ def erstelle_metering_router(
         alle.sort(key=sortkey)
 
         return templates.TemplateResponse("metering/metering_points_list.html", {
-            **basis_context,
+            **basis_context(request),
             "request": request, "user": user,
             "metering_points": alle, "MeteringPointType": MeteringPointType,
             "year": date.today().year,
@@ -198,7 +215,7 @@ def erstelle_metering_router(
         alle_parzellen = result.scalars().all()
 
         return templates.TemplateResponse("metering/metering_point_form.html", {
-            **basis_context,
+            **basis_context(request),
             "request": request, "user": user,
             "alle_parzellen": alle_parzellen, "heute": date.today().isoformat(),
         })
@@ -252,7 +269,7 @@ def erstelle_metering_router(
         user = await require_user(request, db)
         metering_point = await _lade_zaehlpunkt_mit_details(db, metering_point_id)
         if not metering_point:
-            raise HTTPException(status_code=404, detail=f"{medium_label}-Zählpunkt nicht gefunden")
+            raise HTTPException(status_code=404, detail=t_for(request, "metering.errors.point_not_found", medium=medium_label(request)))
 
         current_meter = metering_point.current_meter
         former_meters = sorted(
@@ -270,7 +287,7 @@ def erstelle_metering_router(
                 })
 
         return templates.TemplateResponse("metering/metering_point_detail.html", {
-            **basis_context,
+            **basis_context(request),
             "request": request, "user": user,
             "metering_point": metering_point,
             "current_meter": current_meter,
@@ -377,14 +394,16 @@ def erstelle_metering_router(
 
         zaehler = metering_point.current_meter
         if not zaehler:
-            raise HTTPException(status_code=400, detail="Kein aktiver Zähler für diesen Zählpunkt vorhanden")
+            raise HTTPException(status_code=400, detail=t_for(request, "metering.errors.no_active_meter"))
 
         neuer_stand = _parse_zahl(reading, dezimalstellen)
         if neuer_stand is None:
-            return RedirectResponse(f"{rueck_url}?fehler=Ungültiger+Zählerstand", status_code=302)
+            meldung = urllib.parse.quote(t_for(request, "metering.errors.invalid_reading"))
+            return RedirectResponse(f"{rueck_url}?fehler={meldung}", status_code=302)
 
-        fehler = check_monotonicity(zaehler, year, neuer_stand)
-        if fehler:
+        fehler_info = check_monotonicity(zaehler, year, neuer_stand)
+        if fehler_info:
+            fehler = t_for(request, fehler_info[0], **fehler_info[1])
             return RedirectResponse(f"{rueck_url}?fehler={urllib.parse.quote(fehler)}", status_code=302)
 
         existing = next((z for z in zaehler.readings if z.year == year), None)
@@ -470,7 +489,7 @@ def erstelle_metering_router(
         verein_zeilen = aufbereiten(MeteringPointType.CLUB)
 
         return templates.TemplateResponse("metering/readings_list.html", {
-            **basis_context,
+            **basis_context(request),
             "request": request, "user": user, "year": year,
             "hauptzaehler_zeilen": hauptzaehler_zeilen,
             "parzellen_zeilen": parzellen_zeilen,
@@ -517,9 +536,9 @@ def erstelle_metering_router(
 
         warnung = None
         if summe_haupt > 0 and (summe_parzellen + summe_verein) > summe_haupt:
-            warnung = (
-                f"Verteilverbrauch ({summe_parzellen + summe_verein} {unit}) übersteigt "
-                f"Hauptzähler-Verbrauch ({summe_haupt} {unit})."
+            warnung = t_for(
+                request, "metering.errors.overall_plausibility_evaluation",
+                total=summe_parzellen + summe_verein, main=summe_haupt, unit=unit,
             )
 
         verfuegbare_jahre = sorted({
@@ -529,7 +548,7 @@ def erstelle_metering_router(
             verfuegbare_jahre.insert(0, year)
 
         return templates.TemplateResponse("metering/evaluation.html", {
-            **basis_context,
+            **basis_context(request),
             "request": request, "user": user, "year": year,
             "verfuegbare_jahre": verfuegbare_jahre,
             "hauptzaehler_zeilen": hauptzaehler_zeilen,
@@ -555,7 +574,7 @@ def erstelle_metering_router(
 
         output = io.StringIO()
         writer = csv.writer(output, delimiter=";")
-        writer.writerow(["Typ", "Zählpunkt", f"{medium_label}zähler-Nr.", "Zählerstand", f"Verbrauch ({unit})"])
+        writer.writerow(["Typ", "Zählpunkt", f"{medium_label_de}zähler-Nr.", "Zählerstand", f"Verbrauch ({unit})"])
 
         typ_label = {
             MeteringPointType.MAIN_METER: "Hauptzähler",

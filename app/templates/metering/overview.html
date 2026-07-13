@@ -12,7 +12,7 @@
         </select>
     </form>
     <a href="{{ url_prefix }}/readings?year={{ year }}" class="btn btn-sm btn-primary">
-        <i class="bi bi-clipboard-check me-1"></i>Ablesung erfassen
+        <i class="bi bi-clipboard-check me-1"></i>{{ t('metering.overview.record_reading') }}
     </a>
 </div>
 {% endblock %}
@@ -29,8 +29,8 @@
 {% if offene_ablesungen > 0 %}
 <div class="alert alert-info d-flex gap-2 align-items-center mb-3">
     <i class="bi bi-info-circle-fill"></i>
-    {{ offene_ablesungen }} Zählpunkt(e) haben für {{ year }} noch keine Ablesung.
-    <a href="{{ url_prefix }}/readings?year={{ year }}" class="alert-link ms-1">Jetzt erfassen →</a>
+    {{ t('metering.overview.open_readings_notice', count=offene_ablesungen, year=year) }}
+    <a href="{{ url_prefix }}/readings?year={{ year }}" class="alert-link ms-1">{{ t('metering.overview.record_now_link') }}</a>
 </div>
 {% endif %}
 
@@ -39,12 +39,12 @@
         <div class="card h-100">
             <div class="card-body">
                 <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                    Hauptzähler
+                    {{ t('metering.overview.stat_main_meter') }}
                 </div>
                 <div style="font-size: 1.6rem; font-weight: 700; color: var(--gv-gruen);">
                     {{ verbrauch_haupt | fmt(dezimalstellen) }} {{ unit }}
                 </div>
-                <div class="text-muted" style="font-size: 0.8rem;">{{ anzahl_hauptzaehler }} Zähler</div>
+                <div class="text-muted" style="font-size: 0.8rem;">{{ anzahl_hauptzaehler }} {{ t('metering.overview.stat_main_meter_suffix') }}</div>
             </div>
         </div>
     </div>
@@ -52,12 +52,12 @@
         <div class="card h-100">
             <div class="card-body">
                 <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                    Parzellen
+                    {{ t('metering.overview.stat_parcels') }}
                 </div>
                 <div style="font-size: 1.6rem; font-weight: 700; color: var(--gv-braun);">
                     {{ verbrauch_parzellen | fmt(dezimalstellen) }} {{ unit }}
                 </div>
-                <div class="text-muted" style="font-size: 0.8rem;">{{ anzahl_parzellen }} Zählpunkte</div>
+                <div class="text-muted" style="font-size: 0.8rem;">{{ anzahl_parzellen }} {{ t('metering.overview.stat_parcels_suffix') }}</div>
             </div>
         </div>
     </div>
@@ -65,12 +65,12 @@
         <div class="card h-100">
             <div class="card-body">
                 <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                    Vereinsanschlüsse
+                    {{ t('metering.overview.stat_club') }}
                 </div>
                 <div style="font-size: 1.6rem; font-weight: 700; color: #1e40af;">
                     {{ verbrauch_verein | fmt(dezimalstellen) }} {{ unit }}
                 </div>
-                <div class="text-muted" style="font-size: 0.8rem;">{{ anzahl_verein }} Zählpunkte</div>
+                <div class="text-muted" style="font-size: 0.8rem;">{{ anzahl_verein }} {{ t('metering.overview.stat_club_suffix') }}</div>
             </div>
         </div>
     </div>
@@ -78,13 +78,13 @@
         <div class="card h-100">
             <div class="card-body">
                 <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                    Differenz
+                    {{ t('metering.overview.stat_difference') }}
                 </div>
                 {% set differenz = verbrauch_haupt - verbrauch_parzellen - verbrauch_verein %}
                 <div style="font-size: 1.6rem; font-weight: 700; color: {% if differenz < 0 %}#991b1b{% else %}#065f46{% endif %};">
                     {{ differenz | fmt(dezimalstellen) }} {{ unit }}
                 </div>
-                <div class="text-muted" style="font-size: 0.8rem;">Haupt − Verteilung</div>
+                <div class="text-muted" style="font-size: 0.8rem;">{{ t('metering.overview.stat_difference_suffix') }}</div>
             </div>
         </div>
     </div>
@@ -95,13 +95,13 @@
         <div class="card">
             <div class="card-body d-grid gap-2">
                 <a href="{{ url_prefix }}/metering-points" class="btn btn-outline-primary text-start">
-                    <i class="bi {{ icon }} me-2"></i>Alle Zählpunkte
+                    <i class="bi {{ icon }} me-2"></i>{{ t('metering.overview.nav_all_points') }}
                 </a>
                 <a href="{{ url_prefix }}/metering-points/new" class="btn btn-outline-primary text-start">
-                    <i class="bi bi-plus-square me-2"></i>Neuer Zählpunkt
+                    <i class="bi bi-plus-square me-2"></i>{{ t('metering.overview.nav_new_point') }}
                 </a>
-                <a href="{{ url_prefix }}/auswertung?year={{ year }}" class="btn btn-outline-secondary text-start">
-                    <i class="bi bi-bar-chart me-2"></i>Jahresauswertung
+                <a href="{{ url_prefix }}/evaluation?year={{ year }}" class="btn btn-outline-secondary text-start">
+                    <i class="bi bi-bar-chart me-2"></i>{{ t('metering.overview.nav_evaluation') }}
                 </a>
             </div>
         </div>

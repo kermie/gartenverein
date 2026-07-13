@@ -143,11 +143,11 @@ app.include_router(purchase_requests.router)
 # instanziiert für Wasser und Strom – siehe erstelle_metering_router().
 water_router = erstelle_metering_router(
     medium=MeteringMedium.WATER, url_prefix="/water", modul_name="water",
-    medium_label="Wasser", unit="m³", icon="bi-droplet", dezimalstellen=1,
+    medium_label_key="metering.medium.water", unit="m³", icon="bi-droplet", dezimalstellen=1,
 )
 electricity_router = erstelle_metering_router(
     medium=MeteringMedium.ELECTRICITY, url_prefix="/electricity", modul_name="electricity",
-    medium_label="Strom", unit="kWh", icon="bi-lightning-charge", dezimalstellen=0,
+    medium_label_key="metering.medium.electricity", unit="kWh", icon="bi-lightning-charge", dezimalstellen=0,
 )
 app.include_router(water_router)
 app.include_router(electricity_router)
