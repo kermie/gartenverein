@@ -5,7 +5,30 @@
     "back": "Back"
   },
   "nav": {
-    "tickets": "Tickets"
+    "tickets": "Tickets",
+    "brand_subtitle": "Management",
+    "dashboard": "Dashboard",
+    "members": "Members",
+    "parcels": "Parcels",
+    "purchase_requests": "Purchase Requests",
+    "work_hours_group": "Work Sessions",
+    "work_hours_overview": "Sessions & Overview",
+    "work_hours_evaluation": "Annual Evaluation",
+    "work_hours_sponsorships": "Sponsorships",
+    "water": "Water",
+    "electricity": "Electricity",
+    "insurance": "Insurance",
+    "overview": "Overview",
+    "metering_points": "Metering Points",
+    "readings": "Readings",
+    "evaluation": "Evaluation",
+    "configuration": "Configuration",
+    "administration": "Administration",
+    "users": "Users",
+    "settings": "Settings",
+    "logout": "Log Out",
+    "menu_open_aria": "Open Menu",
+    "default_title": "Gartenverein Management"
   },
   "errors": {
     "ticket_not_found": "Ticket not found",

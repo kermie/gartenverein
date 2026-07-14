@@ -5,7 +5,30 @@
     "back": "Zurück"
   },
   "nav": {
-    "tickets": "Tickets"
+    "tickets": "Tickets",
+    "brand_subtitle": "Verwaltung",
+    "dashboard": "Dashboard",
+    "members": "Mitglieder",
+    "parcels": "Parzellen",
+    "purchase_requests": "Einkaufswünsche",
+    "work_hours_group": "Arbeitseinsätze",
+    "work_hours_overview": "Einsätze & Übersicht",
+    "work_hours_evaluation": "Jahresauswertung",
+    "work_hours_sponsorships": "Patenschaften",
+    "water": "Wasser",
+    "electricity": "Strom",
+    "insurance": "Versicherungen",
+    "overview": "Übersicht",
+    "metering_points": "Zählpunkte",
+    "readings": "Ablesung",
+    "evaluation": "Auswertung",
+    "configuration": "Konfiguration",
+    "administration": "Administration",
+    "users": "Benutzer",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "menu_open_aria": "Menü öffnen",
+    "default_title": "Gartenverein Verwaltung"
   },
   "errors": {
     "ticket_not_found": "Ticket nicht gefunden",
