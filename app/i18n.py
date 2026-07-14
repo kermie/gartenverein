@@ -50,6 +50,7 @@ TRANSLATIONS_DIR = Path(__file__).parent / "translations"
 AVAILABLE_LANGUAGES = {
     "de": "Deutsch",
     "en": "English",
+    "pl": "Polski",
 }
 
 # In-Memory-Cache: {"de": {...verschachteltes dict...}, "en": {...}}
