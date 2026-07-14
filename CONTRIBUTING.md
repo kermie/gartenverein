@@ -44,11 +44,16 @@ http://localhost:8000/api/docs.
 
 - **Language**: technical identifiers (class/table/column names,
   function names, URLs, API endpoints) are in **English**. User-facing UI
-  text (labels, error messages, email content) stays in **German**, since
-  the software's audience is German-speaking club members -- see
-  [Architecture Decisions](./docs/architecture-decisions.md) for the
-  reasoning and history of this split. Code comments and docstrings are
-  also generally German, matching the maintainers' primary language.
+  text (labels, error messages, email content) is written in **German
+  first** -- that's still the authoring source language, since the
+  maintainers and the software's original audience are German-speaking --
+  and then translated into the other supported languages (currently
+  English, Polish, Czech, Slovak, French, Dutch) via the i18n system; see
+  [i18n & l10n](./docs/i18n-l10n.md) for how that works and what a new
+  module needs. Code comments and docstrings are also generally German,
+  matching the maintainers' primary language, and are *not* translated
+  (see [Architecture Decisions](./docs/architecture-decisions.md) for the
+  original reasoning behind the identifier-vs-UI-text split).
 - **Genericity**: new fields/functions should, where sensible, not only
   fit the originating association but allotment garden associations in
   general (e.g. configurable area types instead of hard-coded A/B/C

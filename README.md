@@ -58,8 +58,18 @@ version publicly available. Details and contribution guidelines in
   board members must approve before a purchase is made)
 - ✅ REST API with JWT authentication and Swagger documentation
 - ✅ Database migrations via Alembic
-- ✅ i18n foundation: one language per installation (German/English),
-  switchable in admin settings, JSON-based translation catalogs
+- ✅ i18n: 7 languages (German, English, Polish, Czech, Slovak, French,
+  Dutch), one language per installation, switchable in admin settings,
+  every module and the navigation fully translated. JSON translation
+  catalogs, English as the runtime fallback for any missing key.
+- ✅ l10n: region and currency are independent settings from language
+  (e.g. an English-language UI can still show German number formatting
+  and EUR). Number and money formatting via Babel (correct
+  decimal/thousands separators and currency symbol position per
+  region); address display order adapts per region (continental
+  postcode-before-city vs. UK-style postcode-last).
+- ✅ Responsive/mobile layout: off-canvas navigation on narrow screens,
+  wide tables scroll independently of the page
 
 ## Planned (next phases)
 
@@ -69,9 +79,6 @@ version publicly available. Details and contribution guidelines in
 - Document management
 - Mail merge / email campaigns
 - WordPress integration (work-session sign-up via API)
-- Complete the i18n rollout: translate every module's UI text (currently
-  only the Tickets module is fully translated as a worked example; all
-  other modules still show German UI text even when English is selected)
 
 ---
 
@@ -84,6 +91,7 @@ version publicly available. Details and contribution guidelines in
 | CSS | Bootstrap 5 |
 | Database | PostgreSQL 16 |
 | Migrations | Alembic |
+| i18n/l10n | JSON translation catalogs + Babel (number/currency formatting) |
 | Container | Docker + docker compose |
 
 ---

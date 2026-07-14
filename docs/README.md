@@ -19,6 +19,8 @@ decisions and reasoning are still fresh.
 - [Architecture Decisions](./architecture-decisions.md) -- why certain things are built the way they are
 - [Operations](./operations.md) -- Docker, migrations, SMTP setup, troubleshooting
 - [Automated Tests](./testing.md) -- testing philosophy, execution, known limits
+- [i18n & l10n](./i18n-l10n.md) -- languages, region/currency, how to add a new one
+- [Responsive Design](./responsive-design.md) -- mobile layout patterns for new templates
 
 ## For new modules
 
@@ -33,5 +35,10 @@ Architecture Decisions for details):
 4. Entry in `app/module_flags.py` (`MODULE_DEFAULTS`)
 5. Entry in `app/routers/admin.py` (`MODULE_FELDER`) for the enable/disable UI
 6. Navigation block in `app/templates/base.html` as a collapsible `nav-group`
-7. `tests/test_<module>.py` with at least one happy-path test
-8. Write a new page here in `docs/` while the decisions are still fresh
+7. Translation keys in **all 7** `app/translations/*.json` files (de, en,
+   pl, cs, sk, fr, nl) -- not just German -- see
+   [i18n & l10n](./i18n-l10n.md). Any money value uses the `money` filter,
+   any multi-column table gets a `.table-responsive` wrapper (see
+   [Responsive Design](./responsive-design.md))
+8. `tests/test_<module>.py` with at least one happy-path test
+9. Write a new page here in `docs/` while the decisions are still fresh

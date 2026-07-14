@@ -297,3 +297,118 @@ discussion of the plugin system).
 and REST API endpoints (`app/routers/api_<module>.py`) from the start, not
 one after the other. Existing gaps (work hours, metering, insurance) were
 caught up.
+
+## i18n: one language per installation, English as runtime fallback
+
+**Context:** the software started German-only. Making it a genuine
+open-source product meant supporting other languages -- but *how* the
+language is chosen matters as much as the translation content itself.
+
+**Decision: one language per installation, not per user, not
+browser-detected.** A shared club-management tool where different board
+members privately see different languages would be more confusing than
+helpful for a small volunteer-run association -- everyone should be
+looking at the same labels when discussing the same screen together.
+The admin picks a language once in Admin -> Settings; it applies to
+everyone. This ruled out both a per-user profile setting and an
+`Accept-Language`-header-based auto-detection.
+
+**Decision: German remains the authoring source language, but English is
+the runtime fallback -- not the same thing.** New UI text is still
+written in German first (that hasn't changed), but if a translation key
+is missing for whichever language is currently selected -- most likely
+because a module hasn't been translated into that language yet -- the
+string falls back to English, not German. Same for a completely fresh
+install with no language chosen yet: it starts in English. This was a
+deliberate, explicit request (not an oversight) to make English the
+"safe default" a new international user lands on, rather than German
+text they may not read. The two decisions (source language vs. runtime
+default) are controlled by two different mechanisms in `app/i18n.py`
+and can, in principle, diverge further if needed.
+
+**Implementation:** JSON translation catalogs (one file per language,
+`app/translations/<code>.json`), loaded once at startup. `t()` in
+templates, `t_for(request, ...)` in Python for web-UI-facing error
+messages. REST API error messages are deliberately **not** translated
+(every API router leaves error `detail` strings in German) -- the API is
+for programmatic integrations, not a language-switchable human UI.
+
+## l10n: region and currency as settings independent of language and each other
+
+**Context:** once several languages existed, it became obvious that
+"language" and "regional formatting conventions" are not the same axis.
+An English-speaking board member isn't necessarily using GBP; a
+French-speaking one isn't necessarily in France. Tying number format or
+currency to the language selector would have been a false shortcut.
+
+**Decision:** two more `ClubSettings`, `region` and `currency`, each
+independently selectable from `language` and from each other. `region`
+(a Babel locale string like `de_DE`, `en_GB`, `fr_FR`) drives number
+formatting and address field order; `currency` (an ISO code like `EUR`,
+`GBP`) drives the money symbol and its position. Defaults (`de_DE` /
+`EUR`) were chosen to match where this software actually runs today,
+independent of the `language` default being English -- these three
+settings don't have to agree, and in practice often won't for
+associations outside German-speaking countries.
+
+**Decision: use Babel instead of hand-rolled formatting.** Before this,
+formatting was ad-hoc and broken for anything but German -- e.g. the
+dashboard had a literal `.format(x).replace(",", ".")` hack to force
+German-style thousands separators, and every monetary value across ~30
+templates hardcoded a trailing `€`. Babel's `format_currency`/
+`format_decimal` get real per-locale nuances right that are easy to miss
+by hand: Dutch puts the symbol *before* the number (`€ 1.234,50`), French
+uses a narrow no-break space for thousands and a non-breaking space
+before the symbol (`3 000,00 €`), British English has no space at all
+between symbol and number (`£127.50`). Two Jinja filters (`money`,
+`number`) replace every hand-written format string app-wide.
+
+**Decision: address format via a five-line dict, not a library.** Full
+address-formatting libraries (e.g. Google's `libaddressinput` data)
+model dozens of countries with genuinely different field structures.
+Across the 7 countries this project currently supports, the only real
+variation is whether the postal code sits before the city (continental
+Europe) or gets its own line after the city (UK) -- a small
+region-to-template dict in `app/l10n.py` covers that completely without
+pulling in a much larger dependency. Revisit if a country with a
+genuinely different address structure gets added later.
+
+See [i18n & l10n](./i18n-l10n.md) for the practical how-to (adding a
+language, a region, a currency).
+
+## Responsive design: off-canvas nav + mandatory `.table-responsive`
+
+**Context:** the app was originally built and used almost exclusively on
+desktop by board members at a computer. As usage extended to checking
+things on a phone (e.g. during a work session, or a quick lookup at the
+allotment itself), the always-visible sidebar and un-wrapped tables broke
+down badly on narrow screens -- the sidebar ate half the viewport
+permanently, and wide tables (5-8 columns: ticket lists, member lists,
+annual evaluations) forced the whole page to scroll sideways instead of
+just the table.
+
+**Decision:** plain CSS media queries and a small amount of vanilla JS,
+no frontend framework and no separate mobile template set. Below 768px:
+the sidebar becomes an off-canvas overlay (hidden via
+`transform: translateX(-100%)`, toggled by a hamburger button, closed by
+backdrop tap / Escape / clicking a nav link), Bootstrap's small button
+and form-control variants get a minimum touch-target height, and
+`.btn-group` rows (e.g. ticket status filters) wrap instead of clipping.
+
+**Rule going forward: every `<table>` gets wrapped in
+`.table-responsive`, no exceptions.** This was audited in one pass across
+all 46 templates at the time -- 16 of 19 tables were missing the wrapper.
+Any new template with a table that skips this works fine on desktop and
+silently breaks on mobile, which is exactly the kind of bug that doesn't
+show up until someone happens to test on a phone.
+
+**Bug found along the way:** the sidebar's "active page" highlighting for
+Members/Parcels had silently never worked since those URLs were
+translated from German to English (`/mitglieder` -> `/members/`) --
+the highlighting logic still checked the old paths. Caught and fixed
+during the same pass; a reminder that even a purely visual/CSS-focused
+change is worth cross-checking against still-current routes.
+
+See [Responsive Design](./responsive-design.md) for the practical
+reference (breakpoints, what's automatic vs. what needs a per-template
+wrapper, how to test it).
