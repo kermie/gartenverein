@@ -1008,5 +1008,30 @@
       "sponsorship_not_found": "Patenschaft nicht gefunden",
       "no_configuration_for_year": "Keine Konfiguration für {year}"
     }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "members_label": "Mitglieder",
+    "active_suffix": "aktiv",
+    "show_all": "Alle anzeigen",
+    "parcels_active_label": "Parzellen aktiv",
+    "vacant_suffix": "unbesetzt",
+    "all_occupied": "alle besetzt",
+    "terminated_label": "Gekündigt",
+    "parcels_word": "Parzellen",
+    "show": "Anzeigen",
+    "total_area_label": "Gesamtfläche (qm)",
+    "active_parcels_suffix": "aktive Parzellen",
+    "total_area_footer": "Summe aller aktiven Parzellenflächen",
+    "recent_members_card_title": "Neueste Mitglieder",
+    "no_members": "Noch keine Mitglieder angelegt.",
+    "new_member_button": "Neues Mitglied",
+    "quick_access_card_title": "Schnellzugriff",
+    "quick_create_member": "Neues Mitglied anlegen",
+    "quick_create_parcel": "Neue Parzelle anlegen",
+    "quick_export_members_csv": "Mitglieder als CSV exportieren",
+    "quick_export_parcels_csv": "Parzellen als CSV exportieren",
+    "quick_manage_users": "Benutzer verwalten",
+    "quick_api_docs": "API-Dokumentation (Swagger)"
   }
 }

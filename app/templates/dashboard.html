@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
+{% block title %}{{ t('dashboard.title') }}{% endblock %}
+{% block page_title %}{{ t('dashboard.title') }}{% endblock %}
 
 {% block content %}
 <div class="row g-3 mb-4">
@@ -13,13 +13,13 @@
                     <i class="bi bi-people"></i>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">Mitglieder</div>
+                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">{{ t('dashboard.members_label') }}</div>
                     <div style="font-size: 1.8rem; font-weight: 700; color: var(--gv-gruen);">{{ stats.mitglieder_gesamt }}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">{{ stats.mitglieder_aktiv }} aktiv</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ stats.mitglieder_aktiv }} {{ t('dashboard.active_suffix') }}</div>
                 </div>
             </div>
             <div class="card-footer bg-transparent border-top-0 pt-0">
-                <a href="/members/" class="btn btn-sm btn-outline-primary w-100">Alle anzeigen</a>
+                <a href="/members/" class="btn btn-sm btn-outline-primary w-100">{{ t('dashboard.show_all') }}</a>
             </div>
         </div>
     </div>
@@ -32,17 +32,17 @@
                     <i class="bi bi-grid-3x3"></i>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">Parzellen aktiv</div>
+                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">{{ t('dashboard.parcels_active_label') }}</div>
                     <div style="font-size: 1.8rem; font-weight: 700; color: var(--gv-braun);">{{ stats.parzellen_aktiv }}</div>
                     {% if stats.parzellen_unbesetzt > 0 %}
-                    <div style="font-size: 0.75rem; color: #92400e;">{{ stats.parzellen_unbesetzt }} unbesetzt</div>
+                    <div style="font-size: 0.75rem; color: #92400e;">{{ stats.parzellen_unbesetzt }} {{ t('dashboard.vacant_suffix') }}</div>
                     {% else %}
-                    <div class="text-muted" style="font-size: 0.75rem;">alle besetzt</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ t('dashboard.all_occupied') }}</div>
                     {% endif %}
                 </div>
             </div>
             <div class="card-footer bg-transparent border-top-0 pt-0">
-                <a href="/parcels/" class="btn btn-sm btn-outline-primary w-100">Alle anzeigen</a>
+                <a href="/parcels/" class="btn btn-sm btn-outline-primary w-100">{{ t('dashboard.show_all') }}</a>
             </div>
         </div>
     </div>
@@ -55,13 +55,13 @@
                     <i class="bi bi-exclamation-triangle"></i>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">Gekündigt</div>
+                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">{{ t('dashboard.terminated_label') }}</div>
                     <div style="font-size: 1.8rem; font-weight: 700; color: #92400e;">{{ stats.parzellen_gekuendigt }}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Parzellen</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ t('dashboard.parcels_word') }}</div>
                 </div>
             </div>
             <div class="card-footer bg-transparent border-top-0 pt-0">
-                <a href="/parcels/?status_filter=gekuendigt" class="btn btn-sm btn-outline-primary w-100">Anzeigen</a>
+                <a href="/parcels/?status_filter=gekuendigt" class="btn btn-sm btn-outline-primary w-100">{{ t('dashboard.show') }}</a>
             </div>
         </div>
     </div>
@@ -74,15 +74,15 @@
                     <i class="bi bi-rulers"></i>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">C-Fläche (qm)</div>
+                    <div class="text-muted" style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">{{ t('dashboard.total_area_label') }}</div>
                     <div style="font-size: 1.8rem; font-weight: 700; color: #1e40af;">
                         {{ "{:,.0f}".format(stats.flaeche_gesamt_qm).replace(",", ".") }}
                     </div>
-                    <div class="text-muted" style="font-size: 0.75rem;">aktive Parzellen</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ t('dashboard.active_parcels_suffix') }}</div>
                 </div>
             </div>
             <div class="card-footer bg-transparent border-top-0 pt-0 text-muted" style="font-size: 0.75rem;">
-                Summe aller aktiven Parzellenflächen
+                {{ t('dashboard.total_area_footer') }}
             </div>
         </div>
     </div>
@@ -91,7 +91,7 @@
 <div class="row g-3">
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header"><i class="bi bi-people me-2"></i>Neueste Mitglieder</div>
+            <div class="card-header"><i class="bi bi-people me-2"></i>{{ t('dashboard.recent_members_card_title') }}</div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
                     {% for m in neueste_mitglieder %}
@@ -105,41 +105,41 @@
                         </span>
                     </li>
                     {% else %}
-                    <li class="list-group-item text-muted">Noch keine Mitglieder angelegt.</li>
+                    <li class="list-group-item text-muted">{{ t('dashboard.no_members') }}</li>
                     {% endfor %}
                 </ul>
             </div>
             <div class="card-footer">
                 <a href="/members/new" class="btn btn-sm btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i>Neues Mitglied
+                    <i class="bi bi-plus-lg me-1"></i>{{ t('dashboard.new_member_button') }}
                 </a>
             </div>
         </div>
     </div>
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header"><i class="bi bi-lightning me-2"></i>Schnellzugriff</div>
+            <div class="card-header"><i class="bi bi-lightning me-2"></i>{{ t('dashboard.quick_access_card_title') }}</div>
             <div class="card-body">
                 <div class="d-grid gap-2">
                     <a href="/members/new" class="btn btn-outline-primary text-start">
-                        <i class="bi bi-person-plus me-2"></i>Neues Mitglied anlegen
+                        <i class="bi bi-person-plus me-2"></i>{{ t('dashboard.quick_create_member') }}
                     </a>
                     <a href="/parcels/new" class="btn btn-outline-primary text-start">
-                        <i class="bi bi-plus-square me-2"></i>Neue Parzelle anlegen
+                        <i class="bi bi-plus-square me-2"></i>{{ t('dashboard.quick_create_parcel') }}
                     </a>
                     <a href="/members/export/csv" class="btn btn-outline-secondary text-start">
-                        <i class="bi bi-download me-2"></i>Mitglieder als CSV exportieren
+                        <i class="bi bi-download me-2"></i>{{ t('dashboard.quick_export_members_csv') }}
                     </a>
                     <a href="/parcels/export/csv" class="btn btn-outline-secondary text-start">
-                        <i class="bi bi-download me-2"></i>Parzellen als CSV exportieren
+                        <i class="bi bi-download me-2"></i>{{ t('dashboard.quick_export_parcels_csv') }}
                     </a>
                     {% if user.role.value in ['admin', 'board'] %}
                     <a href="/admin/" class="btn btn-outline-secondary text-start">
-                        <i class="bi bi-people-fill me-2"></i>Benutzer verwalten
+                        <i class="bi bi-people-fill me-2"></i>{{ t('dashboard.quick_manage_users') }}
                     </a>
                     {% endif %}
                     <a href="/api/docs" target="_blank" class="btn btn-outline-secondary text-start">
-                        <i class="bi bi-code-slash me-2"></i>API-Dokumentation (Swagger)
+                        <i class="bi bi-code-slash me-2"></i>{{ t('dashboard.quick_api_docs') }}
                     </a>
                 </div>
             </div>

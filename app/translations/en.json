@@ -1008,5 +1008,30 @@
       "sponsorship_not_found": "Sponsorship not found",
       "no_configuration_for_year": "No configuration for {year}"
     }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "members_label": "Members",
+    "active_suffix": "active",
+    "show_all": "Show All",
+    "parcels_active_label": "Active Parcels",
+    "vacant_suffix": "vacant",
+    "all_occupied": "all occupied",
+    "terminated_label": "Terminated",
+    "parcels_word": "Parcels",
+    "show": "Show",
+    "total_area_label": "Total Area (sqm)",
+    "active_parcels_suffix": "active parcels",
+    "total_area_footer": "Sum of all active parcel areas",
+    "recent_members_card_title": "Recent Members",
+    "no_members": "No members created yet.",
+    "new_member_button": "New Member",
+    "quick_access_card_title": "Quick Access",
+    "quick_create_member": "Create New Member",
+    "quick_create_parcel": "Create New Parcel",
+    "quick_export_members_csv": "Export Members as CSV",
+    "quick_export_parcels_csv": "Export Parcels as CSV",
+    "quick_manage_users": "Manage Users",
+    "quick_api_docs": "API Documentation (Swagger)"
   }
 }
