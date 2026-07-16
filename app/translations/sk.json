@@ -406,7 +406,9 @@
       "col_old_value": "Staršia hodnota",
       "col_new_value": "Nová hodnota",
       "col_changed_by": "Zmenil",
-      "unknown_author": "Neznámy"
+      "unknown_author": "Neznámy",
+      "no_member_matches": "Žiadne výsledky",
+      "select_member_from_list": "Vyberte prosím člena zo zoznamu"
     }
   },
   "parcels_assignment_form": {

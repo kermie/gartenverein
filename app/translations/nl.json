@@ -406,7 +406,9 @@
       "col_old_value": "Oude waarde",
       "col_new_value": "Nieuwe waarde",
       "col_changed_by": "Gewijzigd door",
-      "unknown_author": "Onbekend"
+      "unknown_author": "Onbekend",
+      "no_member_matches": "Geen resultaten",
+      "select_member_from_list": "Selecteer een lid uit de lijst"
     }
   },
   "parcels_assignment_form": {

@@ -406,7 +406,9 @@
       "col_old_value": "Old value",
       "col_new_value": "New value",
       "col_changed_by": "Changed by",
-      "unknown_author": "Unknown"
+      "unknown_author": "Unknown",
+      "no_member_matches": "No matches",
+      "select_member_from_list": "Please select a member from the list"
     }
   },
   "parcels_assignment_form": {

@@ -147,6 +147,9 @@ async def parzelle_detail(
         .order_by(Member.last_name, Member.first_name)
     )
     alle_mitglieder = mitglieder_result.scalars().all()
+    # Kompakte Liste für das durchsuchbare Auswahlfeld im Template
+    # (JSON-serialisierbar, statt in Jinja mit map/zip zu jonglieren)
+    alle_mitglieder_json = [{"id": m.id, "name": m.full_name} for m in alle_mitglieder]
 
     # Änderungshistorie der Feldwerte
     aenderungen_result = await db.execute(
@@ -167,6 +170,7 @@ async def parzelle_detail(
             "user": user,
             "parcel": parcel,
             "alle_mitglieder": alle_mitglieder,
+            "alle_mitglieder_json": alle_mitglieder_json,
             "aenderungen": aenderungen,
             "ParcelStatus": ParcelStatus,
         },

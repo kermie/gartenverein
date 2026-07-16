@@ -122,13 +122,15 @@
             </div>
             <div class="card-footer">
                 <form method="post" action="/parcels/{{ parcel.id }}/member/assign"
-                      class="d-flex gap-2 flex-wrap align-items-center">
-                    <select name="mitglied_id" class="form-select form-select-sm" style="max-width: 220px;" required>
-                        <option value="">{{ t('parcels.detail.select_member_placeholder') }}</option>
-                        {% for m in alle_mitglieder %}
-                        <option value="{{ m.id }}">{{ m.full_name }}</option>
-                        {% endfor %}
-                    </select>
+                      class="d-flex gap-2 flex-wrap align-items-center" id="form-assign-member">
+                    <div class="position-relative" style="max-width: 220px;">
+                        <input type="text" id="assign-member-search" class="form-control form-control-sm"
+                               placeholder="{{ t('parcels.detail.select_member_placeholder') }}"
+                               autocomplete="off" required>
+                        <input type="hidden" name="member_id" id="assign-member-id">
+                        <div id="assign-member-results" class="list-group position-absolute w-100"
+                             style="z-index: 1000; max-height: 220px; overflow-y: auto; display: none; top: 100%;"></div>
+                    </div>
                     <input type="date" name="assigned_from" class="form-control form-control-sm" style="max-width: 150px;" placeholder="Datum">
                     <button type="submit" class="btn btn-sm btn-primary">
                         <i class="bi bi-plus-lg me-1"></i>{{ t('parcels.detail.assign_button') }}
@@ -137,6 +139,82 @@
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Suchbares Member-Auswahlfeld statt einer langen <select>-Liste
+        // (wird mit vielen Mitgliedern schnell unbenutzbar). Die
+        // eigentlich übermittelte ID steckt im versteckten Feld
+        // #assign-member-id -- das Textfeld ist reine Anzeige/Suche.
+        var alleMitglieder = {{ alle_mitglieder_json | tojson }};
+        var searchInput = document.getElementById('assign-member-search');
+        var hiddenId = document.getElementById('assign-member-id');
+        var resultsBox = document.getElementById('assign-member-results');
+        var form = document.getElementById('form-assign-member');
+
+        function renderResults(query) {
+            var q = query.trim().toLowerCase();
+            if (!q) {
+                resultsBox.style.display = 'none';
+                resultsBox.innerHTML = '';
+                return;
+            }
+            var matches = alleMitglieder.filter(function (m) {
+                return m.name.toLowerCase().indexOf(q) !== -1;
+            }).slice(0, 8);
+
+            if (matches.length === 0) {
+                resultsBox.innerHTML = '<div class="list-group-item text-muted" style="font-size: 0.85rem;">{{ t("parcels.detail.no_member_matches") }}</div>';
+                resultsBox.style.display = 'block';
+                return;
+            }
+
+            resultsBox.innerHTML = matches.map(function (m) {
+                return '<button type="button" class="list-group-item list-group-item-action" ' +
+                       'style="font-size: 0.88rem;" data-id="' + m.id + '" data-name="' +
+                       m.name.replace(/"/g, '&quot;') + '">' + m.name + '</button>';
+            }).join('');
+            resultsBox.style.display = 'block';
+        }
+
+        searchInput.addEventListener('input', function () {
+            hiddenId.value = '';
+            renderResults(searchInput.value);
+        });
+
+        searchInput.addEventListener('focus', function () {
+            if (searchInput.value.trim()) renderResults(searchInput.value);
+        });
+
+        resultsBox.addEventListener('click', function (e) {
+            var btn = e.target.closest('button[data-id]');
+            if (!btn) return;
+            hiddenId.value = btn.getAttribute('data-id');
+            searchInput.value = btn.getAttribute('data-name');
+            resultsBox.style.display = 'none';
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('#assign-member-search') && !e.target.closest('#assign-member-results')) {
+                resultsBox.style.display = 'none';
+            }
+        });
+
+        form.addEventListener('submit', function (e) {
+            if (!hiddenId.value) {
+                e.preventDefault();
+                searchInput.setCustomValidity('{{ t("parcels.detail.select_member_from_list") }}');
+                searchInput.reportValidity();
+            } else {
+                searchInput.setCustomValidity('');
+            }
+        });
+
+        searchInput.addEventListener('input', function () {
+            searchInput.setCustomValidity('');
+        });
+    });
+    </script>
 
     <!-- Pächter-Historie -->
     {% set fruehere = parcel.member_assignments | selectattr('assigned_until') | list %}
