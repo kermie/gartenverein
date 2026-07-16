@@ -238,7 +238,7 @@
       "csv_import": "CSV Import",
       "csv_export": "CSV Export",
       "new_member": "Neues Mitglied",
-      "search_placeholder": "Nach Name oder Ort suchen…",
+      "search_placeholder": "Nach Name oder Parzellennummer suchen…",
       "show_inactive": "Inaktive anzeigen",
       "search_button": "Suchen",
       "reset_button": "Zurücksetzen",

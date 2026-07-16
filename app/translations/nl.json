@@ -238,7 +238,7 @@
       "csv_import": "CSV-import",
       "csv_export": "CSV-export",
       "new_member": "Nieuw lid",
-      "search_placeholder": "Zoek op naam of plaats…",
+      "search_placeholder": "Zoeken op naam of perceelnummer…",
       "show_inactive": "Toon inactieven",
       "search_button": "Zoeken",
       "reset_button": "Reset",

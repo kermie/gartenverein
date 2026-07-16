@@ -238,7 +238,7 @@
       "csv_import": "Import CSV",
       "csv_export": "Export CSV",
       "new_member": "Nouveau membre",
-      "search_placeholder": "Rechercher par nom ou ville…",
+      "search_placeholder": "Rechercher par nom ou numéro de parcelle…",
       "show_inactive": "Afficher les inactifs",
       "search_button": "Rechercher",
       "reset_button": "Réinitialiser",

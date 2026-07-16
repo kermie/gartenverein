@@ -59,11 +59,23 @@ async def mitglieder_liste(
         query = query.where(active_member_filter())
 
     if suche:
+        # Sucht nach Vor-/Nachname ODER Parzellennummer (aktuelle
+        # Zuordnungen -- wer JETZT auf dieser Parzelle wohnt, nicht die
+        # gesamte Historie). "Ort" wurde bewusst entfernt, da die Suche
+        # danach in der Praxis nicht genutzt wurde.
+        parzellen_treffer = (
+            select(MemberParcel.member_id)
+            .join(Parcel, MemberParcel.parcel_id == Parcel.id)
+            .where(
+                Parcel.plot_number.ilike(f"%{suche}%"),
+                MemberParcel.assigned_until.is_(None),
+            )
+        )
         query = query.where(
             or_(
                 Member.first_name.ilike(f"%{suche}%"),
                 Member.last_name.ilike(f"%{suche}%"),
-                Member.city.ilike(f"%{suche}%"),
+                Member.id.in_(parzellen_treffer),
             )
         )
 
