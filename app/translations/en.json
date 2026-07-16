@@ -42,7 +42,9 @@
     "invitation_sent": "Invitation sent",
     "own_account_cannot_deactivate": "Cannot deactivate your own account",
     "purchase_request_not_found": "Purchase request not found",
-    "requester_cannot_self_approve": "The requester may not approve their own purchase request (two-person approval principle)."
+    "requester_cannot_self_approve": "The requester may not approve their own purchase request (two-person approval principle).",
+    "page_title": "Error {code}",
+    "back_to_home": "Back to Home"
   },
   "tickets": {
     "overview": {
@@ -411,7 +413,8 @@
       "select_member_from_list": "Please select a member from the list",
       "delete_history_tooltip": "Delete entry",
       "delete_history_confirm": "Really delete this entry permanently? This cannot be undone.",
-      "cannot_delete_active_assignment": "An active assignment cannot be deleted -- please end the tenancy first."
+      "cannot_delete_active_assignment": "An active assignment cannot be deleted -- please end the tenancy first.",
+      "page_title": "Parcel {plot_number}"
     }
   },
   "parcels_assignment_form": {

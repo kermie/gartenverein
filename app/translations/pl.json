@@ -42,7 +42,9 @@
     "invitation_sent": "Zaproszenie wysłane",
     "own_account_cannot_deactivate": "Nie można dezaktywować własnego konta",
     "purchase_request_not_found": "Nie znaleziono wniosku zakupowego",
-    "requester_cannot_self_approve": "Wnioskodawca nie może sam zatwierdzić własnego wniosku zakupowego (zasada dwóch osób)."
+    "requester_cannot_self_approve": "Wnioskodawca nie może sam zatwierdzić własnego wniosku zakupowego (zasada dwóch osób).",
+    "page_title": "Błąd {code}",
+    "back_to_home": "Powrót do strony głównej"
   },
   "tickets": {
     "overview": {
@@ -411,7 +413,8 @@
       "select_member_from_list": "Proszę wybrać członka z listy",
       "delete_history_tooltip": "Usuń wpis",
       "delete_history_confirm": "Czy na pewno trwale usunąć ten wpis? Tej czynności nie można cofnąć.",
-      "cannot_delete_active_assignment": "Nie można usunąć aktywnego przypisania -- najpierw zakończ dzierżawę."
+      "cannot_delete_active_assignment": "Nie można usunąć aktywnego przypisania -- najpierw zakończ dzierżawę.",
+      "page_title": "Działka {plot_number}"
     }
   },
   "parcels_assignment_form": {

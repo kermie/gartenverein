@@ -42,7 +42,9 @@
     "invitation_sent": "Einladung gesendet",
     "own_account_cannot_deactivate": "Eigenes Konto nicht deaktivierbar",
     "purchase_request_not_found": "Einkaufswunsch nicht gefunden",
-    "requester_cannot_self_approve": "Der Antragsteller darf seinen eigenen Einkaufswunsch nicht mitfreigeben (Vier-Augen-Prinzip)."
+    "requester_cannot_self_approve": "Der Antragsteller darf seinen eigenen Einkaufswunsch nicht mitfreigeben (Vier-Augen-Prinzip).",
+    "page_title": "Fehler {code}",
+    "back_to_home": "Zur Startseite"
   },
   "tickets": {
     "overview": {
@@ -411,7 +413,8 @@
       "select_member_from_list": "Bitte ein Mitglied aus der Liste auswählen",
       "delete_history_tooltip": "Eintrag löschen",
       "delete_history_confirm": "Diesen Eintrag wirklich endgültig löschen? Das kann nicht rückgängig gemacht werden.",
-      "cannot_delete_active_assignment": "Eine aktive Zuordnung kann nicht gelöscht werden -- bitte zuerst die Pacht beenden."
+      "cannot_delete_active_assignment": "Eine aktive Zuordnung kann nicht gelöscht werden -- bitte zuerst die Pacht beenden.",
+      "page_title": "Parzelle {plot_number}"
     }
   },
   "parcels_assignment_form": {

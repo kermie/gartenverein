@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Parzelle {{ parcel.plot_number }}{% endblock %}
-{% block page_title %}Parzelle {{ parcel.plot_number }}{% endblock %}
+{% block title %}{{ t('parcels.detail.page_title', plot_number=parcel.plot_number) }}{% endblock %}
+{% block page_title %}{{ t('parcels.detail.page_title', plot_number=parcel.plot_number) }}{% endblock %}
 
 {% block topbar_actions %}
 <div class="d-flex gap-2">

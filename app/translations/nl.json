@@ -42,7 +42,9 @@
     "invitation_sent": "Uitnodiging verzonden",
     "own_account_cannot_deactivate": "Kan uw eigen account niet deactiveren",
     "purchase_request_not_found": "Aankoopaanvraag niet gevonden",
-    "requester_cannot_self_approve": "De aanvrager mag zijn eigen aankoopaanvraag niet goedkeuren (twee-personen goedkeuringsprincipe)."
+    "requester_cannot_self_approve": "De aanvrager mag zijn eigen aankoopaanvraag niet goedkeuren (twee-personen goedkeuringsprincipe).",
+    "page_title": "Fout {code}",
+    "back_to_home": "Terug naar startpagina"
   },
   "tickets": {
     "overview": {
@@ -411,7 +413,8 @@
       "select_member_from_list": "Selecteer een lid uit de lijst",
       "delete_history_tooltip": "Item verwijderen",
       "delete_history_confirm": "Dit item echt permanent verwijderen? Dit kan niet ongedaan worden gemaakt.",
-      "cannot_delete_active_assignment": "Een actieve toewijzing kan niet worden verwijderd -- beëindig eerst de huur."
+      "cannot_delete_active_assignment": "Een actieve toewijzing kan niet worden verwijderd -- beëindig eerst de huur.",
+      "page_title": "Perceel {plot_number}"
     }
   },
   "parcels_assignment_form": {

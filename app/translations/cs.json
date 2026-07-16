@@ -42,7 +42,9 @@
     "invitation_sent": "Pozvánka odeslána",
     "own_account_cannot_deactivate": "Nelze deaktivovat vlastní účet",
     "purchase_request_not_found": "Žádost o nákup nebyla nalezena",
-    "requester_cannot_self_approve": "Žadatel nemůže schválit vlastní žádost o nákup (princip schvalování dvěma osobami)."
+    "requester_cannot_self_approve": "Žadatel nemůže schválit vlastní žádost o nákup (princip schvalování dvěma osobami).",
+    "page_title": "Chyba {code}",
+    "back_to_home": "Zpět na úvodní stránku"
   },
   "tickets": {
     "overview": {
@@ -411,7 +413,8 @@
       "select_member_from_list": "Vyberte prosím člena ze seznamu",
       "delete_history_tooltip": "Smazat záznam",
       "delete_history_confirm": "Opravdu trvale smazat tento záznam? Tuto akci nelze vrátit zpět.",
-      "cannot_delete_active_assignment": "Aktivní přiřazení nelze smazat -- nejprve ukončete nájem."
+      "cannot_delete_active_assignment": "Aktivní přiřazení nelze smazat -- nejprve ukončete nájem.",
+      "page_title": "Zahrádka {plot_number}"
     }
   },
   "parcels_assignment_form": {

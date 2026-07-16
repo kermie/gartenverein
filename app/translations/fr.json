@@ -42,7 +42,9 @@
     "invitation_sent": "Invitation envoyée",
     "own_account_cannot_deactivate": "Impossible de désactiver votre propre compte",
     "purchase_request_not_found": "Demande d'achat non trouvée",
-    "requester_cannot_self_approve": "Le demandeur ne peut pas approuver sa propre demande d'achat (principe d'approbation à deux personnes)."
+    "requester_cannot_self_approve": "Le demandeur ne peut pas approuver sa propre demande d'achat (principe d'approbation à deux personnes).",
+    "page_title": "Erreur {code}",
+    "back_to_home": "Retour à l'accueil"
   },
   "tickets": {
     "overview": {
@@ -411,7 +413,8 @@
       "select_member_from_list": "Veuillez sélectionner un membre dans la liste",
       "delete_history_tooltip": "Supprimer l'entrée",
       "delete_history_confirm": "Vraiment supprimer définitivement cette entrée ? Cette action est irréversible.",
-      "cannot_delete_active_assignment": "Une affectation active ne peut pas être supprimée -- veuillez d'abord mettre fin au bail."
+      "cannot_delete_active_assignment": "Une affectation active ne peut pas être supprimée -- veuillez d'abord mettre fin au bail.",
+      "page_title": "Parcelle {plot_number}"
     }
   },
   "parcels_assignment_form": {
