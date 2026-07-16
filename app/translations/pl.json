@@ -408,7 +408,10 @@
       "col_changed_by": "Zmienione przez",
       "unknown_author": "Nieznany",
       "no_member_matches": "Brak wyników",
-      "select_member_from_list": "Proszę wybrać członka z listy"
+      "select_member_from_list": "Proszę wybrać członka z listy",
+      "delete_history_tooltip": "Usuń wpis",
+      "delete_history_confirm": "Czy na pewno trwale usunąć ten wpis? Tej czynności nie można cofnąć.",
+      "cannot_delete_active_assignment": "Nie można usunąć aktywnego przypisania -- najpierw zakończ dzierżawę."
     }
   },
   "parcels_assignment_form": {

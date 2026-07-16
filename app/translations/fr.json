@@ -408,7 +408,10 @@
       "col_changed_by": "Modifié par",
       "unknown_author": "Inconnu",
       "no_member_matches": "Aucun résultat",
-      "select_member_from_list": "Veuillez sélectionner un membre dans la liste"
+      "select_member_from_list": "Veuillez sélectionner un membre dans la liste",
+      "delete_history_tooltip": "Supprimer l'entrée",
+      "delete_history_confirm": "Vraiment supprimer définitivement cette entrée ? Cette action est irréversible.",
+      "cannot_delete_active_assignment": "Une affectation active ne peut pas être supprimée -- veuillez d'abord mettre fin au bail."
     }
   },
   "parcels_assignment_form": {

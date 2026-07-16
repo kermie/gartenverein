@@ -408,7 +408,10 @@
       "col_changed_by": "Changed by",
       "unknown_author": "Unknown",
       "no_member_matches": "No matches",
-      "select_member_from_list": "Please select a member from the list"
+      "select_member_from_list": "Please select a member from the list",
+      "delete_history_tooltip": "Delete entry",
+      "delete_history_confirm": "Really delete this entry permanently? This cannot be undone.",
+      "cannot_delete_active_assignment": "An active assignment cannot be deleted -- please end the tenancy first."
     }
   },
   "parcels_assignment_form": {

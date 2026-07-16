@@ -408,7 +408,10 @@
       "col_changed_by": "Změnil",
       "unknown_author": "Neznámý",
       "no_member_matches": "Žádné výsledky",
-      "select_member_from_list": "Vyberte prosím člena ze seznamu"
+      "select_member_from_list": "Vyberte prosím člena ze seznamu",
+      "delete_history_tooltip": "Smazat záznam",
+      "delete_history_confirm": "Opravdu trvale smazat tento záznam? Tuto akci nelze vrátit zpět.",
+      "cannot_delete_active_assignment": "Aktivní přiřazení nelze smazat -- nejprve ukončete nájem."
     }
   },
   "parcels_assignment_form": {

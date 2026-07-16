@@ -247,6 +247,17 @@
                                        class="btn btn-sm btn-outline-secondary border-0" title="{{ t('parcels.detail.edit_period_tooltip') }}">
                                         <i class="bi bi-pencil"></i>
                                     </a>
+                                    {% if user.role.value in ['admin', 'board'] %}
+                                    <form method="post"
+                                          action="/parcels/{{ parcel.id }}/member/{{ z.id }}/delete-history"
+                                          class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                                onclick="return confirm('{{ t('parcels.detail.delete_history_confirm') }}')"
+                                                title="{{ t('parcels.detail.delete_history_tooltip') }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

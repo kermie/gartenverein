@@ -408,7 +408,10 @@
       "col_changed_by": "Geändert von",
       "unknown_author": "Unbekannt",
       "no_member_matches": "Keine Treffer",
-      "select_member_from_list": "Bitte ein Mitglied aus der Liste auswählen"
+      "select_member_from_list": "Bitte ein Mitglied aus der Liste auswählen",
+      "delete_history_tooltip": "Eintrag löschen",
+      "delete_history_confirm": "Diesen Eintrag wirklich endgültig löschen? Das kann nicht rückgängig gemacht werden.",
+      "cannot_delete_active_assignment": "Eine aktive Zuordnung kann nicht gelöscht werden -- bitte zuerst die Pacht beenden."
     }
   },
   "parcels_assignment_form": {

@@ -16,7 +16,7 @@ from app.database import get_db, active_member_filter
 from app.models import (
     Parcel, ParcelStatus, MemberParcel, Member, ChangeHistory
 )
-from app.auth import require_user
+from app.auth import require_user, require_admin
 from app.i18n import t_for
 from app.change_tracker import ChangeTracker
 
@@ -388,6 +388,44 @@ async def mitglied_entfernen(
     if zuordnung and zuordnung.assigned_until is None:
         zuordnung.assigned_until = date.today()
         await db.commit()
+    return RedirectResponse(f"/parcels/{parcel_id}", status_code=302)
+
+
+@router.post("/{parcel_id}/member/{assignment_id}/delete-history")
+async def fruehere_zuordnung_loeschen(
+    parcel_id: str,
+    assignment_id: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Löscht einen historischen (bereits beendeten) Pächter-Eintrag
+    vollständig aus der Datenbank -- anders als /remove oben, das nur
+    assigned_until setzt und die Historie bewusst erhält. Für echte
+    Datenpflege (Tippfehler bei der Zuordnung, versehentliche
+    Doppelzuordnung o.ä.), nicht für den normalen "Pächterwechsel".
+    Admin/Board only. Nur für bereits beendete Zuordnungen (assigned_until
+    gesetzt) -- eine aktive Zuordnung muss zuerst über /remove beendet
+    werden, damit dieser Endpunkt nicht als Umgehung dafür dient.
+    """
+    await require_admin(request, db)
+    result = await db.execute(
+        select(MemberParcel).where(
+            MemberParcel.id == assignment_id,
+            MemberParcel.parcel_id == parcel_id,
+        )
+    )
+    zuordnung = result.scalar_one_or_none()
+    if not zuordnung:
+        raise HTTPException(status_code=404, detail="Zuordnung nicht gefunden")
+    if zuordnung.assigned_until is None:
+        raise HTTPException(
+            status_code=400,
+            detail=t_for(request, "parcels.detail.cannot_delete_active_assignment"),
+        )
+
+    await db.delete(zuordnung)
+    await db.commit()
     return RedirectResponse(f"/parcels/{parcel_id}", status_code=302)
 
 
