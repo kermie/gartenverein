@@ -321,6 +321,9 @@
       "delete_confirm": "Echt {name} verwijderen?",
       "button_delete": "Lid verwijderen",
       "deleted_message": "{name} verwijderd."
+    },
+    "errors": {
+      "member_not_found": "Lid niet gevonden"
     }
   },
   "parcels": {
@@ -415,6 +418,10 @@
       "delete_history_confirm": "Dit item echt permanent verwijderen? Dit kan niet ongedaan worden gemaakt.",
       "cannot_delete_active_assignment": "Een actieve toewijzing kan niet worden verwijderd -- beëindig eerst de huur.",
       "page_title": "Perceel {plot_number}"
+    },
+    "errors": {
+      "parcel_not_found": "Perceel niet gevonden",
+      "assignment_not_found": "Toewijzing niet gevonden"
     }
   },
   "parcels_assignment_form": {
@@ -512,6 +519,9 @@
       "col_total": "Totaal",
       "yes": "Ja",
       "empty": "Geen verzekerde percelen voor {year}."
+    },
+    "errors": {
+      "parcel_not_found": "Perceel niet gevonden"
     }
   },
   "purchase_requests": {

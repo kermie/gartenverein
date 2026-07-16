@@ -321,6 +321,9 @@
       "delete_confirm": "Vraiment supprimer {name} ?",
       "button_delete": "Supprimer le membre",
       "deleted_message": "{name} supprimé."
+    },
+    "errors": {
+      "member_not_found": "Membre introuvable"
     }
   },
   "parcels": {
@@ -415,6 +418,10 @@
       "delete_history_confirm": "Vraiment supprimer définitivement cette entrée ? Cette action est irréversible.",
       "cannot_delete_active_assignment": "Une affectation active ne peut pas être supprimée -- veuillez d'abord mettre fin au bail.",
       "page_title": "Parcelle {plot_number}"
+    },
+    "errors": {
+      "parcel_not_found": "Parcelle introuvable",
+      "assignment_not_found": "Affectation introuvable"
     }
   },
   "parcels_assignment_form": {
@@ -512,6 +519,9 @@
       "col_total": "Total",
       "yes": "Oui",
       "empty": "Aucune parcelle assurée pour {year}."
+    },
+    "errors": {
+      "parcel_not_found": "Parcelle introuvable"
     }
   },
   "purchase_requests": {

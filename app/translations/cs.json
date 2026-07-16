@@ -321,6 +321,9 @@
       "delete_confirm": "Opravdu smazat {name}?",
       "button_delete": "Smazat člena",
       "deleted_message": "{name} smazán."
+    },
+    "errors": {
+      "member_not_found": "Člen nenalezen"
     }
   },
   "parcels": {
@@ -415,6 +418,10 @@
       "delete_history_confirm": "Opravdu trvale smazat tento záznam? Tuto akci nelze vrátit zpět.",
       "cannot_delete_active_assignment": "Aktivní přiřazení nelze smazat -- nejprve ukončete nájem.",
       "page_title": "Zahrádka {plot_number}"
+    },
+    "errors": {
+      "parcel_not_found": "Zahrádka nenalezena",
+      "assignment_not_found": "Přiřazení nenalezeno"
     }
   },
   "parcels_assignment_form": {
@@ -512,6 +519,9 @@
       "col_total": "Celkem",
       "yes": "Ano",
       "empty": "Žádné pojištěné parcely pro {year}."
+    },
+    "errors": {
+      "parcel_not_found": "Zahrádka nenalezena"
     }
   },
   "purchase_requests": {

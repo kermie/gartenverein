@@ -321,6 +321,9 @@
       "delete_confirm": "{name} wirklich löschen?",
       "button_delete": "Mitglied löschen",
       "deleted_message": "{name} gelöscht."
+    },
+    "errors": {
+      "member_not_found": "Member nicht gefunden"
     }
   },
   "parcels": {
@@ -415,6 +418,10 @@
       "delete_history_confirm": "Diesen Eintrag wirklich endgültig löschen? Das kann nicht rückgängig gemacht werden.",
       "cannot_delete_active_assignment": "Eine aktive Zuordnung kann nicht gelöscht werden -- bitte zuerst die Pacht beenden.",
       "page_title": "Parzelle {plot_number}"
+    },
+    "errors": {
+      "parcel_not_found": "Parcel nicht gefunden",
+      "assignment_not_found": "Zuordnung nicht gefunden"
     }
   },
   "parcels_assignment_form": {
@@ -512,6 +519,9 @@
       "col_total": "Gesamt",
       "yes": "Ja",
       "empty": "Keine versicherten Parzellen für {year}."
+    },
+    "errors": {
+      "parcel_not_found": "Parcel nicht gefunden"
     }
   },
   "purchase_requests": {

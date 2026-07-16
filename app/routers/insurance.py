@@ -15,6 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
+from app.i18n import t_for
 from app.models import (
     PropertyInsurancePackage, InsuranceConfiguration, ParcelInsurance,
     AccidentInsuranceAdditionalPerson, Parcel, ParcelStatus, MemberParcel, Member,
@@ -319,7 +320,7 @@ async def insurance_detail(
     )
     parcel = parcel_result.scalar_one_or_none()
     if not parcel:
-        raise HTTPException(status_code=404, detail="Parcel nicht gefunden")
+        raise HTTPException(status_code=404, detail=t_for(request, "insurance.errors.parcel_not_found"))
 
     configuration = await _get_configuration(db, year)
     packages = await _get_packages(db, year)

@@ -146,7 +146,7 @@ async def mitglied_detail(
     member = await _get_member_mit_details(db, member_id)
 
     if not member:
-        raise HTTPException(status_code=404, detail="Member nicht gefunden")
+        raise HTTPException(status_code=404, detail=t_for(request, "members.errors.member_not_found"))
 
     # Alle aktiven Parzellen für Zuordnung
     parzellen_result = await db.execute(
@@ -175,7 +175,7 @@ async def mitglied_bearbeiten_seite(
     member = await _get_member_mit_details(db, member_id)
 
     if not member:
-        raise HTTPException(status_code=404, detail="Member nicht gefunden")
+        raise HTTPException(status_code=404, detail=t_for(request, "members.errors.member_not_found"))
 
     return templates.TemplateResponse(
         "members/form.html",
@@ -245,7 +245,7 @@ async def mitglied_loeschen(
     member = await _get_member_mit_details(db, member_id)
 
     if not member:
-        raise HTTPException(status_code=404, detail="Member nicht gefunden")
+        raise HTTPException(status_code=404, detail=t_for(request, "members.errors.member_not_found"))
 
     member.deleted_at = datetime.now(timezone.utc)
     await db.commit()

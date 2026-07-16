@@ -321,6 +321,9 @@
       "delete_confirm": "Really delete {name}?",
       "button_delete": "Delete Member",
       "deleted_message": "{name} deleted."
+    },
+    "errors": {
+      "member_not_found": "Member not found"
     }
   },
   "parcels": {
@@ -415,6 +418,10 @@
       "delete_history_confirm": "Really delete this entry permanently? This cannot be undone.",
       "cannot_delete_active_assignment": "An active assignment cannot be deleted -- please end the tenancy first.",
       "page_title": "Parcel {plot_number}"
+    },
+    "errors": {
+      "parcel_not_found": "Parcel not found",
+      "assignment_not_found": "Assignment not found"
     }
   },
   "parcels_assignment_form": {
@@ -512,6 +519,9 @@
       "col_total": "Total",
       "yes": "Yes",
       "empty": "No insured parcels for {year}."
+    },
+    "errors": {
+      "parcel_not_found": "Parcel not found"
     }
   },
   "purchase_requests": {

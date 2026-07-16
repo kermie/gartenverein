@@ -321,6 +321,9 @@
       "delete_confirm": "Czy na pewno usunąć {name}?",
       "button_delete": "Usuń członka",
       "deleted_message": "{name} usunięty."
+    },
+    "errors": {
+      "member_not_found": "Nie znaleziono członka"
     }
   },
   "parcels": {
@@ -415,6 +418,10 @@
       "delete_history_confirm": "Czy na pewno trwale usunąć ten wpis? Tej czynności nie można cofnąć.",
       "cannot_delete_active_assignment": "Nie można usunąć aktywnego przypisania -- najpierw zakończ dzierżawę.",
       "page_title": "Działka {plot_number}"
+    },
+    "errors": {
+      "parcel_not_found": "Nie znaleziono działki",
+      "assignment_not_found": "Nie znaleziono przypisania"
     }
   },
   "parcels_assignment_form": {
@@ -512,6 +519,9 @@
       "col_total": "Razem",
       "yes": "Tak",
       "empty": "Brak ubezpieczonych działek dla {year}."
+    },
+    "errors": {
+      "parcel_not_found": "Nie znaleziono działki"
     }
   },
   "purchase_requests": {

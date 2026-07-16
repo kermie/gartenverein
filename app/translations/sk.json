@@ -321,6 +321,9 @@
       "delete_confirm": "Naozaj zmazať {name}?",
       "button_delete": "Zmazať člena",
       "deleted_message": "{name} zmazaný."
+    },
+    "errors": {
+      "member_not_found": "Člen nenájdený"
     }
   },
   "parcels": {
@@ -415,6 +418,10 @@
       "delete_history_confirm": "Naozaj natrvalo zmazať tento záznam? Túto akciu nie je možné vrátiť späť.",
       "cannot_delete_active_assignment": "Aktívne priradenie nie je možné zmazať -- najprv ukončite nájom.",
       "page_title": "Záhradka {plot_number}"
+    },
+    "errors": {
+      "parcel_not_found": "Záhradka nenájdená",
+      "assignment_not_found": "Priradenie nenájdené"
     }
   },
   "parcels_assignment_form": {
@@ -512,6 +519,9 @@
       "col_total": "Celkom",
       "yes": "Áno",
       "empty": "Žiadne poistené parcely pre {year}."
+    },
+    "errors": {
+      "parcel_not_found": "Záhradka nenájdená"
     }
   },
   "purchase_requests": {

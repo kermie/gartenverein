@@ -138,7 +138,7 @@ async def parzelle_detail(
     parcel = await _get_parcel_mit_details(db, parcel_id)
 
     if not parcel:
-        raise HTTPException(status_code=404, detail="Parcel nicht gefunden")
+        raise HTTPException(status_code=404, detail=t_for(request, "parcels.errors.parcel_not_found"))
 
     # Alle Mitglieder für Zuordnung
     mitglieder_result = await db.execute(
@@ -323,7 +323,7 @@ async def mitglied_zuordnung_bearbeiten_seite(
     )
     zuordnung = result.scalar_one_or_none()
     if not zuordnung:
-        raise HTTPException(status_code=404, detail="Zuordnung nicht gefunden")
+        raise HTTPException(status_code=404, detail=t_for(request, "parcels.errors.assignment_not_found"))
 
     parcel = await _get_parcel_mit_details(db, parcel_id)
 
@@ -356,7 +356,7 @@ async def mitglied_zuordnung_aktualisieren(
     )
     zuordnung = result.scalar_one_or_none()
     if not zuordnung:
-        raise HTTPException(status_code=404, detail="Zuordnung nicht gefunden")
+        raise HTTPException(status_code=404, detail=t_for(request, "parcels.errors.assignment_not_found"))
 
     zuordnung.assigned_from = date.fromisoformat(assigned_from) if assigned_from.strip() else None
     zuordnung.assigned_until = date.fromisoformat(assigned_until) if assigned_until.strip() else None
@@ -417,7 +417,7 @@ async def fruehere_zuordnung_loeschen(
     )
     zuordnung = result.scalar_one_or_none()
     if not zuordnung:
-        raise HTTPException(status_code=404, detail="Zuordnung nicht gefunden")
+        raise HTTPException(status_code=404, detail=t_for(request, "parcels.errors.assignment_not_found"))
     if zuordnung.assigned_until is None:
         raise HTTPException(
             status_code=400,
