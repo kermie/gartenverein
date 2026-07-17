@@ -942,6 +942,12 @@ class TicketMessage(Base):
     )
     direction: Mapped[MessageDirection] = mapped_column(SAEnum(MessageDirection), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    # Nur für INCOMING-Nachrichten gesetzt, deren E-Mail einen text/html-Teil
+    # hatte -- bereits bereinigt (siehe app/html_sanitizer.py) BEVOR es hier
+    # gespeichert wird, damit es sicher mit {{ ... | safe }} gerendert werden
+    # kann. `content` bleibt daneben immer die reine Textversion (Suche,
+    # Benachrichtigungen, Fallback-Anzeige, falls kein HTML-Teil vorhanden war).
+    content_html: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     authored_by_id: Mapped[Optional[str]] = mapped_column(
         String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )

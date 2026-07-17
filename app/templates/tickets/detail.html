@@ -2,6 +2,20 @@
 {% block title %}{{ ticket.subject }}{% endblock %}
 {% block page_title %}{{ ticket.subject }}{% endblock %}
 
+{% block extra_head %}
+<style>
+    /* Alle Attribute (style=, class=) werden beim Bereinigen entfernt
+       (siehe app/html_sanitizer.py) -- diese Regeln sorgen dafür, dass
+       eingebettete Tabellen/Listen/Links trotzdem vernünftig aussehen,
+       statt komplett ungestyled zu wirken. */
+    .email-html-body table { border-collapse: collapse; max-width: 100%; }
+    .email-html-body td, .email-html-body th { border: 1px solid #e5e7eb; padding: 0.35rem 0.5rem; }
+    .email-html-body a { color: var(--gv-gruen); }
+    .email-html-body blockquote { border-left: 3px solid #d1d5db; margin-left: 0; padding-left: 0.75rem; color: #6b7280; }
+    .email-html-body p:last-child { margin-bottom: 0; }
+</style>
+{% endblock %}
+
 {% block topbar_actions %}
 <a href="/tickets/" class="btn btn-sm btn-outline-secondary">
     <i class="bi bi-arrow-left me-1"></i>{{ t('common.back') }}
@@ -37,7 +51,11 @@
                         </span>
                         <span class="text-muted" style="font-size: 0.78rem;">{{ n.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
                     </div>
+                    {% if n.content_html %}
+                    <div class="email-html-body" style="font-size: 0.9rem; overflow-x: auto;">{{ n.content_html | sanitize_html | safe }}</div>
+                    {% else %}
                     <div style="white-space: pre-wrap; font-size: 0.9rem;">{{ n.content }}</div>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>

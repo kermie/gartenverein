@@ -119,14 +119,42 @@ with the same subject), the fallback is to search open tickets by sender
 address + normalized subject (with the "Re:"/"Fwd:" prefix stripped). If
 no match is found, a new ticket is created.
 
-**Closed tickets automatically reopen on a new reply** -- the status
-jumps back to `ASSIGNED` (if still assigned) or `UNASSIGNED`.
+**Any incoming reply reactivates the ticket** -- CLOSED, POSTPONED, or
+WAITING all jump back to `ASSIGNED` (if still assigned) or `ACTIVE`. A
+reply from the sender ends whatever "we're waiting" state the ticket was
+in, regardless of which one it was (see the ticket-status ADR entry for
+the full status set).
 
 **Spam checking is already called, even though it's still a no-op.**
 `pruefe_auf_spam()` from stage 1 is already called for every incoming
 email, and the result is stored in `spam_suspected`/`spam_score` -- only
 the actual check logic is still empty. In stage 3, therefore, only this
 one function needs to be swapped out, with no changes to callers.
+
+**HTML emails are sanitized and rendered properly, not just stripped
+to plain text.** `TicketMessage.content` stays plain text (search,
+notifications, and the fallback display for emails with no HTML part).
+For emails that do have a `text/html` part, that HTML is additionally
+sanitized (see `app/html_sanitizer.py`) and stored in
+`TicketMessage.content_html`, then rendered directly on the ticket
+detail page. This matters because the content comes from an arbitrary
+external sender -- anyone can email the ticket inbox -- so this is a
+textbook stored-XSS surface if handled carelessly. The sanitizer:
+strips `<script>`/`<style>` tags **and their content** (bleach's own
+tag-stripping keeps inner text, which is wrong specifically for these
+two), allows only a small set of formatting tags (no `<img>`, to avoid
+both tracking pixels and the `onerror=` attack vector), strips all
+`style=`/`class=` attributes entirely (no CSS-based tricks like hidden
+text), restricts link protocols to `http`/`https`/`mailto` (blocks
+`javascript:` URLs), and forces external links to
+`target="_blank" rel="noopener noreferrer"`. Sanitization happens once
+at ingestion (before anything is written to the database), plus a
+second pass via a `sanitize_html` Jinja filter at render time as a cheap
+defense-in-depth safety net, in case a future code path ever renders
+this content without going through the same ingestion path. Historical
+messages received before this feature only have `content` (plain text)
+-- there was no way to recover the original HTML after the fact, since
+it was never stored.
 
 ## Data model (stage 1)
 
@@ -145,21 +173,30 @@ anyway (e.g. with a real "extended board" role). A separate ticket
 permission system would only have complicated that extension.
 
 **Status as an explicit state machine**, not implicitly derived from the
-assignment:
-```
-UNASSIGNED -> ASSIGNED -> CLOSED
-     ↘ DEFERRED (until date) ↗
-```
-When a ticket is assigned, the status automatically jumps to `ASSIGNED`;
-when the assignment is cleared, it goes back to `UNASSIGNED`.
+assignment. Originally just four states
+(`UNASSIGNED -> ASSIGNED -> CLOSED`, with `DEFERRED` as a side branch);
+redesigned later into six (`ACTIVE`, `ASSIGNED`, `WAITING`, `POSTPONED`,
+`CLOSED`, `DELETED`) at the association's request -- see the ticket-status
+ADR entry in `docs/architecture-decisions.md` for the full reasoning
+(why `WAITING` exists as a distinct state from `POSTPONED`, why
+`DELETED` is a status rather than a `deleted_at` column here, and the
+bulk-actions UI that came with it). When a ticket is assigned, the
+status automatically jumps to `ASSIGNED`; when the assignment is
+cleared, it goes back to `ACTIVE`.
 
-**"Deferred until" is purely computed, not a background job.** A ticket
-with status `DEFERRED` whose date has been reached is not automatically
-switched to another status in the database. Instead, the `Ticket.is_due`
-property computes this live on every view (`status == DEFERRED and
-deferred_until <= today`). This avoids a background job that would only
-exist for this purpose -- the one background job that's actually needed
-(email polling) arrives in stage 2 anyway.
+**"Postponed until" is a real status flip, not just a computed
+display.** Earlier, `DEFERRED` was purely computed on every view
+(`status == DEFERRED and deferred_until <= today`) without ever writing
+anything back -- meaning a "deferred" ticket stayed visible in the active
+list the whole time, just with a badge once overdue. That didn't match
+what the association actually wanted (invisible until the date, then
+genuinely active again), so a `POSTPONED` ticket is now lazily flipped
+to `ACTIVE`/`ASSIGNED` for real -- writing to the database -- the next
+time anyone loads the ticket list or that ticket's detail page (see
+`_reaktiviere_faellige_tickets()` in `app/routers/tickets.py`). Still no
+background job -- just triggered by normal page loads instead of a
+purely computed property, which is enough in practice since staff check
+the ticket list regularly anyway.
 
 **Member matching by email address is deliberately cautious.** Similar to
 the accident-insurance logic: if the sender address can be **uniquely**

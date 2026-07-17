@@ -37,6 +37,7 @@ from app.models import ClubSetting, Ticket, TicketMessage, TicketStatus, Message
 from app.email_service import lade_smtp_konfiguration
 from app.ticket_utils import find_members_by_email
 from app.spam_filter import pruefe_auf_spam
+from app.html_sanitizer import sanitize_email_html
 
 logger = logging.getLogger(__name__)
 
@@ -144,13 +145,45 @@ def _extract_text(msg) -> str:
                 payload = part.get_payload(decode=True)
                 if payload:
                     html = _safe_decode(payload, part.get_content_charset())
+                    # <script>/<style>-Inhalt zuerst komplett entfernen (nicht nur
+                    # die Tags) -- sonst landet z.B. CSS-Code sichtbar im Fallback-Text.
+                    html = re.sub(r"<(script|style)[^>]*>.*?</\1>", "", html, flags=re.IGNORECASE | re.DOTALL)
                     return re.sub(r"<[^>]+>", "", html).strip()
         return ""
     else:
         payload = msg.get_payload(decode=True)
-        if payload:
-            return _safe_decode(payload, msg.get_content_charset())
-        return ""
+        if not payload:
+            return ""
+        text = _safe_decode(payload, msg.get_content_charset())
+        if msg.get_content_type() == "text/html":
+            # Einzelteilige (nicht-multipart) HTML-Mail -- gleiche
+            # Tag-Bereinigung wie im multipart-Fall oben, sonst landet
+            # rohes Markup im reinen Text-Fallback (z.B. CSV-Export,
+            # Suchindex, oder als letzter Ausweg falls content_html mal
+            # leer sein sollte).
+            text = re.sub(r"<(script|style)[^>]*>.*?</\1>", "", text, flags=re.IGNORECASE | re.DOTALL)
+            text = re.sub(r"<[^>]+>", "", text).strip()
+        return text
+
+
+def _extract_html(msg) -> Optional[str]:
+    """Gibt den rohen (noch NICHT bereinigten) text/html-Teil einer E-Mail
+    zurück, falls vorhanden -- sonst None. Aufrufer ist dafür verantwortlich,
+    das Ergebnis über sanitize_email_html() zu bereinigen, BEVOR es
+    gespeichert oder gerendert wird (siehe app/html_sanitizer.py)."""
+    if msg.is_multipart():
+        for part in msg.walk():
+            if part.get_content_type() == "text/html" and not part.get("Content-Disposition"):
+                payload = part.get_payload(decode=True)
+                if payload:
+                    return _safe_decode(payload, part.get_content_charset())
+        return None
+    else:
+        if msg.get_content_type() == "text/html":
+            payload = msg.get_payload(decode=True)
+            if payload:
+                return _safe_decode(payload, msg.get_content_charset())
+        return None
 
 
 def _fetch_highest_uid_sync(config: Dict[str, Any]) -> int:
@@ -231,6 +264,7 @@ def _fetch_new_mails_sync(config: Dict[str, Any], last_uid: Optional[int]) -> Li
                 "from_name": from_name.strip(),
                 "subject": subject.strip() or "(ohne Betreff)",
                 "text": _extract_text(msg).strip(),
+                "html": _extract_html(msg),
             })
 
         return results
@@ -373,6 +407,7 @@ async def process_incoming_mails(db: AsyncSession) -> int:
             ticket_id=ticket.id,
             direction=MessageDirection.INCOMING,
             content=mail["text"] or "(kein Textinhalt)",
+            content_html=sanitize_email_html(mail["html"]) if mail.get("html") else None,
             message_id=mail["message_id"] or None,
             in_reply_to=mail["in_reply_to"] or None,
         ))
