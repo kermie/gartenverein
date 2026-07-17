@@ -9,7 +9,13 @@
 </div>
 {% endif %}
 
-<form method="post" action="/admin/settings">
+<div class="d-flex justify-content-end mb-3">
+    <button type="submit" form="settings-form" class="btn btn-primary">
+        <i class="bi bi-check-lg me-1"></i>{{ t('admin.settings.save_button') }}
+    </button>
+</div>
+
+<form method="post" action="/admin/settings" id="settings-form">
 <div class="row g-3">
 
     <div class="col-12">
