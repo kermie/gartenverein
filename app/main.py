@@ -229,22 +229,14 @@ async def startseite(request: Request):
         )
         recent_members = neueste_result.scalars().all()
 
-        # Offene Einkaufswünsche fürs Dashboard -- nur relevant, wenn das
-        # Modul überhaupt aktiv ist (siehe request.state.module_flags im
+        # Für die Dashboard-Kachel "Offene Einkaufswünsche" -- nur relevant,
+        # wenn das Modul aktiv ist (siehe request.state.module_flags im
         # Template), aber die Abfrage kostet nichts, wenn leer/deaktiviert.
         purchase_requests_open_count = await db.scalar(
             select(func.count()).select_from(PurchaseRequest).where(
                 PurchaseRequest.status == PurchaseRequestStatus.OPEN
             )
         )
-        offene_ekw_result = await db.execute(
-            select(PurchaseRequest)
-            .options(selectinload(PurchaseRequest.requested_by))
-            .where(PurchaseRequest.status == PurchaseRequestStatus.OPEN)
-            .order_by(PurchaseRequest.created_at.desc())
-            .limit(5)
-        )
-        recent_purchase_requests = offene_ekw_result.scalars().all()
 
     stats = {
         "mitglieder_gesamt": members_total or 0,
@@ -263,7 +255,6 @@ async def startseite(request: Request):
             "user": user,
             "stats": stats,
             "neueste_mitglieder": recent_members,
-            "offene_einkaufswuensche": recent_purchase_requests,
         },
     )
 

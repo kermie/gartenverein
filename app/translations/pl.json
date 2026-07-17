@@ -1061,8 +1061,6 @@
     "quick_manage_users": "Zarządzaj użytkownikami",
     "quick_api_docs": "Dokumentacja API (Swagger)",
     "purchase_requests_card_title": "Otwarte wnioski zakupowe",
-    "purchase_requests_empty": "Brak otwartych wniosków zakupowych.",
-    "purchase_requests_view_all": "Pokaż wszystkie",
-    "purchase_requests_new_button": "Nowy wniosek zakupowy"
+    "purchase_requests_suffix": "oczekuje na zatwierdzenie"
   }
 }

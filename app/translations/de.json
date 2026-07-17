@@ -1061,8 +1061,6 @@
     "quick_manage_users": "Benutzer verwalten",
     "quick_api_docs": "API-Dokumentation (Swagger)",
     "purchase_requests_card_title": "Offene Einkaufswünsche",
-    "purchase_requests_empty": "Keine offenen Einkaufswünsche.",
-    "purchase_requests_view_all": "Alle anzeigen",
-    "purchase_requests_new_button": "Neuer Einkaufswunsch"
+    "purchase_requests_suffix": "warten auf Freigabe"
   }
 }
