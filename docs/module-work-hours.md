@@ -24,6 +24,7 @@ member_club_roles         – member -> club role assignment (year-based)
 work_sessions             – standard and special sessions
 session_participations    – who attended which session, with hours
 sponsorships              – area responsibilities (flat-rate credit)
+work_tasks                – task backlog, optionally scheduled/assigned
 ```
 
 ## Key decisions
@@ -65,12 +66,42 @@ credit.
 remain freely editable (e.g. in case a sponsorship takes more effort than
 the standard requirement).
 
+**Tasks track a workload label, deliberately nothing about the person.**
+The task backlog (`work_tasks`) has a three-stage lifecycle, each stage
+optional: backlog (no session yet) -> scheduled (tied to a specific work
+session) -> assigned (tied to one specific participant who signed up for
+that session). Every task carries a `workload` (Light / Moderate /
+Demanding) so whoever coordinates a session can hand out appropriately
+matched work -- but that's the *only* thing the system tracks. There is
+no field anywhere for a member's age, health, or ability, and no
+automated matching of any kind; the actual pairing of task to person is
+a manual judgment call made by the coordinator, who knows the people
+involved. Rescheduling a task to a different session (or back to the
+backlog) automatically clears any participant assignment, since an
+assignment only makes sense for the session that person actually signed
+up for -- enforced identically in the web UI and the REST API, with the
+API additionally rejecting outright any attempt to assign a task to a
+participant of a session other than the one it's currently scheduled to.
+
 ## Known pitfalls
 
 - `SessionType` and `ParticipationStatus` had to be corrected to uppercase
   after the fact (like several other enums) -- see
   [Architecture Decisions](./architecture-decisions.md) for the full
   explanation of this recurring bug.
+- `session_detail.html` crashed with a 500 error for *any* session with
+  at least one participant, for a long time -- a `sort(attribute=...)`
+  filter referenced the old German attribute name (`mitglied.last_name`)
+  from before the identifier rename instead of `member.last_name`. Found
+  and fixed while building the task-assignment feature, since assigning
+  a task to a participant meant actually loading that page with real
+  participants for the first time in a while.
+- When adding `work_tasks` via a migration, an explicit `CREATE TYPE`
+  statement before `op.create_table(...)` failed with "type already
+  exists" -- `sa.Enum(...)` used directly in a column definition inside
+  `create_table` already creates the Postgres enum type automatically.
+  Matches the pattern already used by every other enum column in this
+  project's migrations; no separate `CREATE TYPE` needed.
 
 ## REST API
 
@@ -79,4 +110,17 @@ endpoints for this module (JWT-authenticated, see `/api/docs`). See the
 README for the endpoint overview. Background: early modules were
 initially built as web UI only, with the API added later -- since then
 the rule is that every new module gets **both** the web UI and API
-endpoints **from the start** (see Architecture Decisions).
+endpoints **from the start** (see Architecture Decisions). The `tasks`
+endpoints followed this rule from the start when they were added.
+
+One current limitation worth knowing if you're integrating against
+`PUT /api/v1/work-hours/tasks/{id}`: `TaskUpdate.session_id` can't
+distinguish "this field wasn't sent" from "this field was explicitly
+set to null" -- both arrive as Python `None`. To send a task back to
+the backlog via the API, send an empty string (`"session_id": ""`)
+rather than JSON `null`. Proper PATCH sentinel semantics would fix this
+cleanly but felt like over-engineering for what's currently a single
+field with this ambiguity; revisit if it becomes a real integration
+pain point.
+
+

@@ -1,4 +1,4 @@
-# Parcella
+# Gartenmanager
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.12-blue)](https://python.org)
@@ -34,17 +34,23 @@ version publicly available. Details and contribution guidelines in
 - ✅ Invitation system (no public sign-up)
 - ✅ Role system: Admin, Board, Treasurer, Read-only
 - ✅ Member management (core data, multiple phone numbers, multiple email
-  addresses, IBAN)
+  addresses, IBAN, soft delete for Admin/Board)
 - ✅ Parcel management (status: active/terminated/deleted, area, termination)
-- ✅ Many-to-many member ↔ parcel assignment (primary/co-tenant, multiple
-  parcels per member)
+- ✅ Many-to-many member ↔ parcel assignment, multiple parcels per member;
+  every resident of a parcel is held jointly responsible, with no
+  hierarchy between them
 - ✅ CSV export and import (members, parcels) with duplicate detection
 - ✅ Club settings (A/B/C area sizes, SMTP configuration)
-- ✅ Dashboard with live statistics (members, parcels, areas)
+- ✅ Dashboard with live statistics (members, parcels, areas, plus open
+  purchase requests and open tickets when those modules are enabled)
 - ✅ Work-hours system (year-based configuration, configurable per parcel
   or per member)
 - ✅ Work sessions (standard and special), participant management with
   hours tracking
+- ✅ Task backlog for work sessions: create tasks, optionally schedule
+  to a session, optionally assign to a specific signed-up participant
+  (workload label only -- no member ability/health data stored, task
+  matching stays a manual coordinator decision)
 - ✅ Sponsorships (flat-rate hour credit for area coordinators)
 - ✅ Club roles / extended board with work-hours exemption
 - ✅ Annual work-hours report with CSV export
@@ -52,16 +58,23 @@ version publicly available. Details and contribution guidelines in
   consumption reports)
 - ✅ Property and accident insurance tracking per parcel, with annual
   report
-- ✅ Ticket system with automatic member matching, spam heuristics, and
-  IMAP inbox polling
+- ✅ Ticket system with automatic member matching, spam heuristics, IMAP
+  inbox polling, six explicit statuses (Active/Assigned/Waiting/
+  Postponed/Closed/Deleted), bulk status-change and bulk-assign from the
+  ticket list, and safely rendered HTML emails (allowlist-based
+  sanitization, no tracking pixels, no script execution)
 - ✅ Purchase requests with a two-person approval principle (two distinct
   board members must approve before a purchase is made)
 - ✅ REST API with JWT authentication and Swagger documentation
 - ✅ Database migrations via Alembic
+- ✅ Custom club branding: upload your own logo and set your club's
+  display name from Admin -> Settings, replacing the default tree icon
+  and "Gartenverein" placeholder everywhere in the sidebar
 - ✅ i18n: 7 languages (German, English, Polish, Czech, Slovak, French,
   Dutch), one language per installation, switchable in admin settings,
   every module and the navigation fully translated. JSON translation
-  catalogs, English as the runtime fallback for any missing key.
+  catalogs, English as the base/authoring language and the runtime
+  fallback for any missing key.
 - ✅ l10n: region and currency are independent settings from language
   (e.g. an English-language UI can still show German number formatting
   and EUR). Number and money formatting via Babel (correct
@@ -69,7 +82,9 @@ version publicly available. Details and contribution guidelines in
   region); address display order adapts per region (continental
   postcode-before-city vs. UK-style postcode-last).
 - ✅ Responsive/mobile layout: off-canvas navigation on narrow screens,
-  wide tables scroll independently of the page
+  wide tables scroll independently of the page; sidebar module groups
+  behave as an accordion (only one open at a time) to stay usable as
+  more modules get added
 
 ## Planned (next phases)
 
@@ -188,6 +203,7 @@ for convenient testing.
 | GET/PUT | `/api/v1/work-hours/configuration/{year}` | Work-hours configuration |
 | GET/POST/PUT/DELETE | `/api/v1/work-hours/club-roles` | Club roles + assignments |
 | GET/POST/PUT/DELETE | `/api/v1/work-hours/sessions` | Work sessions + participations |
+| GET/POST/PUT/DELETE | `/api/v1/work-hours/tasks` | Task backlog, scheduling, assignment |
 | GET/POST/PUT/DELETE | `/api/v1/work-hours/sponsorships` | Sponsorships |
 | GET | `/api/v1/work-hours/evaluation/{year}` | Annual report |
 | GET/POST/PUT/DELETE | `/api/v1/water/metering-points` | Water metering points + meters |

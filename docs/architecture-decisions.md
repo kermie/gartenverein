@@ -637,3 +637,58 @@ the area anyway.
 **German is not going away as a supported language** -- this is purely
 about which language the *source* is written in and read from; `de.json`
 remains one of the seven fully-supported UI languages, same as before.
+
+## Work tasks: a workload label, not a member-ability field
+
+**Context:** the feature request was explicit that tasks should be
+matchable to the right person -- specifically calling out that elderly
+or disabled members should get lighter work while younger, stronger
+members handle more demanding tasks. The tempting, "obvious" way to
+build that is a field on the Member record (age already exists via
+`date_of_birth`; a new field for health/ability/mobility would complete
+the picture) and some matching logic that uses it.
+
+**Decision: the system stores none of that.** `WorkTask.workload` is a
+plain three-value label (Light / Moderate / Demanding) describing the
+*task*, never the person. There's no field anywhere recording a
+member's health, ability, or any reason they might need lighter work,
+and no automated suggestion or matching logic at all -- assigning a task
+to a participant is a single manual dropdown selection made by whoever
+is coordinating that session.
+
+**Why:** the actual judgment of who's suited to which task belongs to a
+human who knows the person -- their health, their preferences on a given
+day, whether they mentioned a bad back last week -- none of which
+belongs in a database record, and none of which this software could
+reason about responsibly even if it were stored. A stored "ability"
+field would also inevitably drift out of date, and worse, would frame a
+volunteer's capability as a fixed data point rather than something they
+get to communicate for themselves each time. The workload label on the
+*task* solves the actual coordination problem (knowing at a glance which
+jobs are light) without creating a sensitive, easily-stale, and
+easily-misused attribute on a person.
+
+## Custom club branding: logo and name from settings
+
+**Context:** the software is meant for adoption by any allotment-garden
+association, not just the one it was originally built for -- a
+hardcoded "Gartenverein" name and a fixed tree icon in the sidebar
+doesn't fit that goal.
+
+**Decision:** two things, loaded once per request via a new middleware
+(`app/branding.py`), following the exact same pattern already
+established for language, module flags, and region/currency
+(`request.state.club_name` / `request.state.logo_url`, available on
+every page without any router needing to fetch them individually):
+- The club's display name reuses the existing `verein_name` ClubSetting
+  (already used for the address block) rather than introducing a
+  second, redundant name field.
+- A new `logo_filename` ClubSetting, paired with an actual uploaded
+  image file under `app/static/uploads/logo.<ext>` -- validated
+  (allowed image types, 2MB limit) and always saved under a fixed name
+  so re-uploading a different file type cleanly replaces the old one
+  rather than leaving it orphaned but still reachable.
+
+Falls back to "Gartenverein" and the default tree icon when nothing's
+configured, so a fresh install doesn't look broken before an admin sets
+things up.
