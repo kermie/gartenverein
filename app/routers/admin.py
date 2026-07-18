@@ -18,6 +18,7 @@ from app.i18n import AVAILABLE_LANGUAGES, t_for
 from app.l10n import AVAILABLE_REGIONS, AVAILABLE_CURRENCIES
 from app.branding import save_logo_upload, remove_logo_file
 from app.config import settings
+from app.public_api_auth import get_or_create_public_api_token, regenerate_public_api_token
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 from app.templating import templates
@@ -199,6 +200,7 @@ MODULE_FELDER = [
     ("modul_tickets", "admin.settings.modules.tickets_name", "admin.settings.modules.tickets_desc"),
     ("modul_purchase_requests", "admin.settings.modules.purchase_requests_name", "admin.settings.modules.purchase_requests_desc"),
     ("modul_calendar", "admin.settings.modules.calendar_name", "admin.settings.modules.calendar_desc"),
+    ("modul_public_signup_api", "admin.settings.modules.public_signup_api_name", "admin.settings.modules.public_signup_api_desc"),
 ]
 
 
@@ -344,3 +346,35 @@ async def einstellungen_speichern(
     if logo_error:
         return RedirectResponse(f"/admin/settings?logo_error={logo_error}", status_code=302)
     return RedirectResponse("/admin/settings?erfolg=1", status_code=302)
+
+
+# ---------------------------------------------------------------------------
+# Integrations: public signup API for external CMS connectors (WordPress,
+# TYPO3, Contao, ...). See docs/module-public-api.md and app/routers/api_public.py.
+# A dedicated page rather than a field on the settings page, matching the
+# calendar module's ICS-token hub -- a shared secret is sensitive enough to
+# warrant its own explicit "yes, show/regenerate this" screen.
+# ---------------------------------------------------------------------------
+
+@router.get("/integrations", response_class=HTMLResponse)
+async def integrations_seite(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await require_admin(request, db)
+    token = await get_or_create_public_api_token(db)
+
+    result = await db.execute(select(ClubSetting).where(ClubSetting.key == "modul_public_signup_api"))
+    entry = result.scalar_one_or_none()
+    modul_aktiv = (entry.value.strip().lower() in ("true", "1", "ja", "an")) if entry else False
+
+    return templates.TemplateResponse("admin/integrations.html", {
+        "request": request, "user": user,
+        "api_token": token,
+        "modul_aktiv": modul_aktiv,
+        "base_url": str(request.base_url).rstrip("/"),
+    })
+
+
+@router.post("/integrations/regenerate-token")
+async def integrations_token_neu(request: Request, db: AsyncSession = Depends(get_db)):
+    await require_admin(request, db)
+    await regenerate_public_api_token(db)
+    return RedirectResponse("/admin/integrations?erfolg=1", status_code=302)

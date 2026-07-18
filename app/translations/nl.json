@@ -34,7 +34,8 @@
     "calendar_community": "Verenigingskalender",
     "calendar_birthdays": "Verjaardagen",
     "calendar_council_presence": "Aanwezigheid bestuur",
-    "calendar_council_absence": "Afwezigheid bestuur"
+    "calendar_council_absence": "Afwezigheid bestuur",
+    "integrations": "Integraties"
   },
   "errors": {
     "ticket_not_found": "Ticket niet gevonden",
@@ -238,7 +239,9 @@
         "purchase_requests_name": "Aankoopaanvragen",
         "purchase_requests_desc": "Twee-personen goedkeuringsprincipe voor verenigingsuitgaven: aanvragen indienen, door twee bestuursleden laten goedkeuren of afwijzen.",
         "calendar_name": "Kalender",
-        "calendar_desc": "Verenigingskalender (vergaderingen, inspecties, werksessies), verjaardagen van leden en aanwezigheid/afwezigheid van het bestuur, elk met ICS-export. Schakel uit als je vereniging dit niet nodig heeft."
+        "calendar_desc": "Verenigingskalender (vergaderingen, inspecties, werksessies), verjaardagen van leden en aanwezigheid/afwezigheid van het bestuur, elk met ICS-export. Schakel uit als je vereniging dit niet nodig heeft.",
+        "public_signup_api_name": "Publieke aanmeld-API",
+        "public_signup_api_desc": "Laat een externe website (bijv. een WordPress-plugin) aanmeldingen voor werkbeurten indienen zonder Parcella-login. Standaard uitgeschakeld omdat dit een publiek schrijf-eindpunt opent; het toegangstoken staat op de pagina Integraties."
       },
       "region_header": "Regio",
       "region_help": "Bepaalt het getal- en adresformaat (bijv. duizendtalscheidingsteken, volgorde van postcode en plaats). Onafhankelijk van de interfacetaal.",
@@ -249,6 +252,24 @@
       "logo_remove_label": "Logo verwijderen (terug naar het standaardicoon)",
       "logo_error_type": "Ongeldig bestandstype. Upload een PNG-, JPEG-, WebP- of SVG-bestand.",
       "logo_error_size": "Het bestand is te groot (maximaal 2 MB)."
+    },
+    "integrations": {
+      "title": "Integraties",
+      "token_regenerated": "Er is een nieuw API-token gegenereerd. Werk alle gekoppelde websites bij met de nieuwe waarde.",
+      "module_disabled_notice": "De publieke aanmeld-API is momenteel uitgeschakeld, dus deze eindpunten zijn niet bereikbaar.",
+      "module_disabled_link": "Inschakelen bij Instellingen",
+      "public_signup_api_title": "Publieke aanmeld-API",
+      "public_signup_api_desc": "Laat elk CMS (WordPress, TYPO3, Contao of je eigen website) via een kleine connector aanmeldingen voor werkbeurten indienen, zonder dat leden hoeven in te loggen bij Parcella. Een referentie-WordPress-plugin staat in de integrations-map van het project.",
+      "token_label": "API-token",
+      "regenerate_button": "Opnieuw genereren",
+      "regenerate_confirm": "Het opnieuw genereren van het token maakt elke connector die nog het oude token gebruikt, direct onbruikbaar. Doorgaan?",
+      "regenerate_hint": "Opnieuw genereren maakt het huidige token direct ongeldig. Werk daarna alle gekoppelde websites bij.",
+      "endpoints_label": "Eindpunten",
+      "endpoint_method": "Methode",
+      "endpoint_url": "URL",
+      "endpoint_auth": "Authenticatie",
+      "auth_none": "Geen (publiek leesbaar)",
+      "wordpress_hint": "Een referentie-WordPress-connectorplugin staat in de map integrations/wordpress van het project."
     }
   },
   "members": {
@@ -973,7 +994,15 @@
       "add_button": "Toevoegen",
       "tasks_card_title": "Taken",
       "manage_tasks_link": "Taken beheren",
-      "no_tasks": "Voor deze sessie zijn nog geen taken ingepland."
+      "no_tasks": "Voor deze sessie zijn nog geen taken ingepland.",
+      "public_signups_card_title": "Publieke aanmeldingen",
+      "col_parcel": "Perceel",
+      "col_name": "Naam",
+      "col_contact": "Contact",
+      "col_remarks": "Opmerkingen",
+      "no_public_signups": "Nog geen aanmeldingen via het publieke formulier.",
+      "remove_public_signup_confirm": "Deze publieke aanmelding van de werkbeurt verwijderen?",
+      "public_signups_hint": "Ingediend via de publieke aanmeld-API (bijv. het formulier op de verenigingswebsite). Om deze uren aan een lid toe te schrijven in het jaaroverzicht, voeg het lid hierboven ook als reguliere deelnemer toe."
     },
     "session_form": {
       "title_edit": "Sessie bewerken",

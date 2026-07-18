@@ -1,0 +1,60 @@
+DELIVERY NOTES -- Public Signup API, round 3
+==============================================
+
+Unzip directly into the repo root. No new migration this round --
+these are template/router/schema changes only, `web` just needs a
+restart (or will hot-reload if you're already running with --reload).
+
+## What was actually going on
+
+Your earlier submission DID work -- I confirmed the row was really
+written to public_session_signups in the DB. The problem was that I'd
+built the API and never built anywhere in Parcella's own web UI to
+*see* that data. That's now fixed (see below). Sorry for the gap --
+should have been part of the first delivery.
+
+## Fix 1: Public signups now visible in the web UI
+
+New "Public Signups" card on each session's detail page
+(Work Hours -> a session -> scroll below Participants), showing parcel
+number, name, phone/email, remarks, with a remove button per entry.
+Separate from the regular participations table, since a public signup
+identifies by parcel, not necessarily a Member.
+
+If you want a signup's hours credited to a specific member's annual
+total, add that member as a regular participant too from the same
+page (existing "add participant" form at the bottom of the
+Participants card) -- there's no automatic link between a public
+signup and a real participation; see docs/module-public-api.md for why.
+
+## Fix 2 (clarification, not a new bug): phone/email fields still showing
+
+That's the plugin defaulting both fields to visible for backward
+compatibility with anyone else using it. To hide them on your site:
+WordPress admin -> Settings -> Parcella Connector -> uncheck "Show
+phone number field" / "Show email address field" -> Save Changes.
+If you already tried that and they're still showing, let me know --
+that would be an actual bug, not expected behavior, and I'll dig in
+(possible browser cache of the page is worth ruling out first: hard
+refresh or check in a private/incognito window).
+
+## What's new / changed since the previous delivery
+
+- app/routers/work_hours.py: session detail route now also loads
+  public signups for that session
+- app/templates/work_hours/session_detail.html: new "Public Signups"
+  card + remove button
+- New route: POST /work-hours/sessions/{id}/public-signups/{link_id}/remove
+  (removes the signup's link to *this* session only; a submission can
+  cover several sessions. Cleans up the underlying signup row
+  automatically once it has no sessions left linked to it)
+- All 7 translation files: 8 new keys (1082 -> 1090), matched
+- docs/module-work-hours.md and docs/module-public-api.md updated
+
+## Verified before packaging
+
+- Full test suite: 36/36 passing
+- Live smoke test: submitted a real public signup, confirmed it
+  appeared on the session detail page, confirmed the remove button
+  correctly removes it and the page falls back to the
+  "no signups yet" message

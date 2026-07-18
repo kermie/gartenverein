@@ -14,6 +14,7 @@ decisions and reasoning are still fresh.
 - [Ticket System](./module-tickets.md) -- support tickets, all 3 stages complete
 - [Purchase Requests](./module-purchase-requests.md) -- two-person approval principle for club expenses
 - [Calendar](./module-calendar.md) -- community calendar, birthdays, council presence/absence, ICS export
+- [Public Signup API](./module-public-api.md) -- CMS-agnostic public API for external site connectors (WordPress plugin included)
 
 ## Cross-cutting topics
 
@@ -33,7 +34,10 @@ Architecture Decisions for details):
 2. Migration in `migrations/versions/`, revision name under 32 characters
 3. Router with `dependencies=[Depends(require_modul("<name>"))]` -- both
    the web UI and the REST API from the start (API-first rule)
-4. Entry in `app/module_flags.py` (`MODULE_DEFAULTS`)
+4. Entry in `app/module_flags.py` (`MODULE_DEFAULTS`) -- default `True`
+   unless the module opens a new public/unauthenticated attack surface
+   (e.g. a public write endpoint), in which case default `False` and
+   require an explicit opt-in (see the public signup API for why)
 5. Entry in `app/routers/admin.py` (`MODULE_FELDER`) for the enable/disable UI
 6. Navigation block in `app/templates/base.html` as a collapsible `nav-group`
 7. If the module has something worth a headline number (open items, a

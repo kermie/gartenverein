@@ -37,6 +37,7 @@ from app.routers.metering import erstelle_metering_router
 from app.models import MeteringMedium
 from app.routers import api_auth, api_members, api_parcels, api_club_settings, api_stats
 from app.routers import api_work_hours, api_insurance, api_tickets, api_purchase_requests
+from app.routers import api_public
 from app.routers.api_metering import erstelle_metering_api_router
 
 logging.basicConfig(level=logging.INFO)
@@ -198,6 +199,7 @@ app.include_router(api_work_hours.router)
 app.include_router(api_insurance.router)
 app.include_router(api_tickets.router)
 app.include_router(api_purchase_requests.router)
+app.include_router(api_public.router)
 
 api_water_router = erstelle_metering_api_router(MeteringMedium.WATER, "/water", "water")
 api_electricity_router = erstelle_metering_api_router(MeteringMedium.ELECTRICITY, "/electricity", "electricity")

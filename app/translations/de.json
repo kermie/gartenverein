@@ -34,7 +34,8 @@
     "calendar_community": "Vereinskalender",
     "calendar_birthdays": "Geburtstage",
     "calendar_council_presence": "Vorstandspräsenz",
-    "calendar_council_absence": "Vorstandsabwesenheit"
+    "calendar_council_absence": "Vorstandsabwesenheit",
+    "integrations": "Integrationen"
   },
   "errors": {
     "ticket_not_found": "Ticket nicht gefunden",
@@ -238,7 +239,9 @@
         "purchase_requests_name": "Einkaufswünsche",
         "purchase_requests_desc": "Vier-Augen-Prinzip für Vereinsausgaben: Anträge stellen, von zwei Vorstandsmitgliedern freigeben oder ablehnen lassen.",
         "calendar_name": "Kalender",
-        "calendar_desc": "Vereinskalender (Versammlungen, Begehungen, Arbeitseinsätze), Mitglieder-Geburtstage sowie Vorstandspräsenz/-abwesenheit, jeweils mit ICS-Export. Deaktivieren, falls Ihr Verein das nicht benötigt."
+        "calendar_desc": "Vereinskalender (Versammlungen, Begehungen, Arbeitseinsätze), Mitglieder-Geburtstage sowie Vorstandspräsenz/-abwesenheit, jeweils mit ICS-Export. Deaktivieren, falls Ihr Verein das nicht benötigt.",
+        "public_signup_api_name": "Öffentliche Anmelde-API",
+        "public_signup_api_desc": "Ermöglicht einer externen Website (z. B. einem WordPress-Plugin), Anmeldungen zu Arbeitseinsätzen ohne Parcella-Login einzureichen. Standardmäßig deaktiviert, da dies einen öffentlichen Schreib-Endpunkt öffnet; das Zugriffs-Token findest du auf der Seite Integrationen."
       },
       "region_header": "Region",
       "region_help": "Bestimmt Zahlen- und Adressformat (z.B. Tausendertrennzeichen, Reihenfolge von PLZ und Ort). Unabhängig von der Oberflächensprache.",
@@ -249,6 +252,24 @@
       "logo_remove_label": "Logo entfernen (zurück zum Standard-Symbol)",
       "logo_error_type": "Ungültiger Dateityp. Bitte PNG, JPEG, WebP oder SVG hochladen.",
       "logo_error_size": "Die Datei ist zu groß (maximal 2 MB)."
+    },
+    "integrations": {
+      "title": "Integrationen",
+      "token_regenerated": "Ein neues API-Token wurde erzeugt. Aktualisiere alle verbundenen Websites mit dem neuen Wert.",
+      "module_disabled_notice": "Die öffentliche Anmelde-API ist derzeit deaktiviert, die Endpunkte sind daher nicht erreichbar.",
+      "module_disabled_link": "In den Einstellungen aktivieren",
+      "public_signup_api_title": "Öffentliche Anmelde-API",
+      "public_signup_api_desc": "Ermöglicht es jedem CMS (WordPress, TYPO3, Contao oder der eigenen Website), über einen kleinen Connector Anmeldungen zu Arbeitseinsätzen einzureichen, ohne dass Mitglieder einen Parcella-Login benötigen. Ein Referenz-WordPress-Plugin liegt im integrations-Ordner des Projekts.",
+      "token_label": "API-Token",
+      "regenerate_button": "Neu erzeugen",
+      "regenerate_confirm": "Das Neu-Erzeugen des Tokens macht jeden Connector, der noch das alte Token verwendet, sofort ungültig. Fortfahren?",
+      "regenerate_hint": "Beim Neu-Erzeugen wird das aktuelle Token sofort ungültig. Aktualisiere danach alle verbundenen Websites.",
+      "endpoints_label": "Endpunkte",
+      "endpoint_method": "Methode",
+      "endpoint_url": "URL",
+      "endpoint_auth": "Authentifizierung",
+      "auth_none": "Keine (öffentlich lesbar)",
+      "wordpress_hint": "Ein Referenz-WordPress-Connector-Plugin liegt im Ordner integrations/wordpress des Projekts."
     }
   },
   "members": {
@@ -973,7 +994,15 @@
       "add_button": "Hinzufügen",
       "tasks_card_title": "Aufgaben",
       "manage_tasks_link": "Aufgaben verwalten",
-      "no_tasks": "Für diesen Einsatz sind noch keine Aufgaben eingeplant."
+      "no_tasks": "Für diesen Einsatz sind noch keine Aufgaben eingeplant.",
+      "public_signups_card_title": "Öffentliche Anmeldungen",
+      "col_parcel": "Garten",
+      "col_name": "Name",
+      "col_contact": "Kontakt",
+      "col_remarks": "Anmerkungen",
+      "no_public_signups": "Noch keine Anmeldungen über das öffentliche Formular.",
+      "remove_public_signup_confirm": "Diese öffentliche Anmeldung vom Arbeitseinsatz entfernen?",
+      "public_signups_hint": "Über die öffentliche Anmelde-API eingereicht (z. B. über das Formular der Vereins-Website). Um diese Stunden einem Mitglied für die Jahresauswertung gutzuschreiben, oben zusätzlich als regulären Teilnehmer eintragen."
     },
     "session_form": {
       "title_edit": "Einsatz bearbeiten",

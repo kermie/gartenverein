@@ -15,6 +15,15 @@ exemption.
 
 Module flag: `work_hours` (see `app/module_flags.py`)
 
+`session_detail.html` also shows a "Public Signups" card listing
+submissions made via the public signup API (see
+`docs/module-public-api.md`) for that specific session -- separate from
+the member participations table above it, since a public signup
+identifies by parcel, not necessarily a Member. Removing one there only
+detaches it from *this* session (a submission can cover several); the
+underlying signup row is cleaned up automatically once it has no
+sessions left linked to it.
+
 ## Data model
 
 ```

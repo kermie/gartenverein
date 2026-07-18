@@ -736,3 +736,48 @@ if someone reused `build_community_calendar`'s public route pattern for
 a private feed by mistake) -- worth remembering if this module is
 extended: check which category any new feed belongs to *before* writing
 the route, not after.
+
+## Public signup API: CMS-agnostic contract, off-by-default, parcel identity not Member identity
+
+**Context:** clubs need external websites (typically WordPress, but
+potentially TYPO3, Contao, or anything else) to be able to create
+work-session signups in Parcella. The obvious anti-pattern to avoid: a
+WordPress-specific plugin that reimplements capacity checks, validation,
+and data storage on its own, with Parcella as an afterthought synced by
+hand.
+
+**Decision: a CMS-agnostic public HTTP contract; the WordPress plugin is
+just the first (and reference) client.** Three endpoints
+(`GET .../work-sessions/upcoming`, `GET .../parcels`,
+`POST .../work-sessions/signup`) under `/api/v1/public/`, documented in
+`docs/module-public-api.md`. All business logic -- capacity, matching,
+storage -- lives in Parcella. Any future CMS connector implements the
+same three calls; nothing about Parcella's side changes.
+
+**Off by default, unlike every other optional module.** Every entry in
+`MODULE_DEFAULTS` (`app/module_flags.py`) defaults to `True` so an
+upgrade doesn't silently remove functionality an existing club already
+relies on. `public_signup_api` is the one exception, defaulting to
+`False`: it's the only module that opens a public, unauthenticated-write
+HTTP endpoint, which is a security-relevant choice a club should make
+consciously, not one that should appear pre-enabled after a version
+bump.
+
+**Public signups identify by parcel, not by matching an existing
+Member.** Considered requiring the submitted name to match a real
+Member (which would let the signup become a proper
+`SessionParticipation`). Rejected: a partner, tenant, or helping
+neighbor filling out a public form isn't necessarily a Member record,
+and requiring a match would silently reject legitimate signups from
+exactly the people a work session most wants to reach. Tradeoff,
+documented in `docs/module-public-api.md`: these hours don't
+automatically count toward any individual's annual work-hours total --
+a board member has to enter that manually if a club wants it credited.
+
+**A dedicated shared API token, reusing the ICS-token shape rather than
+the member API's JWTs.** A CMS plugin is a server-side script, not a
+logged-in user -- there's no account for it to authenticate as. One
+regenerable shared secret per installation, mirroring
+`get_or_create_ics_token` almost exactly (see `app/public_api_auth.py`),
+keeps the auth story consistent across the whole codebase instead of
+inventing a fourth pattern.

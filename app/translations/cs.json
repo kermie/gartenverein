@@ -34,7 +34,8 @@
     "calendar_community": "Kalendář spolku",
     "calendar_birthdays": "Narozeniny",
     "calendar_council_presence": "Přítomnost výboru",
-    "calendar_council_absence": "Nepřítomnost výboru"
+    "calendar_council_absence": "Nepřítomnost výboru",
+    "integrations": "Integrace"
   },
   "errors": {
     "ticket_not_found": "Ticket nebyl nalezen",
@@ -238,7 +239,9 @@
         "purchase_requests_name": "Žádosti o nákup",
         "purchase_requests_desc": "Princip schvalování dvěma osobami pro výdaje spolku: předkládejte žádosti, nechte je schválit nebo zamítnout dvěma členy výboru.",
         "calendar_name": "Kalendář",
-        "calendar_desc": "Kalendář spolku (schůze, kontroly, pracovní směny), narozeniny členů a přítomnost/nepřítomnost výboru, každý s exportem ICS. Vypněte, pokud to váš spolek nepotřebuje."
+        "calendar_desc": "Kalendář spolku (schůze, kontroly, pracovní směny), narozeniny členů a přítomnost/nepřítomnost výboru, každý s exportem ICS. Vypněte, pokud to váš spolek nepotřebuje.",
+        "public_signup_api_name": "Veřejné API pro přihlášky",
+        "public_signup_api_desc": "Umožňuje externímu webu (např. pluginu WordPress) odesílat přihlášky na pracovní brigády bez přihlášení do Parcella. Ve výchozím nastavení vypnuto, protože otevírá veřejný zapisovací endpoint; přístupový token najdete na stránce Integrace."
       },
       "region_header": "Region",
       "region_help": "Určuje formát čísel a adresy (např. oddělovač tisíců, pořadí PSČ a města). Nezávisle na jazyce rozhraní.",
@@ -249,6 +252,24 @@
       "logo_remove_label": "Odstranit logo (zpět na výchozí ikonu)",
       "logo_error_type": "Neplatný typ souboru. Nahrajte prosím PNG, JPEG, WebP nebo SVG.",
       "logo_error_size": "Soubor je příliš velký (maximálně 2 MB)."
+    },
+    "integrations": {
+      "title": "Integrace",
+      "token_regenerated": "Byl vygenerován nový API token. Aktualizujte jím všechny propojené weby.",
+      "module_disabled_notice": "Veřejné API pro přihlášky je momentálně vypnuté, takže tyto endpointy nejsou dostupné.",
+      "module_disabled_link": "Zapnout v Nastavení",
+      "public_signup_api_title": "Veřejné API pro přihlášky",
+      "public_signup_api_desc": "Umožňuje jakémukoli CMS (WordPress, TYPO3, Contao nebo vlastnímu webu) odesílat přihlášky na pracovní brigády prostřednictvím malého konektoru, aniž by se členové museli přihlašovat do Parcella. Referenční plugin pro WordPress najdete ve složce integrations projektu.",
+      "token_label": "API token",
+      "regenerate_button": "Vygenerovat znovu",
+      "regenerate_confirm": "Opětovné vygenerování tokenu okamžitě znefunkční každý konektor, který stále používá starý token. Pokračovat?",
+      "regenerate_hint": "Opětovné vygenerování okamžitě zneplatní aktuální token. Poté aktualizujte všechny propojené weby.",
+      "endpoints_label": "Endpointy",
+      "endpoint_method": "Metoda",
+      "endpoint_url": "URL",
+      "endpoint_auth": "Autentizace",
+      "auth_none": "Žádná (veřejné čtení)",
+      "wordpress_hint": "Referenční konektorový plugin pro WordPress najdete ve složce integrations/wordpress projektu."
     }
   },
   "members": {
@@ -973,7 +994,15 @@
       "add_button": "Přidat",
       "tasks_card_title": "Úkoly",
       "manage_tasks_link": "Spravovat úkoly",
-      "no_tasks": "Pro tuto směnu zatím nejsou naplánovány žádné úkoly."
+      "no_tasks": "Pro tuto směnu zatím nejsou naplánovány žádné úkoly.",
+      "public_signups_card_title": "Veřejné přihlášky",
+      "col_parcel": "Zahrada",
+      "col_name": "Jméno",
+      "col_contact": "Kontakt",
+      "col_remarks": "Poznámky",
+      "no_public_signups": "Zatím žádné přihlášky přes veřejný formulář.",
+      "remove_public_signup_confirm": "Odstranit tuto veřejnou přihlášku z brigády?",
+      "public_signups_hint": "Odesláno přes veřejné API pro přihlášky (např. formulář na webu spolku). Chcete-li tyto hodiny započítat členovi do roční evaluace, přidejte ho výše navíc jako běžného účastníka."
     },
     "session_form": {
       "title_edit": "Upravit sezení",

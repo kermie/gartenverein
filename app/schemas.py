@@ -9,7 +9,7 @@ from datetime import date, datetime
 from typing import Optional, List
 from decimal import Decimal
 
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+from pydantic import BaseModel, EmailStr, ConfigDict, Field, field_validator
 
 from app.models import ParcelStatus, UserRole
 
@@ -646,3 +646,64 @@ class PurchaseRequestOut(BaseModel):
 
 class PurchaseRequestDetailOut(PurchaseRequestOut):
     approvals: List[PurchaseRequestApprovalOut] = []
+
+
+# ---------------------------------------------------------------------------
+# Public signup API (see app/routers/api_public.py) -- deliberately its own
+# small schema set, independent from WorkSessionOut/ParcelOut above: this is
+# an external, CMS-agnostic contract, so it should keep changing on its own
+# terms rather than accidentally following internal-API refactors.
+# ---------------------------------------------------------------------------
+
+class PublicWorkSessionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    title: str
+    date: date
+    time_from: Optional[str] = None
+    time_until: Optional[str] = None
+    spots_left: Optional[int] = Field(None, description="null = no capacity limit")
+
+
+class PublicParcelOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    plot_number: str
+
+
+class PublicSignupCreate(BaseModel):
+    parcel_number: str = Field(..., description="Plot number, e.g. 'G042', as shown on the parcel dropdown")
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[EmailStr] = None
+    remarks: Optional[str] = None
+    session_ids: List[str] = Field(..., min_length=1, description="One or more work session IDs from the upcoming-sessions listing")
+    # Honeypot: real visitors never see or fill this field (hidden via CSS
+    # in the reference WordPress connector). Left non-empty by simple bots
+    # that fill in every field they find. Not documented in the public API
+    # docs' example payload on purpose.
+    website: Optional[str] = Field(None, description="Leave empty")
+
+    @field_validator("name", "phone", "email", "remarks", "website", mode="before")
+    @classmethod
+    def blank_to_none(cls, value):
+        # HTML forms send empty optional fields as "", not absent -- most
+        # visibly a problem for `email`, where EmailStr rejects "" outright
+        # (a real bug hit via the WordPress connector: an untouched email
+        # field caused a 422 on every submission). Treating blank strings
+        # as "not provided" here fixes it for every connector, not just
+        # that one.
+        if isinstance(value, str) and value.strip() == "":
+            return None
+        return value
+
+
+class PublicSignupSessionResult(BaseModel):
+    session_id: str
+    accepted: bool
+    reason: Optional[str] = Field(None, description="Set when accepted=false, e.g. session full")
+
+
+class PublicSignupResult(BaseModel):
+    signup_id: Optional[str] = None
+    results: List[PublicSignupSessionResult]

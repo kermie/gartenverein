@@ -94,6 +94,12 @@ version publicly available. Details and contribution guidelines in
   the community calendar's feed is public (embeddable on your public
   website), the other three require a private access token since they
   contain more sensitive information
+- ✅ Public signup API: lets an external CMS (WordPress, TYPO3, Contao,
+  or anything else) submit work-session signups without a Parcella
+  login, identifying only by parcel number. Off by default (it opens a
+  public write endpoint) and protected by a regenerable shared token;
+  a reference WordPress connector plugin is included under
+  `integrations/wordpress/`
 
 ## Planned (next phases)
 
@@ -231,6 +237,9 @@ for convenient testing.
 | GET/POST | `/api/v1/purchase-requests` | List/create purchase requests |
 | POST | `/api/v1/purchase-requests/{id}/approve` | Approve (two distinct approvals needed) |
 | POST | `/api/v1/purchase-requests/{id}/reject` | Reject (single rejection is enough) |
+| GET | `/api/v1/public/work-sessions/upcoming` | Public, unauthenticated: upcoming sessions for external CMS forms |
+| GET | `/api/v1/public/parcels` | Public, unauthenticated: parcel list for external CMS forms |
+| POST | `/api/v1/public/work-sessions/signup` | Public signup, requires `X-Parcella-API-Token` header |
 
 Write access (POST/PUT/DELETE) requires the role `admin`, `board`, or
 `treasurer`. Read access is available to all authenticated users

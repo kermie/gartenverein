@@ -34,7 +34,8 @@
     "calendar_community": "Community Calendar",
     "calendar_birthdays": "Birthdays",
     "calendar_council_presence": "Council Presence",
-    "calendar_council_absence": "Council Absence"
+    "calendar_council_absence": "Council Absence",
+    "integrations": "Integrations"
   },
   "errors": {
     "ticket_not_found": "Ticket not found",
@@ -238,7 +239,9 @@
         "purchase_requests_name": "Purchase requests",
         "purchase_requests_desc": "Two-person approval principle for club expenses: submit requests, have them approved or rejected by two board members.",
         "calendar_name": "Calendar",
-        "calendar_desc": "Community calendar (meetings, inspections, work sessions), member birthdays, and council presence/absence tracking, each with an ICS export. Disable if your association doesn't need these."
+        "calendar_desc": "Community calendar (meetings, inspections, work sessions), member birthdays, and council presence/absence tracking, each with an ICS export. Disable if your association doesn't need these.",
+        "public_signup_api_name": "Public signup API",
+        "public_signup_api_desc": "Lets an external website (e.g. a WordPress plugin) submit work-session signups without a Parcella login. Off by default since it opens a public write endpoint; see the Integrations page for the access token."
       },
       "region_header": "Region",
       "region_help": "Determines number and address format (e.g. thousands separator, order of postal code and city). Independent of the interface language.",
@@ -249,6 +252,24 @@
       "logo_remove_label": "Remove logo (revert to the default icon)",
       "logo_error_type": "Invalid file type. Please upload PNG, JPEG, WebP, or SVG.",
       "logo_error_size": "The file is too large (maximum 2 MB)."
+    },
+    "integrations": {
+      "title": "Integrations",
+      "token_regenerated": "A new API token has been generated. Update any connected sites with the new value.",
+      "module_disabled_notice": "The public signup API is currently disabled, so these endpoints are not reachable.",
+      "module_disabled_link": "Enable it in Settings",
+      "public_signup_api_title": "Public Signup API",
+      "public_signup_api_desc": "Lets any CMS (WordPress, TYPO3, Contao, or your own site) submit work-session signups through a small connector, without members needing a Parcella login. A reference WordPress plugin is included in the project's integrations folder.",
+      "token_label": "API token",
+      "regenerate_button": "Regenerate",
+      "regenerate_confirm": "Regenerating the token immediately breaks any connector still using the old one. Continue?",
+      "regenerate_hint": "Regenerating invalidates the current token immediately. Update all connected sites afterwards.",
+      "endpoints_label": "Endpoints",
+      "endpoint_method": "Method",
+      "endpoint_url": "URL",
+      "endpoint_auth": "Authentication",
+      "auth_none": "None (public read)",
+      "wordpress_hint": "A reference WordPress connector plugin is included in the project's integrations/wordpress folder."
     }
   },
   "members": {
@@ -973,7 +994,15 @@
       "add_button": "Add",
       "tasks_card_title": "Tasks",
       "manage_tasks_link": "Manage Tasks",
-      "no_tasks": "No tasks scheduled for this session yet."
+      "no_tasks": "No tasks scheduled for this session yet.",
+      "public_signups_card_title": "Public Signups",
+      "col_parcel": "Parcel",
+      "col_name": "Name",
+      "col_contact": "Contact",
+      "col_remarks": "Remarks",
+      "no_public_signups": "No signups via the public form yet.",
+      "remove_public_signup_confirm": "Remove this public signup from the session?",
+      "public_signups_hint": "Submitted through the public signup API (e.g. the club website's form). To credit these hours to a member's annual total, add them above as a regular participant as well."
     },
     "session_form": {
       "title_edit": "Edit Session",

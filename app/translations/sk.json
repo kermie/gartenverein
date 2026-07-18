@@ -34,7 +34,8 @@
     "calendar_community": "Kalendár klubu",
     "calendar_birthdays": "Narodeniny",
     "calendar_council_presence": "Prítomnosť výboru",
-    "calendar_council_absence": "Neprítomnosť výboru"
+    "calendar_council_absence": "Neprítomnosť výboru",
+    "integrations": "Integrácie"
   },
   "errors": {
     "ticket_not_found": "Ticket nebol nájdený",
@@ -238,7 +239,9 @@
         "purchase_requests_name": "Žiadosti o nákup",
         "purchase_requests_desc": "Princíp schvaľovania dvoma osobami pre výdavky spolku: predkladajte žiadosti, nechajte ich schváliť alebo zamietnuť dvoma členmi výboru.",
         "calendar_name": "Kalendár",
-        "calendar_desc": "Kalendár klubu (schôdze, kontroly, pracovné zmeny), narodeniny členov a prítomnosť/neprítomnosť výboru, každý s exportom ICS. Vypnite, ak to váš klub nepotrebuje."
+        "calendar_desc": "Kalendár klubu (schôdze, kontroly, pracovné zmeny), narodeniny členov a prítomnosť/neprítomnosť výboru, každý s exportom ICS. Vypnite, ak to váš klub nepotrebuje.",
+        "public_signup_api_name": "Verejné API pre prihlášky",
+        "public_signup_api_desc": "Umožňuje externému webu (napr. pluginu WordPress) odosielať prihlášky na pracovné brigády bez prihlásenia do Parcella. V predvolenom nastavení vypnuté, pretože otvára verejný zapisovací endpoint; prístupový token nájdete na stránke Integrácie."
       },
       "region_header": "Región",
       "region_help": "Určuje formát čísel a adresy (napr. oddeľovač tisícov, poradie PSČ a mesta). Nezávisle od jazyka rozhrania.",
@@ -249,6 +252,24 @@
       "logo_remove_label": "Odstrániť logo (späť na predvolenú ikonu)",
       "logo_error_type": "Neplatný typ súboru. Nahrajte prosím PNG, JPEG, WebP alebo SVG.",
       "logo_error_size": "Súbor je príliš veľký (maximálne 2 MB)."
+    },
+    "integrations": {
+      "title": "Integrácie",
+      "token_regenerated": "Bol vygenerovaný nový API token. Aktualizujte ním všetky prepojené weby.",
+      "module_disabled_notice": "Verejné API pre prihlášky je momentálne vypnuté, takže tieto endpointy nie sú dostupné.",
+      "module_disabled_link": "Zapnúť v Nastaveniach",
+      "public_signup_api_title": "Verejné API pre prihlášky",
+      "public_signup_api_desc": "Umožňuje akémukoľvek CMS (WordPress, TYPO3, Contao alebo vlastnému webu) odosielať prihlášky na pracovné brigády cez malý konektor, bez toho, aby sa členovia museli prihlasovať do Parcella. Referenčný plugin pre WordPress nájdete v priečinku integrations projektu.",
+      "token_label": "API token",
+      "regenerate_button": "Vygenerovať znova",
+      "regenerate_confirm": "Opätovné vygenerovanie tokenu okamžite znefunkční každý konektor, ktorý stále používa starý token. Pokračovať?",
+      "regenerate_hint": "Opätovné vygenerovanie okamžite zneplatní aktuálny token. Potom aktualizujte všetky prepojené weby.",
+      "endpoints_label": "Endpointy",
+      "endpoint_method": "Metóda",
+      "endpoint_url": "URL",
+      "endpoint_auth": "Autentifikácia",
+      "auth_none": "Žiadna (verejné čítanie)",
+      "wordpress_hint": "Referenčný konektorový plugin pre WordPress nájdete v priečinku integrations/wordpress projektu."
     }
   },
   "members": {
@@ -973,7 +994,15 @@
       "add_button": "Pridať",
       "tasks_card_title": "Úlohy",
       "manage_tasks_link": "Spravovať úlohy",
-      "no_tasks": "Pre túto zmenu zatiaľ nie sú naplánované žiadne úlohy."
+      "no_tasks": "Pre túto zmenu zatiaľ nie sú naplánované žiadne úlohy.",
+      "public_signups_card_title": "Verejné prihlášky",
+      "col_parcel": "Záhrada",
+      "col_name": "Meno",
+      "col_contact": "Kontakt",
+      "col_remarks": "Poznámky",
+      "no_public_signups": "Zatiaľ žiadne prihlášky cez verejný formulár.",
+      "remove_public_signup_confirm": "Odstrániť túto verejnú prihlášku z brigády?",
+      "public_signups_hint": "Odoslané cez verejné API pre prihlášky (napr. formulár na webe spolku). Ak chcete tieto hodiny započítať členovi do ročného vyhodnotenia, pridajte ho vyššie navyše ako bežného účastníka."
     },
     "session_form": {
       "title_edit": "Upraviť sedenie",

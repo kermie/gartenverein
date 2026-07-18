@@ -34,7 +34,8 @@
     "calendar_community": "Kalendarz stowarzyszenia",
     "calendar_birthdays": "Urodziny",
     "calendar_council_presence": "Obecność zarządu",
-    "calendar_council_absence": "Nieobecność zarządu"
+    "calendar_council_absence": "Nieobecność zarządu",
+    "integrations": "Integracje"
   },
   "errors": {
     "ticket_not_found": "Nie znaleziono zgłoszenia",
@@ -238,7 +239,9 @@
         "purchase_requests_name": "Wnioski zakupowe",
         "purchase_requests_desc": "Zasada dwóch osób dla wydatków stowarzyszenia: składanie wniosków, zatwierdzanie lub odrzucanie przez dwóch członków zarządu.",
         "calendar_name": "Kalendarz",
-        "calendar_desc": "Kalendarz stowarzyszenia (zebrania, kontrole, wpisy prac), urodziny członków oraz obecność/nieobecność zarządu, każdy z eksportem ICS. Wyłącz, jeśli Twoje stowarzyszenie tego nie potrzebuje."
+        "calendar_desc": "Kalendarz stowarzyszenia (zebrania, kontrole, wpisy prac), urodziny członków oraz obecność/nieobecność zarządu, każdy z eksportem ICS. Wyłącz, jeśli Twoje stowarzyszenie tego nie potrzebuje.",
+        "public_signup_api_name": "Publiczne API zgłoszeń",
+        "public_signup_api_desc": "Umożliwia zewnętrznej stronie (np. wtyczce WordPress) przesyłanie zgłoszeń na dni robocze bez logowania do Parcella. Domyślnie wyłączone, ponieważ otwiera publiczny punkt zapisu; token dostępu znajdziesz na stronie Integracje."
       },
       "region_header": "Region",
       "region_help": "Określa format liczb i adresu (np. separator tysięcy, kolejność kodu pocztowego i miejscowości). Niezależnie od języka interfejsu.",
@@ -249,6 +252,24 @@
       "logo_remove_label": "Usuń logo (powrót do domyślnej ikony)",
       "logo_error_type": "Nieprawidłowy typ pliku. Proszę przesłać PNG, JPEG, WebP lub SVG.",
       "logo_error_size": "Plik jest za duży (maksymalnie 2 MB)."
+    },
+    "integrations": {
+      "title": "Integracje",
+      "token_regenerated": "Wygenerowano nowy token API. Zaktualizuj wszystkie połączone strony nową wartością.",
+      "module_disabled_notice": "Publiczne API zgłoszeń jest obecnie wyłączone, więc te punkty końcowe są niedostępne.",
+      "module_disabled_link": "Włącz w Ustawieniach",
+      "public_signup_api_title": "Publiczne API zgłoszeń",
+      "public_signup_api_desc": "Umożliwia dowolnemu CMS (WordPress, TYPO3, Contao lub własnej stronie) przesyłanie zgłoszeń na dni robocze poprzez mały łącznik, bez konieczności logowania członków do Parcella. Przykładowa wtyczka WordPress znajduje się w folderze integrations projektu.",
+      "token_label": "Token API",
+      "regenerate_button": "Wygeneruj ponownie",
+      "regenerate_confirm": "Ponowne wygenerowanie tokenu natychmiast unieważni każdy łącznik, który wciąż używa starego tokenu. Kontynuować?",
+      "regenerate_hint": "Ponowne wygenerowanie natychmiast unieważnia bieżący token. Zaktualizuj potem wszystkie połączone strony.",
+      "endpoints_label": "Punkty końcowe",
+      "endpoint_method": "Metoda",
+      "endpoint_url": "URL",
+      "endpoint_auth": "Uwierzytelnianie",
+      "auth_none": "Brak (publiczny odczyt)",
+      "wordpress_hint": "Przykładowa wtyczka-łącznik WordPress znajduje się w folderze integrations/wordpress projektu."
     }
   },
   "members": {
@@ -973,7 +994,15 @@
       "add_button": "Dodaj",
       "tasks_card_title": "Zadania",
       "manage_tasks_link": "Zarządzaj zadaniami",
-      "no_tasks": "Dla tego wpisu nie zaplanowano jeszcze żadnych zadań."
+      "no_tasks": "Dla tego wpisu nie zaplanowano jeszcze żadnych zadań.",
+      "public_signups_card_title": "Publiczne zgłoszenia",
+      "col_parcel": "Działka",
+      "col_name": "Imię i nazwisko",
+      "col_contact": "Kontakt",
+      "col_remarks": "Uwagi",
+      "no_public_signups": "Brak jeszcze zgłoszeń przez formularz publiczny.",
+      "remove_public_signup_confirm": "Usunąć to publiczne zgłoszenie z tego dnia roboczego?",
+      "public_signups_hint": "Przesłane przez publiczne API zgłoszeń (np. formularz na stronie stowarzyszenia). Aby zaliczyć te godziny członkowi w rocznym zestawieniu, dodaj go dodatkowo powyżej jako zwykłego uczestnika."
     },
     "session_form": {
       "title_edit": "Edytuj wpis",

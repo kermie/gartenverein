@@ -1,0 +1,108 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Parcella Work Session Signup 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/kermie/parcella/issues\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Parcella Connector"
+msgstr "Parcella-Connector"
+
+msgid "Connects this site to your Parcella installation's public signup API. Find the base URL and API token on the \"Integrations\" page in Parcella's admin area (Administration -> Integrations)."
+msgstr "Verbindet diese Website mit der öffentlichen Anmelde-API deiner Parcella-Installation. Basis-URL und API-Token findest du auf der Seite \"Integrationen\" im Parcella-Administrationsbereich (Administration -> Integrationen)."
+
+msgid "Parcella base URL"
+msgstr "Parcella-Basis-URL"
+
+msgid "API token"
+msgstr "API-Token"
+
+msgid "Only used for the write (signup submission) call, sent server-side. Never exposed to visitors."
+msgstr "Wird nur für den schreibenden Aufruf (Anmeldung) serverseitig verwendet. Wird Besuchern niemals angezeigt."
+
+msgid "Form fields"
+msgstr "Formularfelder"
+
+msgid "Show phone number field"
+msgstr "Telefonnummernfeld anzeigen"
+
+msgid "Show email address field"
+msgstr "E-Mail-Adressfeld anzeigen"
+
+msgid "Both fields are optional to fill in either way; these settings only control whether they appear on the form at all."
+msgstr "Beide Felder sind ohnehin optional auszufüllen; diese Einstellungen legen nur fest, ob sie im Formular überhaupt angezeigt werden."
+
+msgid "Place the form anywhere with the shortcode:"
+msgstr "Das Formular kann mit folgendem Shortcode überall eingebunden werden:"
+
+msgid "This form is not fully configured yet. Please contact the site administrator."
+msgstr "Dieses Formular ist noch nicht vollständig eingerichtet. Bitte wende dich an die Website-Administration."
+
+msgid "Could not reach Parcella. Please try again later."
+msgstr "Parcella konnte nicht erreicht werden. Bitte später erneut versuchen."
+
+msgid "This form is not correctly configured (invalid API token). Please contact the site administrator."
+msgstr "Dieses Formular ist nicht korrekt konfiguriert (ungültiges API-Token). Bitte wende dich an die Website-Administration."
+
+msgid "Too many submissions right now. Please try again in a little while."
+msgstr "Gerade zu viele Anfragen. Bitte in Kürze erneut versuchen."
+
+msgid "That parcel number was not found. Please check it and try again."
+msgstr "Diese Gartennummer wurde nicht gefunden. Bitte überprüfen und erneut versuchen."
+
+msgid "Something went wrong submitting your signup. Please try again later."
+msgstr "Beim Absenden deiner Anmeldung ist ein Fehler aufgetreten. Bitte später erneut versuchen."
+
+msgid "Please provide a parcel number and select at least one session."
+msgstr "Bitte gib eine Gartennummer an und wähle mindestens einen Arbeitseinsatz aus."
+
+msgid "The signup form is temporarily unavailable. Please try again later."
+msgstr "Das Anmeldeformular ist vorübergehend nicht verfügbar. Bitte später erneut versuchen."
+
+msgid "Thank you, your signup has been received."
+msgstr "Vielen Dank, deine Anmeldung wurde übermittelt."
+
+msgid "Some of the selected sessions could not be booked (likely full). Please choose another date for those."
+msgstr "Einige der ausgewählten Arbeitseinsätze konnten nicht gebucht werden (vermutlich ausgebucht). Bitte für diese einen anderen Termin wählen."
+
+msgid "There are currently no upcoming work sessions open for signup."
+msgstr "Derzeit gibt es keine bevorstehenden Arbeitseinsätze zur Anmeldung."
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Parcel number"
+msgstr "Gartennummer"
+
+msgid "Please choose..."
+msgstr "Bitte wählen..."
+
+msgid "Phone number"
+msgstr "Telefonnummer"
+
+msgid "Email address"
+msgstr "E-Mail-Adresse"
+
+msgid "I would like to sign up for the following work sessions:"
+msgstr "Ich möchte mich zu folgenden Arbeitseinsätzen anmelden:"
+
+#. translators: 1: date, 2: start time, 3: end time, 4: session title
+msgid "%1$s, %2$s - %3$s %4$s"
+msgstr "%1$s, %2$s - %3$s %4$s"
+
+msgid "(%d spot left)"
+msgid_plural "(%d spots left)"
+msgstr[0] "(noch %d Platz frei)"
+msgstr[1] "(noch %d Plätze frei)"
+
+msgid "Remarks or individual session requests"
+msgstr "Anmerkungen oder individuelle Arbeitseinsätze anfragen"
+
+msgid "Leave this field empty"
+msgstr "Dieses Feld leer lassen"
+
+msgid "Sign up"
+msgstr "Anmelden"

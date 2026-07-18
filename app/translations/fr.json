@@ -34,7 +34,8 @@
     "calendar_community": "Calendrier communautaire",
     "calendar_birthdays": "Anniversaires",
     "calendar_council_presence": "Présence du conseil",
-    "calendar_council_absence": "Absence du conseil"
+    "calendar_council_absence": "Absence du conseil",
+    "integrations": "Intégrations"
   },
   "errors": {
     "ticket_not_found": "Ticket non trouvé",
@@ -238,7 +239,9 @@
         "purchase_requests_name": "Demandes d'achat",
         "purchase_requests_desc": "Principe d'approbation à deux personnes pour les dépenses du club : soumettre des demandes, les faire approuver ou rejeter par deux membres du conseil d'administration.",
         "calendar_name": "Calendrier",
-        "calendar_desc": "Calendrier communautaire (assemblées, inspections, sessions de travail), anniversaires des membres, et présence/absence du conseil, chacun avec un export ICS. Désactivez si votre association n'en a pas besoin."
+        "calendar_desc": "Calendrier communautaire (assemblées, inspections, sessions de travail), anniversaires des membres, et présence/absence du conseil, chacun avec un export ICS. Désactivez si votre association n'en a pas besoin.",
+        "public_signup_api_name": "API publique d'inscription",
+        "public_signup_api_desc": "Permet à un site externe (par ex. une extension WordPress) de soumettre des inscriptions aux chantiers collectifs sans connexion à Parcella. Désactivé par défaut car cela ouvre un point d'accès public en écriture ; le jeton d'accès se trouve sur la page Intégrations."
       },
       "region_header": "Région",
       "region_help": "Détermine le format des nombres et de l'adresse (par ex. séparateur de milliers, ordre du code postal et de la ville). Indépendant de la langue de l'interface.",
@@ -249,6 +252,24 @@
       "logo_remove_label": "Supprimer le logo (revenir à l'icône par défaut)",
       "logo_error_type": "Type de fichier invalide. Veuillez charger un fichier PNG, JPEG, WebP ou SVG.",
       "logo_error_size": "Le fichier est trop volumineux (2 Mo maximum)."
+    },
+    "integrations": {
+      "title": "Intégrations",
+      "token_regenerated": "Un nouveau jeton API a été généré. Mettez à jour tous les sites connectés avec la nouvelle valeur.",
+      "module_disabled_notice": "L'API publique d'inscription est actuellement désactivée, ces points d'accès ne sont donc pas joignables.",
+      "module_disabled_link": "Activer dans les Paramètres",
+      "public_signup_api_title": "API publique d'inscription",
+      "public_signup_api_desc": "Permet à n'importe quel CMS (WordPress, TYPO3, Contao ou votre propre site) de soumettre des inscriptions aux chantiers collectifs via un petit connecteur, sans que les membres aient besoin d'un compte Parcella. Une extension WordPress de référence se trouve dans le dossier integrations du projet.",
+      "token_label": "Jeton API",
+      "regenerate_button": "Régénérer",
+      "regenerate_confirm": "Régénérer le jeton rend immédiatement inopérant tout connecteur utilisant encore l'ancien jeton. Continuer ?",
+      "regenerate_hint": "La régénération invalide immédiatement le jeton actuel. Mettez ensuite à jour tous les sites connectés.",
+      "endpoints_label": "Points d'accès",
+      "endpoint_method": "Méthode",
+      "endpoint_url": "URL",
+      "endpoint_auth": "Authentification",
+      "auth_none": "Aucune (lecture publique)",
+      "wordpress_hint": "Une extension WordPress connecteur de référence se trouve dans le dossier integrations/wordpress du projet."
     }
   },
   "members": {
@@ -973,7 +994,15 @@
       "add_button": "Ajouter",
       "tasks_card_title": "Tâches",
       "manage_tasks_link": "Gérer les tâches",
-      "no_tasks": "Aucune tâche encore planifiée pour cette session."
+      "no_tasks": "Aucune tâche encore planifiée pour cette session.",
+      "public_signups_card_title": "Inscriptions publiques",
+      "col_parcel": "Parcelle",
+      "col_name": "Nom",
+      "col_contact": "Contact",
+      "col_remarks": "Remarques",
+      "no_public_signups": "Aucune inscription via le formulaire public pour l'instant.",
+      "remove_public_signup_confirm": "Retirer cette inscription publique du chantier ?",
+      "public_signups_hint": "Soumis via l'API publique d'inscription (par ex. le formulaire du site de l'association). Pour créditer ces heures à un membre dans le bilan annuel, ajoutez-le également ci-dessus comme participant régulier."
     },
     "session_form": {
       "title_edit": "Modifier la session",
