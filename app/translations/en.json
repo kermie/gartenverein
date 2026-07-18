@@ -28,7 +28,13 @@
     "settings": "Settings",
     "logout": "Log Out",
     "menu_open_aria": "Open Menu",
-    "work_hours_tasks": "Tasks"
+    "work_hours_tasks": "Tasks",
+    "calendar_group": "Calendar",
+    "calendar_overview": "Overview",
+    "calendar_community": "Community Calendar",
+    "calendar_birthdays": "Birthdays",
+    "calendar_council_presence": "Council Presence",
+    "calendar_council_absence": "Council Absence"
   },
   "errors": {
     "ticket_not_found": "Ticket not found",
@@ -230,7 +236,9 @@
         "tickets_name": "Ticket system",
         "tickets_desc": "Support tickets with assignment, status, and member matching. Disable if the club doesn't use an internal ticket system.",
         "purchase_requests_name": "Purchase requests",
-        "purchase_requests_desc": "Two-person approval principle for club expenses: submit requests, have them approved or rejected by two board members."
+        "purchase_requests_desc": "Two-person approval principle for club expenses: submit requests, have them approved or rejected by two board members.",
+        "calendar_name": "Calendar",
+        "calendar_desc": "Community calendar (meetings, inspections, work sessions), member birthdays, and council presence/absence tracking, each with an ICS export. Disable if your association doesn't need these."
       },
       "region_header": "Region",
       "region_help": "Determines number and address format (e.g. thousands separator, order of postal code and city). Independent of the interface language.",
@@ -1103,6 +1111,101 @@
     "purchase_requests_suffix": "awaiting approval",
     "tickets_open_label": "Open Tickets",
     "tickets_spam_suffix": "{count} spam suspected",
-    "tickets_no_spam_suffix": "none flagged as spam"
+    "tickets_no_spam_suffix": "none flagged as spam",
+    "birthdays_card_title": "Birthdays This Week",
+    "birthdays_round_badge": "Milestone",
+    "birthdays_today": "today, turning {age}",
+    "birthdays_turning": "turning {age}"
+  },
+  "calendar": {
+    "hub": {
+      "title": "Calendar",
+      "community_title": "Community Calendar",
+      "community_desc": "Member meetings, parcel inspections, and work sessions.",
+      "birthdays_title": "Birthdays",
+      "birthdays_desc": "Upcoming member birthdays.",
+      "council_presence_title": "Council Presence",
+      "council_presence_desc": "When council members will be on-site.",
+      "council_absence_title": "Council Absence",
+      "council_absence_desc": "Log your own absence (e.g. vacation) so others know you're away.",
+      "view_button": "View",
+      "ics_public_label": "Public ICS link (safe to embed on your public website):",
+      "ics_private_label": "Private ICS link (keep this to yourself -- anyone with this link can view it):"
+    },
+    "community": {
+      "title": "Community Calendar",
+      "new_card_title": "New Entry",
+      "event_type_label": "Type",
+      "type_member_meeting": "Member Meeting",
+      "type_parcel_inspection": "Parcel Inspection",
+      "type_other": "Other",
+      "type_work_session": "Work Session",
+      "title_label": "Title",
+      "title_placeholder": "e.g. Annual General Meeting",
+      "start_date_label": "Date",
+      "start_time_label": "Time",
+      "end_date_label": "End Date",
+      "end_date_help": "Only for multi-day entries -- leave empty for a single day.",
+      "end_time_label": "End Time",
+      "location_label": "Location",
+      "description_label": "Description",
+      "create_button": "Add Entry",
+      "upcoming_card_title": "Upcoming",
+      "col_date": "Date",
+      "col_title": "Title",
+      "col_type": "Type",
+      "delete_confirm": "Really delete this entry?",
+      "empty": "No upcoming entries."
+    },
+    "birthdays": {
+      "title": "Birthdays",
+      "upcoming_card_title": "Upcoming Birthdays",
+      "col_date": "Date",
+      "col_name": "Name",
+      "col_turning": "Turning",
+      "round_badge": "Milestone",
+      "turning_label": "{age}",
+      "empty": "No upcoming birthdays on file."
+    },
+    "council_presence": {
+      "title": "Council Presence",
+      "new_card_title": "New Presence Slot",
+      "member_label": "Council Member",
+      "date_label": "Date",
+      "time_from_label": "From",
+      "time_until_label": "Until",
+      "note_label": "Note",
+      "note_placeholder": "e.g. Open office hours for members",
+      "create_button": "Add",
+      "upcoming_card_title": "Upcoming",
+      "col_date": "Date",
+      "col_member": "Member",
+      "col_time": "Time",
+      "col_note": "Note",
+      "delete_confirm": "Really delete this entry?",
+      "empty": "No upcoming presence slots scheduled."
+    },
+    "council_absence": {
+      "title": "Council Absence",
+      "new_card_title": "Log Your Absence",
+      "new_card_help": "Anyone with a system account can log their own absence here.",
+      "start_date_label": "From",
+      "end_date_label": "Until",
+      "note_label": "Note",
+      "note_placeholder": "e.g. Vacation",
+      "create_button": "Add",
+      "upcoming_card_title": "Upcoming Absences",
+      "col_member": "Who",
+      "col_period": "Period",
+      "col_note": "Note",
+      "delete_confirm": "Really delete this entry?",
+      "empty": "No upcoming absences logged."
+    },
+    "errors": {
+      "event_not_found": "Entry not found",
+      "entry_not_found": "Entry not found",
+      "invalid_token": "Invalid or missing access token",
+      "not_your_entry": "You can only delete your own entries"
+    }
   }
 }

@@ -18,6 +18,7 @@ from app.database import get_db, AsyncSessionLocal, active_member_filter
 from app.models import User, UserRole, Member, Parcel, ParcelStatus, MemberParcel
 from app.models import PurchaseRequest, PurchaseRequestStatus
 from app.models import Ticket, TicketStatus
+from app.birthdays import upcoming_birthdays
 from app.auth import hash_password, get_current_user
 from app.module_flags import lade_modul_flags
 from app.i18n import load_translations, load_current_language
@@ -31,7 +32,7 @@ from app.branding import load_branding
 load_translations()
 from app.templating import templates
 from app.ticket_mailer import process_incoming_mails
-from app.routers import auth, members, parcels, admin as admin_router, work_hours, insurance, tickets, purchase_requests
+from app.routers import auth, members, parcels, admin as admin_router, work_hours, insurance, tickets, purchase_requests, calendar as calendar_router
 from app.routers.metering import erstelle_metering_router
 from app.models import MeteringMedium
 from app.routers import api_auth, api_members, api_parcels, api_club_settings, api_stats
@@ -172,6 +173,7 @@ app.include_router(work_hours.router)
 app.include_router(insurance.router)
 app.include_router(tickets.router)
 app.include_router(purchase_requests.router)
+app.include_router(calendar_router.router)
 
 # Zählerwesen: EINE Codebasis (app/routers/metering.py), zweimal
 # instanziiert für Wasser und Strom – siehe erstelle_metering_router().
@@ -268,6 +270,11 @@ async def startseite(request: Request):
             )
         )
 
+    # Dashboard-Kachel "Birthdays this week" -- unabhängig vom Calendar-
+    # Modul-Flag, da Geburtstage hier nur informativ angezeigt werden
+    # (kein Link/keine Abhängigkeit von den Calendar-Routen).
+    birthdays_this_week = await upcoming_birthdays(db, within_days=7)
+
     stats = {
         "mitglieder_gesamt": members_total or 0,
         "mitglieder_aktiv": members_active or 0,
@@ -287,6 +294,8 @@ async def startseite(request: Request):
             "user": user,
             "stats": stats,
             "neueste_mitglieder": recent_members,
+            "birthdays_this_week": birthdays_this_week,
+            "today_date": date.today(),
         },
     )
 

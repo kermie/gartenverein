@@ -1,0 +1,83 @@
+"""
+Birthday calculations shared between the dashboard widget and the
+calendar module's birthday list/ICS feed.
+
+Deliberately not a stored table -- a member's birthday calendar entry is
+entirely derived from Member.date_of_birth each time it's needed, so
+there's nothing to keep in sync when a member's birth date is corrected.
+"""
+from dataclasses import dataclass
+from datetime import date
+from typing import List, Optional
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+from app.database import active_member_filter
+from app.models import Member
+
+# A birthday is considered "round" (a milestone worth highlighting) when
+# the age being turned is a multiple of this number. 10 matches the
+# common convention (30th, 40th, 50th, ...); adjust here if your
+# association also wants to highlight 25/75-style anniversaries.
+ROUND_BIRTHDAY_INTERVAL = 10
+
+
+@dataclass
+class UpcomingBirthday:
+    member: Member
+    next_occurrence: date
+    turning_age: int
+    is_round: bool
+
+
+def _next_occurrence(birth_date: date, today: date) -> date:
+    """Returns this year's birthday if it hasn't passed yet, otherwise
+    next year's. Handles Feb 29 by falling back to Feb 28 in non-leap
+    years, so members born on a leap day still get a yearly entry."""
+    for year in (today.year, today.year + 1):
+        try:
+            candidate = birth_date.replace(year=year)
+        except ValueError:
+            candidate = date(year, 2, 28)
+        if candidate >= today:
+            return candidate
+    # Unreachable in practice, but keeps the return type honest.
+    return birth_date.replace(year=today.year + 1)
+
+
+async def upcoming_birthdays(db: AsyncSession, today: Optional[date] = None, within_days: int = 7) -> List[UpcomingBirthday]:
+    """Active members whose next birthday falls within the given window
+    (inclusive of today), sorted by how soon it is."""
+    today = today or date.today()
+    result = await db.execute(
+        select(Member).where(active_member_filter(), Member.date_of_birth.is_not(None))
+    )
+    members = result.scalars().all()
+
+    upcoming = []
+    for member in members:
+        next_occ = _next_occurrence(member.date_of_birth, today)
+        if (next_occ - today).days > within_days:
+            continue
+        turning_age = next_occ.year - member.date_of_birth.year
+        upcoming.append(UpcomingBirthday(
+            member=member,
+            next_occurrence=next_occ,
+            turning_age=turning_age,
+            is_round=(turning_age % ROUND_BIRTHDAY_INTERVAL == 0),
+        ))
+
+    upcoming.sort(key=lambda b: b.next_occurrence)
+    return upcoming
+
+
+async def all_birthdays_for_calendar(db: AsyncSession) -> List[Member]:
+    """All active members with a birth date on file, for the full
+    birthday calendar/ICS feed (not just the next-N-days dashboard
+    widget)."""
+    result = await db.execute(
+        select(Member).where(active_member_filter(), Member.date_of_birth.is_not(None))
+        .order_by(Member.date_of_birth)
+    )
+    return result.scalars().all()

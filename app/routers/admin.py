@@ -198,6 +198,7 @@ MODULE_FELDER = [
     ("modul_insurance", "admin.settings.modules.insurance_name", "admin.settings.modules.insurance_desc"),
     ("modul_tickets", "admin.settings.modules.tickets_name", "admin.settings.modules.tickets_desc"),
     ("modul_purchase_requests", "admin.settings.modules.purchase_requests_name", "admin.settings.modules.purchase_requests_desc"),
+    ("modul_calendar", "admin.settings.modules.calendar_name", "admin.settings.modules.calendar_desc"),
 ]
 
 

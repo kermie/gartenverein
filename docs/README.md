@@ -13,6 +13,7 @@ decisions and reasoning are still fresh.
 - [Insurance](./module-insurance.md) -- property and accident insurance per parcel
 - [Ticket System](./module-tickets.md) -- support tickets, all 3 stages complete
 - [Purchase Requests](./module-purchase-requests.md) -- two-person approval principle for club expenses
+- [Calendar](./module-calendar.md) -- community calendar, birthdays, council presence/absence, ICS export
 
 ## Cross-cutting topics
 
@@ -35,10 +36,16 @@ Architecture Decisions for details):
 4. Entry in `app/module_flags.py` (`MODULE_DEFAULTS`)
 5. Entry in `app/routers/admin.py` (`MODULE_FELDER`) for the enable/disable UI
 6. Navigation block in `app/templates/base.html` as a collapsible `nav-group`
-7. Translation keys in **all 7** `app/translations/*.json` files (de, en,
+7. If the module has something worth a headline number (open items, a
+   count needing attention), a dashboard stat card in `app/main.py` +
+   `app/templates/dashboard.html` -- gated on the module flag, matching
+   the list page's own default filter exactly (see
+   [Architecture Decisions](./architecture-decisions.md) for the pattern
+   and a real bug that came from not doing this)
+8. Translation keys in **all 7** `app/translations/*.json` files (de, en,
    pl, cs, sk, fr, nl) -- not just German -- see
    [i18n & l10n](./i18n-l10n.md). Any money value uses the `money` filter,
    any multi-column table gets a `.table-responsive` wrapper (see
    [Responsive Design](./responsive-design.md))
-8. `tests/test_<module>.py` with at least one happy-path test
-9. Write a new page here in `docs/` while the decisions are still fresh
+9. `tests/test_<module>.py` with at least one happy-path test
+10. Write a new page here in `docs/` while the decisions are still fresh

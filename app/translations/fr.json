@@ -28,7 +28,13 @@
     "settings": "Paramètres",
     "logout": "Déconnexion",
     "menu_open_aria": "Ouvrir le menu",
-    "work_hours_tasks": "Tâches"
+    "work_hours_tasks": "Tâches",
+    "calendar_group": "Calendrier",
+    "calendar_overview": "Aperçu",
+    "calendar_community": "Calendrier communautaire",
+    "calendar_birthdays": "Anniversaires",
+    "calendar_council_presence": "Présence du conseil",
+    "calendar_council_absence": "Absence du conseil"
   },
   "errors": {
     "ticket_not_found": "Ticket non trouvé",
@@ -230,7 +236,9 @@
         "tickets_name": "Système de tickets",
         "tickets_desc": "Tickets d'assistance avec attribution, statut et correspondance avec les membres. Désactiver si le club n'utilise pas de système de tickets interne.",
         "purchase_requests_name": "Demandes d'achat",
-        "purchase_requests_desc": "Principe d'approbation à deux personnes pour les dépenses du club : soumettre des demandes, les faire approuver ou rejeter par deux membres du conseil d'administration."
+        "purchase_requests_desc": "Principe d'approbation à deux personnes pour les dépenses du club : soumettre des demandes, les faire approuver ou rejeter par deux membres du conseil d'administration.",
+        "calendar_name": "Calendrier",
+        "calendar_desc": "Calendrier communautaire (assemblées, inspections, sessions de travail), anniversaires des membres, et présence/absence du conseil, chacun avec un export ICS. Désactivez si votre association n'en a pas besoin."
       },
       "region_header": "Région",
       "region_help": "Détermine le format des nombres et de l'adresse (par ex. séparateur de milliers, ordre du code postal et de la ville). Indépendant de la langue de l'interface.",
@@ -1103,6 +1111,101 @@
     "purchase_requests_suffix": "en attente d'approbation",
     "tickets_open_label": "Tickets ouverts",
     "tickets_spam_suffix": "{count} suspecté(s) de spam",
-    "tickets_no_spam_suffix": "aucun spam suspecté"
+    "tickets_no_spam_suffix": "aucun spam suspecté",
+    "birthdays_card_title": "Anniversaires cette semaine",
+    "birthdays_round_badge": "Anniversaire rond",
+    "birthdays_today": "aujourd'hui, {age} ans",
+    "birthdays_turning": "{age} ans"
+  },
+  "calendar": {
+    "hub": {
+      "title": "Calendrier",
+      "community_title": "Calendrier communautaire",
+      "community_desc": "Assemblées des membres, inspections de parcelles et sessions de travail.",
+      "birthdays_title": "Anniversaires",
+      "birthdays_desc": "Anniversaires à venir des membres.",
+      "council_presence_title": "Présence du conseil",
+      "council_presence_desc": "Quand les membres du conseil seront sur place.",
+      "council_absence_title": "Absence du conseil",
+      "council_absence_desc": "Enregistrez votre propre absence (ex. vacances) pour que les autres le sachent.",
+      "view_button": "Afficher",
+      "ics_public_label": "Lien ICS public (peut être intégré sur votre site public) :",
+      "ics_private_label": "Lien ICS privé (à ne pas partager -- toute personne disposant de ce lien peut le consulter) :"
+    },
+    "community": {
+      "title": "Calendrier communautaire",
+      "new_card_title": "Nouvelle entrée",
+      "event_type_label": "Type",
+      "type_member_meeting": "Assemblée des membres",
+      "type_parcel_inspection": "Inspection de parcelle",
+      "type_other": "Autre",
+      "type_work_session": "Session de travail",
+      "title_label": "Titre",
+      "title_placeholder": "ex. Assemblée générale annuelle",
+      "start_date_label": "Date",
+      "start_time_label": "Heure",
+      "end_date_label": "Date de fin",
+      "end_date_help": "Seulement pour les entrées sur plusieurs jours -- laisser vide pour un seul jour.",
+      "end_time_label": "Heure de fin",
+      "location_label": "Lieu",
+      "description_label": "Description",
+      "create_button": "Ajouter l'entrée",
+      "upcoming_card_title": "À venir",
+      "col_date": "Date",
+      "col_title": "Titre",
+      "col_type": "Type",
+      "delete_confirm": "Vraiment supprimer cette entrée ?",
+      "empty": "Aucune entrée à venir."
+    },
+    "birthdays": {
+      "title": "Anniversaires",
+      "upcoming_card_title": "Anniversaires à venir",
+      "col_date": "Date",
+      "col_name": "Nom",
+      "col_turning": "Fêtera ses",
+      "round_badge": "Anniversaire rond",
+      "turning_label": "{age}",
+      "empty": "Aucun anniversaire à venir enregistré."
+    },
+    "council_presence": {
+      "title": "Présence du conseil",
+      "new_card_title": "Nouveau créneau de présence",
+      "member_label": "Membre du conseil",
+      "date_label": "Date",
+      "time_from_label": "De",
+      "time_until_label": "À",
+      "note_label": "Note",
+      "note_placeholder": "ex. Permanence pour les membres",
+      "create_button": "Ajouter",
+      "upcoming_card_title": "À venir",
+      "col_date": "Date",
+      "col_member": "Membre",
+      "col_time": "Heure",
+      "col_note": "Note",
+      "delete_confirm": "Vraiment supprimer cette entrée ?",
+      "empty": "Aucun créneau de présence planifié."
+    },
+    "council_absence": {
+      "title": "Absence du conseil",
+      "new_card_title": "Enregistrer votre absence",
+      "new_card_help": "Toute personne disposant d'un compte système peut enregistrer sa propre absence ici.",
+      "start_date_label": "Du",
+      "end_date_label": "Au",
+      "note_label": "Note",
+      "note_placeholder": "ex. Vacances",
+      "create_button": "Ajouter",
+      "upcoming_card_title": "Absences à venir",
+      "col_member": "Qui",
+      "col_period": "Période",
+      "col_note": "Note",
+      "delete_confirm": "Vraiment supprimer cette entrée ?",
+      "empty": "Aucune absence à venir enregistrée."
+    },
+    "errors": {
+      "event_not_found": "Entrée introuvable",
+      "entry_not_found": "Entrée introuvable",
+      "invalid_token": "Jeton d'accès invalide ou manquant",
+      "not_your_entry": "Vous ne pouvez supprimer que vos propres entrées"
+    }
   }
 }

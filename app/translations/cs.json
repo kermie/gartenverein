@@ -28,7 +28,13 @@
     "settings": "Nastavení",
     "logout": "Odhlásit",
     "menu_open_aria": "Otevřít menu",
-    "work_hours_tasks": "Úkoly"
+    "work_hours_tasks": "Úkoly",
+    "calendar_group": "Kalendář",
+    "calendar_overview": "Přehled",
+    "calendar_community": "Kalendář spolku",
+    "calendar_birthdays": "Narozeniny",
+    "calendar_council_presence": "Přítomnost výboru",
+    "calendar_council_absence": "Nepřítomnost výboru"
   },
   "errors": {
     "ticket_not_found": "Ticket nebyl nalezen",
@@ -230,7 +236,9 @@
         "tickets_name": "Ticketový systém",
         "tickets_desc": "Podpůrné tikety s přiřazením, stavem a přiřazením členů. Vypnout, pokud spolek nepoužívá interní ticketový systém.",
         "purchase_requests_name": "Žádosti o nákup",
-        "purchase_requests_desc": "Princip schvalování dvěma osobami pro výdaje spolku: předkládejte žádosti, nechte je schválit nebo zamítnout dvěma členy výboru."
+        "purchase_requests_desc": "Princip schvalování dvěma osobami pro výdaje spolku: předkládejte žádosti, nechte je schválit nebo zamítnout dvěma členy výboru.",
+        "calendar_name": "Kalendář",
+        "calendar_desc": "Kalendář spolku (schůze, kontroly, pracovní směny), narozeniny členů a přítomnost/nepřítomnost výboru, každý s exportem ICS. Vypněte, pokud to váš spolek nepotřebuje."
       },
       "region_header": "Region",
       "region_help": "Určuje formát čísel a adresy (např. oddělovač tisíců, pořadí PSČ a města). Nezávisle na jazyce rozhraní.",
@@ -1103,6 +1111,101 @@
     "purchase_requests_suffix": "čeká na schválení",
     "tickets_open_label": "Otevřené tikety",
     "tickets_spam_suffix": "{count} podezřelých ze spamu",
-    "tickets_no_spam_suffix": "žádné podezření na spam"
+    "tickets_no_spam_suffix": "žádné podezření na spam",
+    "birthdays_card_title": "Narozeniny tento týden",
+    "birthdays_round_badge": "Kulaté",
+    "birthdays_today": "dnes oslaví {age}",
+    "birthdays_turning": "oslaví {age}"
+  },
+  "calendar": {
+    "hub": {
+      "title": "Kalendář",
+      "community_title": "Kalendář spolku",
+      "community_desc": "Členské schůze, kontroly zahrádek a pracovní směny.",
+      "birthdays_title": "Narozeniny",
+      "birthdays_desc": "Nadcházející narozeniny členů.",
+      "council_presence_title": "Přítomnost výboru",
+      "council_presence_desc": "Kdy budou členové výboru na místě.",
+      "council_absence_title": "Nepřítomnost výboru",
+      "council_absence_desc": "Zadejte vlastní nepřítomnost (např. dovolenou), aby ostatní věděli.",
+      "view_button": "Zobrazit",
+      "ics_public_label": "Veřejný odkaz ICS (lze vložit na veřejný web):",
+      "ics_private_label": "Soukromý odkaz ICS (nesdílejte -- kdokoli s tímto odkazem jej může zobrazit):"
+    },
+    "community": {
+      "title": "Kalendář spolku",
+      "new_card_title": "Nový záznam",
+      "event_type_label": "Typ",
+      "type_member_meeting": "Členská schůze",
+      "type_parcel_inspection": "Kontrola zahrádky",
+      "type_other": "Ostatní",
+      "type_work_session": "Pracovní směna",
+      "title_label": "Název",
+      "title_placeholder": "např. Valná hromada",
+      "start_date_label": "Datum",
+      "start_time_label": "Čas",
+      "end_date_label": "Datum ukončení",
+      "end_date_help": "Pouze pro vícedenní záznamy -- pro jeden den ponechte prázdné.",
+      "end_time_label": "Čas ukončení",
+      "location_label": "Místo",
+      "description_label": "Popis",
+      "create_button": "Přidat záznam",
+      "upcoming_card_title": "Nadcházející",
+      "col_date": "Datum",
+      "col_title": "Název",
+      "col_type": "Typ",
+      "delete_confirm": "Opravdu smazat tento záznam?",
+      "empty": "Žádné nadcházející záznamy."
+    },
+    "birthdays": {
+      "title": "Narozeniny",
+      "upcoming_card_title": "Nadcházející narozeniny",
+      "col_date": "Datum",
+      "col_name": "Jméno",
+      "col_turning": "Oslaví",
+      "round_badge": "Kulaté",
+      "turning_label": "{age}",
+      "empty": "Žádné nadcházející narozeniny v systému."
+    },
+    "council_presence": {
+      "title": "Přítomnost výboru",
+      "new_card_title": "Nový termín přítomnosti",
+      "member_label": "Člen výboru",
+      "date_label": "Datum",
+      "time_from_label": "Od",
+      "time_until_label": "Do",
+      "note_label": "Poznámka",
+      "note_placeholder": "např. Konzultační hodiny pro členy",
+      "create_button": "Přidat",
+      "upcoming_card_title": "Nadcházející",
+      "col_date": "Datum",
+      "col_member": "Člen",
+      "col_time": "Čas",
+      "col_note": "Poznámka",
+      "delete_confirm": "Opravdu smazat tento záznam?",
+      "empty": "Žádné naplánované termíny přítomnosti."
+    },
+    "council_absence": {
+      "title": "Nepřítomnost výboru",
+      "new_card_title": "Zadat vlastní nepřítomnost",
+      "new_card_help": "Kdokoli se systémovým účtem zde může zadat vlastní nepřítomnost.",
+      "start_date_label": "Od",
+      "end_date_label": "Do",
+      "note_label": "Poznámka",
+      "note_placeholder": "např. Dovolená",
+      "create_button": "Přidat",
+      "upcoming_card_title": "Nadcházející nepřítomnosti",
+      "col_member": "Kdo",
+      "col_period": "Období",
+      "col_note": "Poznámka",
+      "delete_confirm": "Opravdu smazat tento záznam?",
+      "empty": "Žádné zadané nepřítomnosti."
+    },
+    "errors": {
+      "event_not_found": "Záznam nenalezen",
+      "entry_not_found": "Záznam nenalezen",
+      "invalid_token": "Neplatný nebo chybějící přístupový token",
+      "not_your_entry": "Můžete mazat pouze vlastní záznamy"
+    }
   }
 }

@@ -28,7 +28,13 @@
     "settings": "Einstellungen",
     "logout": "Abmelden",
     "menu_open_aria": "Menü öffnen",
-    "work_hours_tasks": "Aufgaben"
+    "work_hours_tasks": "Aufgaben",
+    "calendar_group": "Kalender",
+    "calendar_overview": "Übersicht",
+    "calendar_community": "Vereinskalender",
+    "calendar_birthdays": "Geburtstage",
+    "calendar_council_presence": "Vorstandspräsenz",
+    "calendar_council_absence": "Vorstandsabwesenheit"
   },
   "errors": {
     "ticket_not_found": "Ticket nicht gefunden",
@@ -230,7 +236,9 @@
         "tickets_name": "Ticketsystem",
         "tickets_desc": "Support-Tickets mit Zuweisung, Status und Member-Zuordnung. Deaktivieren, falls der Verein kein internes Ticketsystem nutzt.",
         "purchase_requests_name": "Einkaufswünsche",
-        "purchase_requests_desc": "Vier-Augen-Prinzip für Vereinsausgaben: Anträge stellen, von zwei Vorstandsmitgliedern freigeben oder ablehnen lassen."
+        "purchase_requests_desc": "Vier-Augen-Prinzip für Vereinsausgaben: Anträge stellen, von zwei Vorstandsmitgliedern freigeben oder ablehnen lassen.",
+        "calendar_name": "Kalender",
+        "calendar_desc": "Vereinskalender (Versammlungen, Begehungen, Arbeitseinsätze), Mitglieder-Geburtstage sowie Vorstandspräsenz/-abwesenheit, jeweils mit ICS-Export. Deaktivieren, falls Ihr Verein das nicht benötigt."
       },
       "region_header": "Region",
       "region_help": "Bestimmt Zahlen- und Adressformat (z.B. Tausendertrennzeichen, Reihenfolge von PLZ und Ort). Unabhängig von der Oberflächensprache.",
@@ -1103,6 +1111,101 @@
     "purchase_requests_suffix": "warten auf Freigabe",
     "tickets_open_label": "Offene Tickets",
     "tickets_spam_suffix": "{count} Spam-Verdacht",
-    "tickets_no_spam_suffix": "kein Spam-Verdacht"
+    "tickets_no_spam_suffix": "kein Spam-Verdacht",
+    "birthdays_card_title": "Geburtstage diese Woche",
+    "birthdays_round_badge": "Rund",
+    "birthdays_today": "heute wird {age}",
+    "birthdays_turning": "wird {age}"
+  },
+  "calendar": {
+    "hub": {
+      "title": "Kalender",
+      "community_title": "Vereinskalender",
+      "community_desc": "Mitgliederversammlungen, Parzellenbegehungen und Arbeitseinsätze.",
+      "birthdays_title": "Geburtstage",
+      "birthdays_desc": "Anstehende Geburtstage von Mitgliedern.",
+      "council_presence_title": "Vorstandspräsenz",
+      "council_presence_desc": "Wann Vorstandsmitglieder vor Ort sind.",
+      "council_absence_title": "Vorstandsabwesenheit",
+      "council_absence_desc": "Eigene Abwesenheit (z.B. Urlaub) eintragen, damit andere Bescheid wissen.",
+      "view_button": "Anzeigen",
+      "ics_public_label": "Öffentlicher ICS-Link (kann auf der öffentlichen Website eingebunden werden):",
+      "ics_private_label": "Privater ICS-Link (nicht weitergeben -- jeder mit diesem Link kann ihn abrufen):"
+    },
+    "community": {
+      "title": "Vereinskalender",
+      "new_card_title": "Neuer Eintrag",
+      "event_type_label": "Art",
+      "type_member_meeting": "Mitgliederversammlung",
+      "type_parcel_inspection": "Parzellenbegehung",
+      "type_other": "Sonstiges",
+      "type_work_session": "Arbeitseinsatz",
+      "title_label": "Titel",
+      "title_placeholder": "z.B. Jahreshauptversammlung",
+      "start_date_label": "Datum",
+      "start_time_label": "Uhrzeit",
+      "end_date_label": "Enddatum",
+      "end_date_help": "Nur für mehrtägige Einträge -- bei eintägigen Einträgen leer lassen.",
+      "end_time_label": "Endzeit",
+      "location_label": "Ort",
+      "description_label": "Beschreibung",
+      "create_button": "Eintrag hinzufügen",
+      "upcoming_card_title": "Anstehend",
+      "col_date": "Datum",
+      "col_title": "Titel",
+      "col_type": "Art",
+      "delete_confirm": "Diesen Eintrag wirklich löschen?",
+      "empty": "Keine anstehenden Einträge."
+    },
+    "birthdays": {
+      "title": "Geburtstage",
+      "upcoming_card_title": "Anstehende Geburtstage",
+      "col_date": "Datum",
+      "col_name": "Name",
+      "col_turning": "Wird",
+      "round_badge": "Rund",
+      "turning_label": "{age}",
+      "empty": "Keine anstehenden Geburtstage hinterlegt."
+    },
+    "council_presence": {
+      "title": "Vorstandspräsenz",
+      "new_card_title": "Neue Präsenzzeit",
+      "member_label": "Vorstandsmitglied",
+      "date_label": "Datum",
+      "time_from_label": "Von",
+      "time_until_label": "Bis",
+      "note_label": "Notiz",
+      "note_placeholder": "z.B. Offene Sprechstunde für Mitglieder",
+      "create_button": "Hinzufügen",
+      "upcoming_card_title": "Anstehend",
+      "col_date": "Datum",
+      "col_member": "Mitglied",
+      "col_time": "Uhrzeit",
+      "col_note": "Notiz",
+      "delete_confirm": "Diesen Eintrag wirklich löschen?",
+      "empty": "Keine anstehenden Präsenzzeiten geplant."
+    },
+    "council_absence": {
+      "title": "Vorstandsabwesenheit",
+      "new_card_title": "Eigene Abwesenheit eintragen",
+      "new_card_help": "Jeder mit einem Systemzugang kann hier seine eigene Abwesenheit eintragen.",
+      "start_date_label": "Von",
+      "end_date_label": "Bis",
+      "note_label": "Notiz",
+      "note_placeholder": "z.B. Urlaub",
+      "create_button": "Hinzufügen",
+      "upcoming_card_title": "Anstehende Abwesenheiten",
+      "col_member": "Wer",
+      "col_period": "Zeitraum",
+      "col_note": "Notiz",
+      "delete_confirm": "Diesen Eintrag wirklich löschen?",
+      "empty": "Keine anstehenden Abwesenheiten eingetragen."
+    },
+    "errors": {
+      "event_not_found": "Eintrag nicht gefunden",
+      "entry_not_found": "Eintrag nicht gefunden",
+      "invalid_token": "Ungültiges oder fehlendes Zugriffstoken",
+      "not_your_entry": "Sie können nur eigene Einträge löschen"
+    }
   }
 }

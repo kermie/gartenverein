@@ -1124,3 +1124,103 @@ class PurchaseRequestApproval(Base):
     __table_args__ = (
         UniqueConstraint("purchase_request_id", "user_id", name="uq_purchase_request_approval"),
     )
+
+
+class CalendarEventType(str, enum.Enum):
+    """What kind of manually-created community calendar entry this is.
+    Work sessions are NOT part of this enum -- they already have their
+    own date/time on the WorkSession model, and the community calendar
+    reads them directly rather than duplicating them into a second table
+    (see docs/module-calendar.md for the reasoning)."""
+    MEMBER_MEETING = "MEMBER_MEETING"
+    PARCEL_INSPECTION = "PARCEL_INSPECTION"
+    OTHER = "OTHER"
+
+
+class CalendarEvent(Base):
+    """
+    A manually-created entry on the community calendar: a full-member
+    meeting, a parcel inspection by the board, or anything else worth
+    announcing. Deliberately separate from WorkSession -- work sessions
+    already have their own date/time and are merged into the community
+    calendar view/ICS feed at read time instead of being copied here.
+    """
+    __tablename__ = "calendar_events"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    event_type: Mapped[CalendarEventType] = mapped_column(
+        SAEnum(CalendarEventType), default=CalendarEventType.OTHER, nullable=False
+    )
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    location: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    start_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    start_time: Mapped[Optional[str]] = mapped_column(String(5), nullable=True)  # "HH:MM"
+    end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    end_time: Mapped[Optional[str]] = mapped_column(String(5), nullable=True)
+    created_by_id: Mapped[Optional[str]] = mapped_column(
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    created_by: Mapped[Optional["User"]] = relationship("User")
+
+    def __repr__(self) -> str:
+        return f"<CalendarEvent {self.title!r} on {self.start_date}>"
+
+
+class CouncilPresence(Base):
+    """
+    A scheduled slot where a specific board/council member will be
+    on-site (e.g. office hours for members with questions). One row per
+    person per slot -- if two council members cover the same time
+    together, that's two rows.
+    """
+    __tablename__ = "council_presence"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    user_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    time_from: Mapped[Optional[str]] = mapped_column(String(5), nullable=True)
+    time_until: Mapped[Optional[str]] = mapped_column(String(5), nullable=True)
+    note: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    user: Mapped["User"] = relationship("User")
+
+    def __repr__(self) -> str:
+        return f"<CouncilPresence {self.user_id} on {self.date}>"
+
+
+class CouncilAbsence(Base):
+    """
+    A self-reported absence period (e.g. vacation) for anyone with a
+    system account -- not restricted to the board/council despite the
+    name, matching the original request that "everybody with access to
+    the system" can log their own absence. Named for its primary use
+    case (knowing when a council member is unreachable), not as an
+    access restriction.
+    """
+    __tablename__ = "council_absence"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    user_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    start_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    end_date: Mapped[date] = mapped_column(Date, nullable=False)
+    note: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    user: Mapped["User"] = relationship("User")
+
+    def __repr__(self) -> str:
+        return f"<CouncilAbsence {self.user_id} {self.start_date}-{self.end_date}>"

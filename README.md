@@ -85,6 +85,15 @@ version publicly available. Details and contribution guidelines in
   wide tables scroll independently of the page; sidebar module groups
   behave as an accordion (only one open at a time) to stay usable as
   more modules get added
+- ✅ Calendar module: community calendar (member meetings, parcel
+  inspections, work sessions -- all in one simple upcoming-items list,
+  no full calendar-grid UI), member birthdays (with a dashboard "this
+  week" widget highlighting round-number birthdays), council on-site
+  presence scheduling, and self-service council absence logging (anyone
+  with a login can enter their own). Each with its own ICS export --
+  the community calendar's feed is public (embeddable on your public
+  website), the other three require a private access token since they
+  contain more sensitive information
 
 ## Planned (next phases)
 
@@ -107,6 +116,7 @@ version publicly available. Details and contribution guidelines in
 | Database | PostgreSQL 16 |
 | Migrations | Alembic |
 | i18n/l10n | JSON translation catalogs + Babel (number/currency formatting) |
+| Calendar/ICS | icalendar (RFC 5545 feed generation) |
 | Container | Docker + docker compose |
 
 ---

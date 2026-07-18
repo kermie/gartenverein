@@ -28,7 +28,13 @@
     "settings": "Instellingen",
     "logout": "Uitloggen",
     "menu_open_aria": "Open menu",
-    "work_hours_tasks": "Taken"
+    "work_hours_tasks": "Taken",
+    "calendar_group": "Kalender",
+    "calendar_overview": "Overzicht",
+    "calendar_community": "Verenigingskalender",
+    "calendar_birthdays": "Verjaardagen",
+    "calendar_council_presence": "Aanwezigheid bestuur",
+    "calendar_council_absence": "Afwezigheid bestuur"
   },
   "errors": {
     "ticket_not_found": "Ticket niet gevonden",
@@ -230,7 +236,9 @@
         "tickets_name": "Ticketsysteem",
         "tickets_desc": "Ondersteuningstickets met toewijzing, status en lidkoppeling. Uitschakelen als de vereniging geen intern ticketsysteem gebruikt.",
         "purchase_requests_name": "Aankoopaanvragen",
-        "purchase_requests_desc": "Twee-personen goedkeuringsprincipe voor verenigingsuitgaven: aanvragen indienen, door twee bestuursleden laten goedkeuren of afwijzen."
+        "purchase_requests_desc": "Twee-personen goedkeuringsprincipe voor verenigingsuitgaven: aanvragen indienen, door twee bestuursleden laten goedkeuren of afwijzen.",
+        "calendar_name": "Kalender",
+        "calendar_desc": "Verenigingskalender (vergaderingen, inspecties, werksessies), verjaardagen van leden en aanwezigheid/afwezigheid van het bestuur, elk met ICS-export. Schakel uit als je vereniging dit niet nodig heeft."
       },
       "region_header": "Regio",
       "region_help": "Bepaalt het getal- en adresformaat (bijv. duizendtalscheidingsteken, volgorde van postcode en plaats). Onafhankelijk van de interfacetaal.",
@@ -1103,6 +1111,101 @@
     "purchase_requests_suffix": "wacht op goedkeuring",
     "tickets_open_label": "Open tickets",
     "tickets_spam_suffix": "{count} verdacht van spam",
-    "tickets_no_spam_suffix": "geen spam vermoed"
+    "tickets_no_spam_suffix": "geen spam vermoed",
+    "birthdays_card_title": "Verjaardagen deze week",
+    "birthdays_round_badge": "Rond",
+    "birthdays_today": "vandaag wordt {age}",
+    "birthdays_turning": "wordt {age}"
+  },
+  "calendar": {
+    "hub": {
+      "title": "Kalender",
+      "community_title": "Verenigingskalender",
+      "community_desc": "Ledenvergaderingen, perceelinspecties en werksessies.",
+      "birthdays_title": "Verjaardagen",
+      "birthdays_desc": "Aankomende verjaardagen van leden.",
+      "council_presence_title": "Aanwezigheid bestuur",
+      "council_presence_desc": "Wanneer bestuursleden aanwezig zullen zijn.",
+      "council_absence_title": "Afwezigheid bestuur",
+      "council_absence_desc": "Registreer je eigen afwezigheid (bijv. vakantie) zodat anderen het weten.",
+      "view_button": "Bekijken",
+      "ics_public_label": "Openbare ICS-link (kan worden ingesloten op je openbare website):",
+      "ics_private_label": "Privé ICS-link (niet delen -- iedereen met deze link kan hem bekijken):"
+    },
+    "community": {
+      "title": "Verenigingskalender",
+      "new_card_title": "Nieuw item",
+      "event_type_label": "Type",
+      "type_member_meeting": "Ledenvergadering",
+      "type_parcel_inspection": "Perceelinspectie",
+      "type_other": "Overig",
+      "type_work_session": "Werksessie",
+      "title_label": "Titel",
+      "title_placeholder": "bijv. Algemene ledenvergadering",
+      "start_date_label": "Datum",
+      "start_time_label": "Tijd",
+      "end_date_label": "Einddatum",
+      "end_date_help": "Alleen voor meerdaagse items -- leeg laten voor één dag.",
+      "end_time_label": "Eindtijd",
+      "location_label": "Locatie",
+      "description_label": "Beschrijving",
+      "create_button": "Item toevoegen",
+      "upcoming_card_title": "Aankomend",
+      "col_date": "Datum",
+      "col_title": "Titel",
+      "col_type": "Type",
+      "delete_confirm": "Dit item echt verwijderen?",
+      "empty": "Geen aankomende items."
+    },
+    "birthdays": {
+      "title": "Verjaardagen",
+      "upcoming_card_title": "Aankomende verjaardagen",
+      "col_date": "Datum",
+      "col_name": "Naam",
+      "col_turning": "Wordt",
+      "round_badge": "Rond",
+      "turning_label": "{age}",
+      "empty": "Geen aankomende verjaardagen bekend."
+    },
+    "council_presence": {
+      "title": "Aanwezigheid bestuur",
+      "new_card_title": "Nieuw aanwezigheidsmoment",
+      "member_label": "Bestuurslid",
+      "date_label": "Datum",
+      "time_from_label": "Van",
+      "time_until_label": "Tot",
+      "note_label": "Notitie",
+      "note_placeholder": "bijv. Inloopspreekuur voor leden",
+      "create_button": "Toevoegen",
+      "upcoming_card_title": "Aankomend",
+      "col_date": "Datum",
+      "col_member": "Lid",
+      "col_time": "Tijd",
+      "col_note": "Notitie",
+      "delete_confirm": "Dit item echt verwijderen?",
+      "empty": "Geen aankomende aanwezigheidsmomenten gepland."
+    },
+    "council_absence": {
+      "title": "Afwezigheid bestuur",
+      "new_card_title": "Eigen afwezigheid registreren",
+      "new_card_help": "Iedereen met een systeemaccount kan hier zijn eigen afwezigheid registreren.",
+      "start_date_label": "Van",
+      "end_date_label": "Tot",
+      "note_label": "Notitie",
+      "note_placeholder": "bijv. Vakantie",
+      "create_button": "Toevoegen",
+      "upcoming_card_title": "Aankomende afwezigheden",
+      "col_member": "Wie",
+      "col_period": "Periode",
+      "col_note": "Notitie",
+      "delete_confirm": "Dit item echt verwijderen?",
+      "empty": "Geen aankomende afwezigheden geregistreerd."
+    },
+    "errors": {
+      "event_not_found": "Item niet gevonden",
+      "entry_not_found": "Item niet gevonden",
+      "invalid_token": "Ongeldig of ontbrekend toegangstoken",
+      "not_your_entry": "Je kunt alleen je eigen items verwijderen"
+    }
   }
 }

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ t('calendar.council_absence.title') }}{% endblock %}
+{% block page_title %}{{ t('calendar.council_absence.title') }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="/calendar/" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>{{ t('common.back') }}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-plus-lg me-2"></i>{{ t('calendar.council_absence.new_card_title') }}</div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size: 0.82rem;">{{ t('calendar.council_absence.new_card_help') }}</p>
+                <form method="post" action="/calendar/council-absence/new">
+                    <div class="row g-2 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">{{ t('calendar.council_absence.start_date_label') }} <span class="text-danger">*</span></label>
+                            <input type="date" name="start_date" class="form-control" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">{{ t('calendar.council_absence.end_date_label') }} <span class="text-danger">*</span></label>
+                            <input type="date" name="end_date" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ t('calendar.council_absence.note_label') }}</label>
+                        <input type="text" name="note" class="form-control"
+                               placeholder="{{ t('calendar.council_absence.note_placeholder') }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-lg me-1"></i>{{ t('calendar.council_absence.create_button') }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-airplane me-2"></i>{{ t('calendar.council_absence.upcoming_card_title') }}</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+<table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>{{ t('calendar.council_absence.col_member') }}</th>
+                                <th>{{ t('calendar.council_absence.col_period') }}</th>
+                                <th>{{ t('calendar.council_absence.col_note') }}</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for e in entries %}
+                            <tr>
+                                <td class="fw-semibold">{{ e.user.name if e.user else '–' }}</td>
+                                <td>{{ e.start_date.strftime('%d.%m.%Y') }} - {{ e.end_date.strftime('%d.%m.%Y') }}</td>
+                                <td class="text-muted" style="font-size: 0.85rem;">{{ e.note or '' }}</td>
+                                <td class="text-end">
+                                    {% if e.user_id == user.id or user.role.value in ['admin', 'board'] %}
+                                    <form method="post" action="/calendar/council-absence/{{ e.id }}/delete" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                                onclick="return confirm('{{ t('calendar.council_absence.delete_confirm') }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">{{ t('calendar.council_absence.empty') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

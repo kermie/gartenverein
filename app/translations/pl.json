@@ -28,7 +28,13 @@
     "settings": "Ustawienia",
     "logout": "Wyloguj",
     "menu_open_aria": "Otwórz menu",
-    "work_hours_tasks": "Zadania"
+    "work_hours_tasks": "Zadania",
+    "calendar_group": "Kalendarz",
+    "calendar_overview": "Przegląd",
+    "calendar_community": "Kalendarz stowarzyszenia",
+    "calendar_birthdays": "Urodziny",
+    "calendar_council_presence": "Obecność zarządu",
+    "calendar_council_absence": "Nieobecność zarządu"
   },
   "errors": {
     "ticket_not_found": "Nie znaleziono zgłoszenia",
@@ -230,7 +236,9 @@
         "tickets_name": "System zgłoszeń",
         "tickets_desc": "Zgłoszenia wsparcia z przypisaniem, statusem i powiązaniem z członkiem. Wyłącz, jeśli stowarzyszenie nie korzysta z wewnętrznego systemu zgłoszeń.",
         "purchase_requests_name": "Wnioski zakupowe",
-        "purchase_requests_desc": "Zasada dwóch osób dla wydatków stowarzyszenia: składanie wniosków, zatwierdzanie lub odrzucanie przez dwóch członków zarządu."
+        "purchase_requests_desc": "Zasada dwóch osób dla wydatków stowarzyszenia: składanie wniosków, zatwierdzanie lub odrzucanie przez dwóch członków zarządu.",
+        "calendar_name": "Kalendarz",
+        "calendar_desc": "Kalendarz stowarzyszenia (zebrania, kontrole, wpisy prac), urodziny członków oraz obecność/nieobecność zarządu, każdy z eksportem ICS. Wyłącz, jeśli Twoje stowarzyszenie tego nie potrzebuje."
       },
       "region_header": "Region",
       "region_help": "Określa format liczb i adresu (np. separator tysięcy, kolejność kodu pocztowego i miejscowości). Niezależnie od języka interfejsu.",
@@ -1103,6 +1111,101 @@
     "purchase_requests_suffix": "oczekuje na zatwierdzenie",
     "tickets_open_label": "Otwarte zgłoszenia",
     "tickets_spam_suffix": "{count} podejrzanych o spam",
-    "tickets_no_spam_suffix": "brak podejrzeń o spam"
+    "tickets_no_spam_suffix": "brak podejrzeń o spam",
+    "birthdays_card_title": "Urodziny w tym tygodniu",
+    "birthdays_round_badge": "Okrągłe",
+    "birthdays_today": "dziś kończy {age}",
+    "birthdays_turning": "kończy {age}"
+  },
+  "calendar": {
+    "hub": {
+      "title": "Kalendarz",
+      "community_title": "Kalendarz stowarzyszenia",
+      "community_desc": "Zebrania członków, kontrole działek i wpisy prac.",
+      "birthdays_title": "Urodziny",
+      "birthdays_desc": "Nadchodzące urodziny członków.",
+      "council_presence_title": "Obecność zarządu",
+      "council_presence_desc": "Kiedy członkowie zarządu będą na miejscu.",
+      "council_absence_title": "Nieobecność zarządu",
+      "council_absence_desc": "Wpisz własną nieobecność (np. urlop), aby inni wiedzieli.",
+      "view_button": "Pokaż",
+      "ics_public_label": "Publiczny link ICS (można osadzić na publicznej stronie):",
+      "ics_private_label": "Prywatny link ICS (nie udostępniaj -- każdy z tym linkiem może go zobaczyć):"
+    },
+    "community": {
+      "title": "Kalendarz stowarzyszenia",
+      "new_card_title": "Nowy wpis",
+      "event_type_label": "Rodzaj",
+      "type_member_meeting": "Zebranie członków",
+      "type_parcel_inspection": "Kontrola działki",
+      "type_other": "Inne",
+      "type_work_session": "Wpis prac",
+      "title_label": "Tytuł",
+      "title_placeholder": "np. Walne zebranie",
+      "start_date_label": "Data",
+      "start_time_label": "Godzina",
+      "end_date_label": "Data końcowa",
+      "end_date_help": "Tylko dla wpisów wielodniowych -- pozostaw puste dla jednego dnia.",
+      "end_time_label": "Godzina końcowa",
+      "location_label": "Miejsce",
+      "description_label": "Opis",
+      "create_button": "Dodaj wpis",
+      "upcoming_card_title": "Nadchodzące",
+      "col_date": "Data",
+      "col_title": "Tytuł",
+      "col_type": "Rodzaj",
+      "delete_confirm": "Czy na pewno usunąć ten wpis?",
+      "empty": "Brak nadchodzących wpisów."
+    },
+    "birthdays": {
+      "title": "Urodziny",
+      "upcoming_card_title": "Nadchodzące urodziny",
+      "col_date": "Data",
+      "col_name": "Imię i nazwisko",
+      "col_turning": "Kończy",
+      "round_badge": "Okrągłe",
+      "turning_label": "{age}",
+      "empty": "Brak nadchodzących urodzin w systemie."
+    },
+    "council_presence": {
+      "title": "Obecność zarządu",
+      "new_card_title": "Nowy termin obecności",
+      "member_label": "Członek zarządu",
+      "date_label": "Data",
+      "time_from_label": "Od",
+      "time_until_label": "Do",
+      "note_label": "Notatka",
+      "note_placeholder": "np. Dyżur dla członków",
+      "create_button": "Dodaj",
+      "upcoming_card_title": "Nadchodzące",
+      "col_date": "Data",
+      "col_member": "Członek",
+      "col_time": "Godzina",
+      "col_note": "Notatka",
+      "delete_confirm": "Czy na pewno usunąć ten wpis?",
+      "empty": "Brak zaplanowanych terminów obecności."
+    },
+    "council_absence": {
+      "title": "Nieobecność zarządu",
+      "new_card_title": "Wpisz swoją nieobecność",
+      "new_card_help": "Każdy posiadacz konta systemowego może tutaj wpisać własną nieobecność.",
+      "start_date_label": "Od",
+      "end_date_label": "Do",
+      "note_label": "Notatka",
+      "note_placeholder": "np. Urlop",
+      "create_button": "Dodaj",
+      "upcoming_card_title": "Nadchodzące nieobecności",
+      "col_member": "Kto",
+      "col_period": "Okres",
+      "col_note": "Notatka",
+      "delete_confirm": "Czy na pewno usunąć ten wpis?",
+      "empty": "Brak wpisanych nieobecności."
+    },
+    "errors": {
+      "event_not_found": "Nie znaleziono wpisu",
+      "entry_not_found": "Nie znaleziono wpisu",
+      "invalid_token": "Nieprawidłowy lub brakujący token dostępu",
+      "not_your_entry": "Możesz usuwać tylko własne wpisy"
+    }
   }
 }

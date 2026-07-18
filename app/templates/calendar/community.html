@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}{{ t('calendar.community.title') }}{% endblock %}
+{% block page_title %}{{ t('calendar.community.title') }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="/calendar/" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>{{ t('common.back') }}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+
+    {% if user.role.value in ['admin', 'board'] %}
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-plus-lg me-2"></i>{{ t('calendar.community.new_card_title') }}</div>
+            <div class="card-body">
+                <form method="post" action="/calendar/community/new">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ t('calendar.community.event_type_label') }}</label>
+                        <select name="event_type" class="form-select">
+                            <option value="MEMBER_MEETING">{{ t('calendar.community.type_member_meeting') }}</option>
+                            <option value="PARCEL_INSPECTION">{{ t('calendar.community.type_parcel_inspection') }}</option>
+                            <option value="OTHER" selected>{{ t('calendar.community.type_other') }}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ t('calendar.community.title_label') }} <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control"
+                               placeholder="{{ t('calendar.community.title_placeholder') }}" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">{{ t('calendar.community.start_date_label') }} <span class="text-danger">*</span></label>
+                            <input type="date" name="start_date" class="form-control" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">{{ t('calendar.community.start_time_label') }}</label>
+                            <input type="time" name="start_time" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">{{ t('calendar.community.end_date_label') }}</label>
+                            <input type="date" name="end_date" class="form-control">
+                            <div class="form-text">{{ t('calendar.community.end_date_help') }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">{{ t('calendar.community.end_time_label') }}</label>
+                            <input type="time" name="end_time" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ t('calendar.community.location_label') }}</label>
+                        <input type="text" name="location" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ t('calendar.community.description_label') }}</label>
+                        <textarea name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-lg me-1"></i>{{ t('calendar.community.create_button') }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="{% if user.role.value in ['admin', 'board'] %}col-lg-8{% else %}col-12{% endif %}">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-calendar-event me-2"></i>{{ t('calendar.community.upcoming_card_title') }}</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+<table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>{{ t('calendar.community.col_date') }}</th>
+                                <th>{{ t('calendar.community.col_title') }}</th>
+                                <th>{{ t('calendar.community.col_type') }}</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for kind, item_date, item in combined %}
+                            <tr>
+                                <td class="fw-semibold">
+                                    {{ item_date.strftime('%d.%m.%Y') }}
+                                    {% if kind == 'event' and item.start_time %}
+                                    <span class="text-muted" style="font-size: 0.8rem;">{{ item.start_time }}{% if item.end_time %}-{{ item.end_time }}{% endif %}</span>
+                                    {% elif kind == 'session' and item.time_from %}
+                                    <span class="text-muted" style="font-size: 0.8rem;">{{ item.time_from }}{% if item.time_until %}-{{ item.time_until }}{% endif %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if kind == 'session' %}
+                                    <a href="/work-hours/sessions/{{ item.id }}" class="text-decoration-none" style="color: var(--gv-gruen);">{{ item.title }}</a>
+                                    {% else %}
+                                    {{ item.title }}
+                                    {% if item.location %}<div class="text-muted" style="font-size: 0.78rem;">📍 {{ item.location }}</div>{% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if kind == 'session' %}
+                                    <span class="badge" style="background: var(--gv-gruen-blass); color: var(--gv-gruen);">{{ t('calendar.community.type_work_session') }}</span>
+                                    {% elif item.event_type.value == 'MEMBER_MEETING' %}
+                                    <span class="badge" style="background: #dbeafe; color: #1e40af;">{{ t('calendar.community.type_member_meeting') }}</span>
+                                    {% elif item.event_type.value == 'PARCEL_INSPECTION' %}
+                                    <span class="badge" style="background: #fef3c7; color: #92400e;">{{ t('calendar.community.type_parcel_inspection') }}</span>
+                                    {% else %}
+                                    <span class="badge" style="background: #f3f4f6; color: #6b7280;">{{ t('calendar.community.type_other') }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if kind == 'event' and user.role.value in ['admin', 'board'] %}
+                                    <form method="post" action="/calendar/community/{{ item.id }}/delete" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                                onclick="return confirm('{{ t('calendar.community.delete_confirm') }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">{{ t('calendar.community.empty') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

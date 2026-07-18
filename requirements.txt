@@ -16,4 +16,5 @@ pydantic-settings==2.5.2
 python-dotenv==1.0.1
 email-validator==2.2.0
 babel==2.16.0
+icalendar==6.1.0
 bleach==6.1.0

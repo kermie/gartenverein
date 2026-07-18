@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ t('calendar.birthdays.title') }}{% endblock %}
+{% block page_title %}{{ t('calendar.birthdays.title') }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="/calendar/" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>{{ t('common.back') }}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header"><i class="bi bi-cake2 me-2"></i>{{ t('calendar.birthdays.upcoming_card_title') }}</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+<table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>{{ t('calendar.birthdays.col_date') }}</th>
+                        <th>{{ t('calendar.birthdays.col_name') }}</th>
+                        <th>{{ t('calendar.birthdays.col_turning') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in upcoming %}
+                    <tr class="{% if b.is_round %}table-warning{% endif %}">
+                        <td class="fw-semibold">{{ b.next_occurrence.strftime('%d.%m.%Y') }}</td>
+                        <td>
+                            <a href="/members/{{ b.member.id }}" class="text-decoration-none" style="color: var(--gv-gruen);">{{ b.member.full_name }}</a>
+                            {% if b.is_round %}
+                            <span class="badge ms-1" style="background: #fef3c7; color: #92400e;">
+                                <i class="bi bi-star-fill me-1"></i>{{ t('calendar.birthdays.round_badge') }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ t('calendar.birthdays.turning_label', age=b.turning_age) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-3">{{ t('calendar.birthdays.empty') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

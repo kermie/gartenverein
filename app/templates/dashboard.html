@@ -136,6 +136,42 @@
     {% endif %}
 </div>
 
+{% if birthdays_this_week %}
+<div class="row g-3 mb-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-cake2 me-2"></i>{{ t('dashboard.birthdays_card_title') }}</div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for b in birthdays_this_week %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center {% if b.is_round %}bg-warning bg-opacity-25{% endif %}">
+                        <div>
+                            <a href="/members/{{ b.member.id }}" class="text-decoration-none fw-semibold" style="color: var(--gv-gruen);">{{ b.member.full_name }}</a>
+                            {% if b.is_round %}
+                            <span class="badge ms-1" style="background: #fef3c7; color: #92400e;">
+                                <i class="bi bi-star-fill me-1"></i>{{ t('dashboard.birthdays_round_badge') }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <span class="text-muted" style="font-size: 0.85rem;">
+                            {% if b.next_occurrence == today_date %}
+                            {{ t('dashboard.birthdays_today', age=b.turning_age) }}
+                            {% else %}
+                            {{ b.next_occurrence.strftime('%d.%m.') }} -- {{ t('dashboard.birthdays_turning', age=b.turning_age) }}
+                            {% endif %}
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card-footer">
+                <a href="/calendar/birthdays" class="btn btn-sm btn-outline-secondary">{{ t('dashboard.show_all') }}</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="row g-3">
     <div class="col-lg-6">
         <div class="card">
