@@ -18,7 +18,7 @@ decisions and reasoning are still fresh.
 
 ## Cross-cutting topics
 
-- [Architecture Decisions](./architecture-decisions.md) -- why certain things are built the way they are
+- [Architecture Decisions](./ADR/README.md) -- why certain things are built the way they are
 - [Operations](./operations.md) -- Docker, migrations, SMTP setup, troubleshooting
 - [Automated Tests](./testing.md) -- testing philosophy, execution, known limits
 - [i18n & l10n](./i18n-l10n.md) -- languages, region/currency, how to add a new one
@@ -44,7 +44,7 @@ Architecture Decisions for details):
    count needing attention), a dashboard stat card in `app/main.py` +
    `app/templates/dashboard.html` -- gated on the module flag, matching
    the list page's own default filter exactly (see
-   [Architecture Decisions](./architecture-decisions.md) for the pattern
+   [Architecture Decisions](./ADR/0019-dashboard-stat-cards-the-pattern-new-modules-should-follow.md) for the pattern
    and a real bug that came from not doing this)
 8. Translation keys in **all 7** `app/translations/*.json` files (de, en,
    pl, cs, sk, fr, nl) -- not just German -- see
@@ -53,3 +53,7 @@ Architecture Decisions for details):
    [Responsive Design](./responsive-design.md))
 9. `tests/test_<module>.py` with at least one happy-path test
 10. Write a new page here in `docs/` while the decisions are still fresh
+11. If the module involved a cross-cutting architectural decision (not
+    just domain logic for that module), add it as a new numbered file
+    in [`docs/ADR/`](./ADR/README.md) rather than folding it into the
+    module page -- one file per decision, listed in the ADR index

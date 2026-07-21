@@ -5,7 +5,7 @@
 > `Arbeitseinsatz` -> `WorkSession`, `Vereinsrolle` -> `ClubRole`,
 > `Patenschaft` -> `Sponsorship`, `/pflichtstunden/` -> `/work-hours/`.
 > Details and lessons learned in
-> [Architecture Decisions](./architecture-decisions.md).
+> [Architecture Decisions](./ADR/0010-second-module-to-english-pflichtstunden-work-hours.md).
 > This page continues to describe the domain logic, which did not
 > change in the process.
 
@@ -96,7 +96,7 @@ participant of a session other than the one it's currently scheduled to.
 
 - `SessionType` and `ParticipationStatus` had to be corrected to uppercase
   after the fact (like several other enums) -- see
-  [Architecture Decisions](./architecture-decisions.md) for the full
+  [Architecture Decisions](./ADR/0002-enum-values-always-uppercase.md) for the full
   explanation of this recurring bug.
 - `session_detail.html` crashed with a 500 error for *any* session with
   at least one participant, for a long time -- a `sort(attribute=...)`

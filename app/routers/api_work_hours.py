@@ -539,7 +539,7 @@ async def evaluation_get(
             total = Decimal("0")
             # Same rule as the web UI: ONE exempt tenant is enough to
             # exempt the whole parcel (any(), not all() -- see
-            # docs/architecture-decisions.md).
+            # docs/ADR/README.md).
             is_exempt = False
             for m in tenants:
                 stand = await _calculate_hours_for_member(db, m.id, year)

@@ -7,7 +7,7 @@
 > `ParzelleVersicherung` -> `ParcelInsurance`,
 > `UnfallversicherungZusatzperson` -> `AccidentInsuranceAdditionalPerson`,
 > `/versicherungen/` -> `/insurance/`. Details and lessons learned in
-> [Architecture Decisions](./architecture-decisions.md).
+> [Architecture Decisions](./ADR/0008-fourth-module-to-english-versicherungen-insurance.md).
 > This page continues to describe the domain logic, which did not
 > change in the process.
 
@@ -33,7 +33,7 @@ share **the same address** with each other (street, postal code, city in
 the member record) -- at no extra cost, since they live in the same
 household. There's no designated "primary" resident to anchor this
 comparison on (that role distinction was removed, see
-[Architecture Decisions](./architecture-decisions.md)); instead, current
+[Architecture Decisions](./ADR/0018-removed-the-primary-co-tenant-role-distinction.md)); instead, current
 residents are grouped by matching address to each other, and the largest
 matching group is the auto-covered household.
 

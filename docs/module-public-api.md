@@ -12,7 +12,7 @@ A reference WordPress connector lives in the "signup" module of the
 consolidated `integrations/wordpress/parcella-connector/` plugin (see
 its own README for installation) -- this plugin also hosts other
 WordPress <-> Parcella integrations (see
-docs/architecture-decisions.md for why it was consolidated rather than
+docs/ADR/0030-wordpress-connector-plugin-consolidated-into-one-plugin.md for why it was consolidated rather than
 shipping a separate plugin per integration). Writing an equivalent
 connector for another CMS means implementing the same three-endpoint
 contract below; none of the logic needs to be reimplemented per CMS.

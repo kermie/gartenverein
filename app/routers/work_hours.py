@@ -1145,7 +1145,7 @@ async def evaluation(
             amount_due = outstanding * float(config.rate_per_hour_eur)
 
             # Exempt if AT LEAST ONE tenant is exempt (any(), not all() --
-            # see docs/architecture-decisions.md). Deliberately NOT called
+            # see docs/ADR/README.md). Deliberately NOT called
             # "all_exempt" -- that name once led to an inverted all()-copy
             # bug in the CSV export and the API.
             is_exempt = any(p["exempt"] for p in tenant_details)
@@ -1249,7 +1249,7 @@ async def evaluation_export_csv(
             paten_h = 0.0
             # Same rule as the evaluation page: ONE exempt tenant is enough
             # to exempt the whole parcel (any(), not all() -- see
-            # docs/architecture-decisions.md).
+            # docs/ADR/README.md).
             ist_befreit = False
             namen = []
             for m in paechter:

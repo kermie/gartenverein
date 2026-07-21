@@ -58,7 +58,7 @@ http://localhost:8000/api/docs.
   you're touching a file for another reason, translating its comments to
   English while you're in there is welcome, but not required just to make
   an unrelated change (see
-  [Architecture Decisions](./docs/architecture-decisions.md) for the
+  [Architecture Decisions](./docs/ADR/0020-english-becomes-the-one-and-only-base-authoring-language.md) for the
   history of this policy and the identifier-vs-UI-text split it grew out
   of).
 - **Genericity**: new fields/functions should, where sensible, not only

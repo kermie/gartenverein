@@ -177,7 +177,7 @@ assignment. Originally just four states
 (`UNASSIGNED -> ASSIGNED -> CLOSED`, with `DEFERRED` as a side branch);
 redesigned later into six (`ACTIVE`, `ASSIGNED`, `WAITING`, `POSTPONED`,
 `CLOSED`, `DELETED`) at the association's request -- see the ticket-status
-ADR entry in `docs/architecture-decisions.md` for the full reasoning
+ADR entry in `docs/ADR/0016-ticket-status-redesign-six-explicit-states-plus-bulk-actions.md` for the full reasoning
 (why `WAITING` exists as a distinct state from `POSTPONED`, why
 `DELETED` is a status rather than a `deleted_at` column here, and the
 bulk-actions UI that came with it). When a ticket is assigned, the

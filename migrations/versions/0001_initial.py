@@ -13,7 +13,7 @@ runs the CREATE statements below.
 
 Note: the table/column names and enum values below (e.g. "benutzer",
 "rolle", "VORSTAND") are historical and were later renamed to English
-by subsequent migrations (see docs/architecture-decisions.md, "module
+by subsequent migrations (see docs/ADR/README.md, "module
 to English" entries) -- left as-is here since editing an already-applied
 migration's SQL would break `alembic stamp head` and fresh installs
 replaying this history.

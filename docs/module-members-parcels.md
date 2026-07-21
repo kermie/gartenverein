@@ -21,7 +21,7 @@ change_history          – generic audit log (see below)
 families). The assignment table `member_parcels` carries
 `assigned_from`/`assigned_until` (date fields) for tenancy history.
 Originally also had an `is_primary_tenant` role distinction; removed
-(see [Architecture Decisions](./architecture-decisions.md)) since the
+(see [Architecture Decisions](./ADR/0018-removed-the-primary-co-tenant-role-distinction.md)) since the
 board holds every resident of a parcel jointly responsible, with no
 hierarchy between them.
 
