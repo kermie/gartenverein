@@ -3,9 +3,16 @@
 {% block page_title %}{{ t('calendar.council_presence.title') }}{% endblock %}
 
 {% block topbar_actions %}
-<a href="/calendar/" class="btn btn-sm btn-outline-secondary">
-    <i class="bi bi-arrow-left me-1"></i>{{ t('common.back') }}
-</a>
+<div class="dropdown">
+    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <i class="bi bi-rss-fill text-warning me-1"></i>{{ t('calendar.ics_subscribe_button') }}
+    </button>
+    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 340px;">
+        <label class="form-label small text-muted mb-1">{{ t('calendar.hub.ics_private_label') }}</label>
+        <input type="text" class="form-control form-control-sm" readonly onclick="this.select()"
+               value="{{ request.base_url }}calendar/council-presence.ics?token={{ ics_token }}">
+    </div>
+</div>
 {% endblock %}
 
 {% block content %}

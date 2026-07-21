@@ -706,3 +706,82 @@ class PublicSignupSessionResult(BaseModel):
 
 class PublicSignupResult(BaseModel):
     results: List[PublicSignupSessionResult]
+
+
+# ---------------------------------------------------------------------------
+# Inventory
+# ---------------------------------------------------------------------------
+
+class InventoryCategoryBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+
+class InventoryCategoryCreate(InventoryCategoryBase):
+    pass
+
+
+class InventoryCategoryOut(InventoryCategoryBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+
+
+class InventoryItemBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    category_id: Optional[str] = None
+    owner_type: str = Field("CLUB", description="CLUB or MEMBER")
+    owner_member_id: Optional[str] = Field(None, description="Required when owner_type = MEMBER")
+    storage_location: Optional[str] = None
+    purchase_date: Optional[date] = None
+    purchase_price: Optional[Decimal] = None
+    current_value: Optional[Decimal] = None
+    current_value_updated_at: Optional[date] = None
+    replacement_cost: Optional[Decimal] = None
+    quantity_total: int = 1
+    is_borrowable: bool = False
+    default_loan_fee: Optional[Decimal] = None
+    notes: Optional[str] = None
+
+
+class InventoryItemCreate(InventoryItemBase):
+    pass
+
+
+class InventoryItemUpdate(InventoryItemBase):
+    pass
+
+
+class InventoryItemOut(InventoryItemBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    retired_at: Optional[datetime] = None
+    quantity_on_loan: int
+    available_quantity: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class ItemLoanCreate(BaseModel):
+    member_id: str
+    quantity: int = 1
+    borrowed_date: date
+    fee_charged: Optional[Decimal] = None
+    note: Optional[str] = None
+
+
+class ItemLoanOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    item_id: str
+    member_id: str
+    quantity: int
+    borrowed_date: date
+    returned_date: Optional[date] = None
+    fee_charged: Optional[Decimal] = None
+    note: Optional[str] = None
+    created_at: datetime
+
+
+class ItemLoanReturn(BaseModel):
+    returned_date: Optional[date] = Field(None, description="Defaults to today if not given")

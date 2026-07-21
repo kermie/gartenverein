@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block title %}{{ item.name }}{% endblock %}
+{% block page_title %}{{ item.name }}{% endblock %}
+
+{% block topbar_actions %}
+<div class="d-flex gap-2 flex-wrap">
+    {% if user.role.value in ['admin', 'board'] %}
+    <a href="/inventory/{{ item.id }}/edit" class="btn btn-sm btn-primary">
+        <i class="bi bi-pencil me-1"></i>{{ t('inventory.detail.edit_button') }}
+    </a>
+    {% if not item.retired_at %}
+    <form method="post" action="/inventory/{{ item.id }}/retire" class="d-inline"
+          onsubmit="return confirm('{{ t('inventory.detail.retire_confirm') }}');">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-archive me-1"></i>{{ t('inventory.detail.retire_button') }}
+        </button>
+    </form>
+    {% endif %}
+    <form method="post" action="/inventory/{{ item.id }}/delete" class="d-inline"
+          onsubmit="return confirm('{{ t('inventory.detail.delete_confirm') }}');">
+        <button type="submit" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-trash me-1"></i>{{ t('inventory.detail.delete_button') }}
+        </button>
+    </form>
+    {% endif %}
+    <a href="/inventory/" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>{{ t('common.back') }}
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+{% if item.retired_at %}
+<div class="alert alert-secondary">{{ t('inventory.detail.retired_notice') }}</div>
+{% endif %}
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card mb-3">
+            <div class="card-header">{{ t('inventory.detail.overview_header') }}</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">{{ t('inventory.detail.field_category') }}</dt>
+                    <dd class="col-sm-7">{{ item.category.name if item.category else t('inventory.list.uncategorized') }}</dd>
+
+                    <dt class="col-sm-5">{{ t('inventory.detail.field_owner') }}</dt>
+                    <dd class="col-sm-7">
+                        {% if item.owner_type.value == 'MEMBER' %}
+                        {{ item.owner_member.full_name if item.owner_member else t('inventory.list.owner_member') }}
+                        {% else %}
+                        {{ t('inventory.list.owner_club') }}
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-5">{{ t('inventory.detail.field_storage_location') }}</dt>
+                    <dd class="col-sm-7">{{ item.storage_location or '-' }}</dd>
+
+                    <dt class="col-sm-5">{{ t('inventory.detail.field_quantity') }}</dt>
+                    <dd class="col-sm-7">
+                        {% if item.is_borrowable %}
+                        {{ item.available_quantity }} / {{ item.quantity_total }} {{ t('inventory.detail.available_suffix') }}
+                        {% else %}
+                        {{ item.quantity_total }}
+                        {% endif %}
+                    </dd>
+
+                    {% if item.description %}
+                    <dt class="col-sm-5">{{ t('inventory.detail.field_description') }}</dt>
+                    <dd class="col-sm-7">{{ item.description }}</dd>
+                    {% endif %}
+                    {% if item.notes %}
+                    <dt class="col-sm-5">{{ t('inventory.detail.field_notes') }}</dt>
+                    <dd class="col-sm-7">{{ item.notes }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">{{ t('inventory.detail.financials_header') }}</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">{{ t('inventory.detail.field_purchase_date') }}</dt>
+                    <dd class="col-sm-7">{{ item.purchase_date.isoformat() if item.purchase_date else '-' }}</dd>
+
+                    <dt class="col-sm-5">{{ t('inventory.detail.field_purchase_price') }}</dt>
+                    <dd class="col-sm-7">{{ item.purchase_price|float|money if item.purchase_price is not none else '-' }}</dd>
+
+                    <dt class="col-sm-5">{{ t('inventory.detail.field_current_value') }}</dt>
+                    <dd class="col-sm-7">
+                        {% if item.current_value is not none %}
+                        {{ item.current_value|float|money }}
+                        {% if item.current_value_updated_at %}
+                        <span class="text-muted" style="font-size: 0.8rem;">({{ t('inventory.detail.as_of') }} {{ item.current_value_updated_at.isoformat() }})</span>
+                        {% endif %}
+                        {% else %}-{% endif %}
+                    </dd>
+
+                    <dt class="col-sm-5">{{ t('inventory.detail.field_replacement_cost') }}</dt>
+                    <dd class="col-sm-7">{{ item.replacement_cost|float|money if item.replacement_cost is not none else '-' }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        {% if item.is_borrowable %}
+        <div class="card mb-3">
+            <div class="card-header">{{ t('inventory.detail.checkout_header') }}</div>
+            <div class="card-body">
+                {% if item.available_quantity > 0 %}
+                {% if user.role.value in ['admin', 'board'] %}
+                <form method="post" action="/inventory/{{ item.id }}/loans/checkout">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ t('inventory.detail.checkout_member') }}</label>
+                            <select name="member_id" class="form-select form-select-sm" required>
+                                <option value="">{{ t('inventory.form.select_member') }}</option>
+                                {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">{{ t('inventory.detail.checkout_quantity') }}</label>
+                            <input type="number" name="quantity" class="form-control form-control-sm" min="1" max="{{ item.available_quantity }}" value="1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">{{ t('inventory.detail.checkout_date') }}</label>
+                            <input type="date" name="borrowed_date" class="form-control form-control-sm" value="{{ today }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ t('inventory.detail.checkout_fee') }}</label>
+                            <input type="text" name="fee_charged" class="form-control form-control-sm"
+                                   placeholder="{{ item.default_loan_fee if item.default_loan_fee is not none else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ t('inventory.detail.checkout_note') }}</label>
+                            <input type="text" name="note" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary mt-2">{{ t('inventory.detail.checkout_button') }}</button>
+                </form>
+                {% endif %}
+                {% else %}
+                <p class="text-muted mb-0">{{ t('inventory.detail.none_available') }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mb-3">
+            <div class="card-header">{{ t('inventory.detail.loan_history_header') }}</div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>{{ t('inventory.detail.loan_col_member') }}</th>
+                            <th>{{ t('inventory.detail.loan_col_quantity') }}</th>
+                            <th>{{ t('inventory.detail.loan_col_borrowed') }}</th>
+                            <th>{{ t('inventory.detail.loan_col_returned') }}</th>
+                            <th>{{ t('inventory.detail.loan_col_fee') }}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in loans %}
+                        <tr>
+                            <td>{{ loan.member.full_name }}</td>
+                            <td>{{ loan.quantity }}</td>
+                            <td>{{ loan.borrowed_date.isoformat() }}</td>
+                            <td>
+                                {% if loan.returned_date %}
+                                {{ loan.returned_date.isoformat() }}
+                                {% else %}
+                                <span class="badge" style="background: #dbeafe; color: #1e40af;">{{ t('inventory.detail.outstanding_badge') }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ loan.fee_charged|float|money if loan.fee_charged is not none else '-' }}</td>
+                            <td class="text-end">
+                                {% if not loan.returned_date and user.role.value in ['admin', 'board'] %}
+                                <form method="post" action="/inventory/loans/{{ loan.id }}/return" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">{{ t('inventory.detail.mark_returned_button') }}</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-3 text-muted">{{ t('inventory.detail.no_loans') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

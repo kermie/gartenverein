@@ -30,13 +30,13 @@
     "menu_open_aria": "Otevřít menu",
     "work_hours_tasks": "Úkoly",
     "calendar_group": "Kalendář",
-    "calendar_overview": "Přehled",
     "calendar_community": "Kalendář spolku",
     "calendar_birthdays": "Narozeniny",
     "calendar_council_presence": "Přítomnost výboru",
     "calendar_council_absence": "Nepřítomnost výboru",
     "integrations": "Integrace",
-    "announcements": "Oznámení"
+    "announcements": "Oznámení",
+    "inventory": "Inventář"
   },
   "errors": {
     "ticket_not_found": "Ticket nebyl nalezen",
@@ -244,7 +244,9 @@
         "public_signup_api_name": "Veřejné API pro přihlášky",
         "public_signup_api_desc": "Umožňuje externímu webu (např. pluginu WordPress) odesílat přihlášky na pracovní brigády bez přihlášení do Parcella. Ve výchozím nastavení vypnuto, protože otevírá veřejný zapisovací endpoint; přístupový token najdete na stránce Integrace.",
         "announcements_name": "Oznámení",
-        "announcements_desc": "Napište zprávu pro klub jednou a připravte ji pro blog, e-mail členům a tištěné oznámení."
+        "announcements_desc": "Napište zprávu pro klub jednou a připravte ji pro blog, e-mail členům a tištěné oznámení.",
+        "inventory_name": "Inventář",
+        "inventory_desc": "Eviduje vše, co klub vlastní (i osobní věci, které si členové ukládají na pozemku klubu), rozdělené do vlastních kategorií, s volitelným systémem půjčování."
       },
       "region_header": "Region",
       "region_help": "Určuje formát čísel a adresy (např. oddělovač tisíců, pořadí PSČ a města). Nezávisle na jazyce rozhraní.",
@@ -1016,7 +1018,8 @@
       "add_button": "Přidat",
       "tasks_card_title": "Úkoly",
       "manage_tasks_link": "Spravovat úkoly",
-      "no_tasks": "Pro tuto směnu zatím nejsou naplánovány žádné úkoly."
+      "no_tasks": "Pro tuto směnu zatím nejsou naplánovány žádné úkoly.",
+      "attendee_sheet_link": "Seznam účastníků"
     },
     "session_form": {
       "title_edit": "Upravit sezení",
@@ -1162,16 +1165,6 @@
   },
   "calendar": {
     "hub": {
-      "title": "Kalendář",
-      "community_title": "Kalendář spolku",
-      "community_desc": "Členské schůze, kontroly zahrádek a pracovní směny.",
-      "birthdays_title": "Narozeniny",
-      "birthdays_desc": "Nadcházející narozeniny členů.",
-      "council_presence_title": "Přítomnost výboru",
-      "council_presence_desc": "Kdy budou členové výboru na místě.",
-      "council_absence_title": "Nepřítomnost výboru",
-      "council_absence_desc": "Zadejte vlastní nepřítomnost (např. dovolenou), aby ostatní věděli.",
-      "view_button": "Zobrazit",
       "ics_public_label": "Veřejný odkaz ICS (lze vložit na veřejný web):",
       "ics_private_label": "Soukromý odkaz ICS (nesdílejte -- kdokoli s tímto odkazem jej může zobrazit):"
     },
@@ -1249,7 +1242,8 @@
       "entry_not_found": "Záznam nenalezen",
       "invalid_token": "Neplatný nebo chybějící přístupový token",
       "not_your_entry": "Můžete mazat pouze vlastní záznamy"
-    }
+    },
+    "ics_subscribe_button": "Odebírat (ICS)"
   },
   "announcements": {
     "list": {
@@ -1304,6 +1298,120 @@
       "print_generated": "PDF vytvořeno",
       "print_too_long_status": "Příliš dlouhé na jednu stránku",
       "print_generate_button": "Vytvořit PDF"
+    }
+  },
+  "inventory": {
+    "list": {
+      "title": "Inventář",
+      "active_loans_link": "Aktivní výpůjčky",
+      "manage_categories_link": "Spravovat kategorie",
+      "new_item": "Nová položka",
+      "all_categories": "Všechny kategorie",
+      "include_retired": "Zahrnout vyřazené položky",
+      "uncategorized": "Bez kategorie",
+      "col_name": "Název",
+      "col_owner": "Vlastník",
+      "col_storage": "Uložení",
+      "col_quantity": "Množství",
+      "col_value": "Hodnota",
+      "retired_badge": "Vyřazeno",
+      "borrowable_badge": "K zapůjčení",
+      "owner_member": "Vlastnictví člena",
+      "owner_club": "Vlastnictví klubu",
+      "empty": "Zatím žádné položky inventáře."
+    },
+    "categories": {
+      "title": "Kategorie inventáře",
+      "error_missing_name": "Zadejte prosím název kategorie.",
+      "error_duplicate_name": "Kategorie s tímto názvem již existuje.",
+      "name_placeholder": "např. Hřiště, Ploty, Zámky a klíče",
+      "description_placeholder": "Volitelný popis",
+      "add_button": "Přidat",
+      "col_name": "Název",
+      "col_description": "Popis",
+      "delete_confirm": "Smazat tuto kategorii? Položky v ní jen zůstanou bez kategorie, nesmažou se.",
+      "empty": "Zatím žádné kategorie."
+    },
+    "form": {
+      "title": "Položka inventáře",
+      "error_missing_name": "Zadejte prosím název.",
+      "error_missing_owner_member": "Vyberte prosím, kterému členovi to patří.",
+      "label_name": "Název",
+      "label_category": "Kategorie",
+      "no_category": "Žádná kategorie",
+      "label_description": "Popis",
+      "label_storage_location": "Místo uložení",
+      "ownership_header": "Vlastnictví",
+      "owner_club_label": "Vlastnictví klubu",
+      "owner_member_label": "Osobní vlastnictví člena",
+      "owner_hint": "Pro věci, které si členové ukládají na pozemku klubu, ale jsou jejich osobním vlastnictvím -- i tak se zde evidují (např. pro účely pojištění/odpovědnosti).",
+      "label_owner_member": "Vlastnící člen",
+      "select_member": "Vyberte člena...",
+      "financials_header": "Finance",
+      "financials_hint": "Aktuální hodnota se zadává/aktualizuje ručně, kdykoli to někdo zkontroluje -- automatický výpočet odpisů zde není.",
+      "label_purchase_date": "Datum nákupu",
+      "label_purchase_price": "Nákupní cena",
+      "label_current_value": "Aktuální hodnota",
+      "label_replacement_cost": "Cena za náhradu",
+      "label_current_value_updated_at": "Hodnota naposledy zkontrolována",
+      "current_value_updated_at_hint": "Aby bylo vidět, jak aktuální hodnota je -- volitelné.",
+      "lending_header": "Půjčování",
+      "label_quantity_total": "Vlastněné množství",
+      "is_borrowable_label": "Členové si to mohou půjčit",
+      "is_borrowable_hint": "Aktivuje systém výpůjčky/vrácení pro tuto položku.",
+      "label_default_loan_fee": "Navrhovaný poplatek za půjčení",
+      "default_loan_fee_hint": "Předvyplní poplatek při výpůjčce; lze u každé výpůjčky změnit.",
+      "label_notes": "Poznámky",
+      "save_button": "Uložit",
+      "cancel_button": "Zrušit"
+    },
+    "detail": {
+      "edit_button": "Upravit",
+      "retire_confirm": "Označit tuto položku jako vyřazenou (již ve vlastnictví/provozu)? Zůstává evidována, ale ve výchozím nastavení je vyloučena z aktivního seznamu.",
+      "retire_button": "Vyřadit",
+      "delete_confirm": "Trvale smazat tuto položku a celou její historii výpůjček? Toto nelze vrátit zpět -- pokud chcete jen označit, že již není ve vlastnictví, použijte místo toho \"Vyřadit\".",
+      "delete_button": "Smazat",
+      "retired_notice": "Tato položka je vyřazena -- již ve vlastnictví/provozu.",
+      "overview_header": "Přehled",
+      "field_category": "Kategorie",
+      "field_owner": "Vlastník",
+      "field_storage_location": "Místo uložení",
+      "field_quantity": "Množství",
+      "available_suffix": "k dispozici",
+      "field_description": "Popis",
+      "field_notes": "Poznámky",
+      "financials_header": "Finance",
+      "field_purchase_date": "Datum nákupu",
+      "field_purchase_price": "Nákupní cena",
+      "field_current_value": "Aktuální hodnota",
+      "as_of": "ke dni",
+      "field_replacement_cost": "Cena za náhradu",
+      "checkout_header": "Půjčit",
+      "checkout_member": "Člen",
+      "checkout_quantity": "Množství",
+      "checkout_date": "Datum",
+      "checkout_fee": "Poplatek",
+      "checkout_note": "Poznámka",
+      "checkout_button": "Půjčit",
+      "none_available": "Momentálně nic k zapůjčení k dispozici.",
+      "loan_history_header": "Historie výpůjček",
+      "loan_col_member": "Člen",
+      "loan_col_quantity": "Množ.",
+      "loan_col_borrowed": "Půjčeno",
+      "loan_col_returned": "Vráceno",
+      "loan_col_fee": "Poplatek",
+      "outstanding_badge": "Nevráceno",
+      "mark_returned_button": "Označit jako vráceno",
+      "no_loans": "Zatím žádné výpůjčky."
+    },
+    "active_loans": {
+      "title": "Aktivní výpůjčky",
+      "col_item": "Položka",
+      "col_member": "Člen",
+      "col_quantity": "Množ.",
+      "col_since": "Od",
+      "col_fee": "Poplatek",
+      "empty": "Momentálně nic není zapůjčeno."
     }
   }
 }

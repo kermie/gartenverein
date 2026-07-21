@@ -30,13 +30,13 @@
     "menu_open_aria": "Open menu",
     "work_hours_tasks": "Taken",
     "calendar_group": "Kalender",
-    "calendar_overview": "Overzicht",
     "calendar_community": "Verenigingskalender",
     "calendar_birthdays": "Verjaardagen",
     "calendar_council_presence": "Aanwezigheid bestuur",
     "calendar_council_absence": "Afwezigheid bestuur",
     "integrations": "Integraties",
-    "announcements": "Mededelingen"
+    "announcements": "Mededelingen",
+    "inventory": "Inventaris"
   },
   "errors": {
     "ticket_not_found": "Ticket niet gevonden",
@@ -244,7 +244,9 @@
         "public_signup_api_name": "Publieke aanmeld-API",
         "public_signup_api_desc": "Laat een externe website (bijv. een WordPress-plugin) aanmeldingen voor werkbeurten indienen zonder Parcella-login. Standaard uitgeschakeld omdat dit een publiek schrijf-eindpunt opent; het toegangstoken staat op de pagina Integraties.",
         "announcements_name": "Mededelingen",
-        "announcements_desc": "Stel clubnieuws één keer op en bereid het voor op de blog, ledenmail en een gedrukte mededeling."
+        "announcements_desc": "Stel clubnieuws één keer op en bereid het voor op de blog, ledenmail en een gedrukte mededeling.",
+        "inventory_name": "Inventaris",
+        "inventory_desc": "Houdt alles bij wat de vereniging bezit (en persoonlijke spullen die leden op het verenigingsterrein opslaan), gegroepeerd in eigen categorieën, met een optioneel uitleensysteem."
       },
       "region_header": "Regio",
       "region_help": "Bepaalt het getal- en adresformaat (bijv. duizendtalscheidingsteken, volgorde van postcode en plaats). Onafhankelijk van de interfacetaal.",
@@ -1016,7 +1018,8 @@
       "add_button": "Toevoegen",
       "tasks_card_title": "Taken",
       "manage_tasks_link": "Taken beheren",
-      "no_tasks": "Voor deze sessie zijn nog geen taken ingepland."
+      "no_tasks": "Voor deze sessie zijn nog geen taken ingepland.",
+      "attendee_sheet_link": "Deelnemerslijst"
     },
     "session_form": {
       "title_edit": "Sessie bewerken",
@@ -1162,16 +1165,6 @@
   },
   "calendar": {
     "hub": {
-      "title": "Kalender",
-      "community_title": "Verenigingskalender",
-      "community_desc": "Ledenvergaderingen, perceelinspecties en werksessies.",
-      "birthdays_title": "Verjaardagen",
-      "birthdays_desc": "Aankomende verjaardagen van leden.",
-      "council_presence_title": "Aanwezigheid bestuur",
-      "council_presence_desc": "Wanneer bestuursleden aanwezig zullen zijn.",
-      "council_absence_title": "Afwezigheid bestuur",
-      "council_absence_desc": "Registreer je eigen afwezigheid (bijv. vakantie) zodat anderen het weten.",
-      "view_button": "Bekijken",
       "ics_public_label": "Openbare ICS-link (kan worden ingesloten op je openbare website):",
       "ics_private_label": "Privé ICS-link (niet delen -- iedereen met deze link kan hem bekijken):"
     },
@@ -1249,7 +1242,8 @@
       "entry_not_found": "Item niet gevonden",
       "invalid_token": "Ongeldig of ontbrekend toegangstoken",
       "not_your_entry": "Je kunt alleen je eigen items verwijderen"
-    }
+    },
+    "ics_subscribe_button": "Abonneren (ICS)"
   },
   "announcements": {
     "list": {
@@ -1304,6 +1298,120 @@
       "print_generated": "PDF gegenereerd",
       "print_too_long_status": "Te lang voor één pagina",
       "print_generate_button": "PDF genereren"
+    }
+  },
+  "inventory": {
+    "list": {
+      "title": "Inventaris",
+      "active_loans_link": "Actieve uitleningen",
+      "manage_categories_link": "Categorieën beheren",
+      "new_item": "Nieuw item",
+      "all_categories": "Alle categorieën",
+      "include_retired": "Uitgefaseerde items meenemen",
+      "uncategorized": "Zonder categorie",
+      "col_name": "Naam",
+      "col_owner": "Eigenaar",
+      "col_storage": "Opslag",
+      "col_quantity": "Aantal",
+      "col_value": "Waarde",
+      "retired_badge": "Uitgefaseerd",
+      "borrowable_badge": "Uitleenbaar",
+      "owner_member": "Eigendom van lid",
+      "owner_club": "Eigendom van vereniging",
+      "empty": "Nog geen inventarisitems."
+    },
+    "categories": {
+      "title": "Inventariscategorieën",
+      "error_missing_name": "Geef een categorienaam op.",
+      "error_duplicate_name": "Er bestaat al een categorie met deze naam.",
+      "name_placeholder": "bijv. Speeltuin, Hekken, Sloten & sleutels",
+      "description_placeholder": "Optionele beschrijving",
+      "add_button": "Toevoegen",
+      "col_name": "Naam",
+      "col_description": "Beschrijving",
+      "delete_confirm": "Deze categorie verwijderen? Items erin worden alleen categorieloos, niet verwijderd.",
+      "empty": "Nog geen categorieën."
+    },
+    "form": {
+      "title": "Inventarisitem",
+      "error_missing_name": "Geef een naam op.",
+      "error_missing_owner_member": "Selecteer aan welk lid dit toebehoort.",
+      "label_name": "Naam",
+      "label_category": "Categorie",
+      "no_category": "Geen categorie",
+      "label_description": "Beschrijving",
+      "label_storage_location": "Opslaglocatie",
+      "ownership_header": "Eigendom",
+      "owner_club_label": "Eigendom van de vereniging",
+      "owner_member_label": "Persoonlijk eigendom van een lid",
+      "owner_hint": "Voor spullen die leden op het verenigingsterrein opslaan maar persoonlijk bezitten -- worden hier toch bijgehouden (bijv. voor verzekerings-/aansprakelijkheidsdoeleinden).",
+      "label_owner_member": "Eigenaar (lid)",
+      "select_member": "Selecteer een lid...",
+      "financials_header": "Financiën",
+      "financials_hint": "De huidige waarde wordt handmatig ingevoerd/bijgewerkt telkens wanneer iemand dit controleert -- er is geen automatische afschrijvingsberekening.",
+      "label_purchase_date": "Aankoopdatum",
+      "label_purchase_price": "Aankoopprijs",
+      "label_current_value": "Huidige waarde",
+      "label_replacement_cost": "Vervangingswaarde",
+      "label_current_value_updated_at": "Waarde laatst gecontroleerd op",
+      "current_value_updated_at_hint": "Zodat zichtbaar is hoe actueel de waarde is -- optioneel.",
+      "lending_header": "Uitlenen",
+      "label_quantity_total": "Aantal in bezit",
+      "is_borrowable_label": "Leden kunnen dit lenen",
+      "is_borrowable_hint": "Schakelt het uitleen-/retoursysteem voor dit item in.",
+      "label_default_loan_fee": "Voorgestelde uitleenvergoeding",
+      "default_loan_fee_hint": "Vult de vergoeding vooraf in bij het lenen; per uitlening nog aan te passen.",
+      "label_notes": "Notities",
+      "save_button": "Opslaan",
+      "cancel_button": "Annuleren"
+    },
+    "detail": {
+      "edit_button": "Bewerken",
+      "retire_confirm": "Dit item markeren als uitgefaseerd (niet meer in bezit/gebruik)? Het blijft geregistreerd, maar wordt standaard uit de actieve lijst weggelaten.",
+      "retire_button": "Uitfaseren",
+      "delete_confirm": "Dit item en de volledige uitleengeschiedenis permanent verwijderen? Dit kan niet ongedaan worden gemaakt -- gebruik in plaats daarvan \"Uitfaseren\" als je alleen wilt aangeven dat het niet meer in bezit is.",
+      "delete_button": "Verwijderen",
+      "retired_notice": "Dit item is uitgefaseerd -- niet meer in bezit/gebruik.",
+      "overview_header": "Overzicht",
+      "field_category": "Categorie",
+      "field_owner": "Eigenaar",
+      "field_storage_location": "Opslaglocatie",
+      "field_quantity": "Aantal",
+      "available_suffix": "beschikbaar",
+      "field_description": "Beschrijving",
+      "field_notes": "Notities",
+      "financials_header": "Financiën",
+      "field_purchase_date": "Aankoopdatum",
+      "field_purchase_price": "Aankoopprijs",
+      "field_current_value": "Huidige waarde",
+      "as_of": "per",
+      "field_replacement_cost": "Vervangingswaarde",
+      "checkout_header": "Uitlenen",
+      "checkout_member": "Lid",
+      "checkout_quantity": "Aantal",
+      "checkout_date": "Datum",
+      "checkout_fee": "Vergoeding",
+      "checkout_note": "Notitie",
+      "checkout_button": "Uitlenen",
+      "none_available": "Momenteel niets beschikbaar om te lenen.",
+      "loan_history_header": "Uitleengeschiedenis",
+      "loan_col_member": "Lid",
+      "loan_col_quantity": "Aantal",
+      "loan_col_borrowed": "Geleend",
+      "loan_col_returned": "Geretourneerd",
+      "loan_col_fee": "Vergoeding",
+      "outstanding_badge": "Openstaand",
+      "mark_returned_button": "Markeren als geretourneerd",
+      "no_loans": "Nog geen uitleningen."
+    },
+    "active_loans": {
+      "title": "Actieve uitleningen",
+      "col_item": "Item",
+      "col_member": "Lid",
+      "col_quantity": "Aantal",
+      "col_since": "Sinds",
+      "col_fee": "Vergoeding",
+      "empty": "Momenteel niets uitgeleend."
     }
   }
 }

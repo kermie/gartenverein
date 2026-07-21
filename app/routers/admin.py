@@ -202,6 +202,7 @@ MODULE_FELDER = [
     ("modul_tickets", "admin.settings.modules.tickets_name", "admin.settings.modules.tickets_desc"),
     ("modul_purchase_requests", "admin.settings.modules.purchase_requests_name", "admin.settings.modules.purchase_requests_desc"),
     ("modul_calendar", "admin.settings.modules.calendar_name", "admin.settings.modules.calendar_desc"),
+    ("modul_inventory", "admin.settings.modules.inventory_name", "admin.settings.modules.inventory_desc"),
     ("modul_public_signup_api", "admin.settings.modules.public_signup_api_name", "admin.settings.modules.public_signup_api_desc"),
     ("modul_announcements", "admin.settings.modules.announcements_name", "admin.settings.modules.announcements_desc"),
 ]

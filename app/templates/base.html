@@ -325,7 +325,6 @@
                 <i class="bi bi-chevron-down nav-group-chevron"></i>
             </button>
             <div class="collapse nav-group-body" id="nav-group-calendar" data-bs-parent="#nav-accordion">
-                <a href="/calendar/" class="{% if request.url.path == '/calendar/' %}aktiv{% endif %}">{{ t('nav.calendar_overview') }}</a>
                 <a href="/calendar/community" class="{% if '/calendar/community' in request.url.path %}aktiv{% endif %}">{{ t('nav.calendar_community') }}</a>
                 <a href="/calendar/birthdays" class="{% if '/calendar/birthdays' in request.url.path %}aktiv{% endif %}">{{ t('nav.calendar_birthdays') }}</a>
                 <a href="/calendar/council-presence" class="{% if '/calendar/council-presence' in request.url.path %}aktiv{% endif %}">{{ t('nav.calendar_council_presence') }}</a>
@@ -337,6 +336,12 @@
         {% if request.state.module_flags.announcements %}
         <a href="/announcements/" class="nav-top-link {% if '/announcements' in request.url.path %}aktiv{% endif %}">
             <i class="bi bi-megaphone"></i> {{ t('nav.announcements') }}
+        </a>
+        {% endif %}
+
+        {% if request.state.module_flags.inventory %}
+        <a href="/inventory/" class="nav-top-link {% if '/inventory' in request.url.path %}aktiv{% endif %}">
+            <i class="bi bi-box-seam"></i> {{ t('nav.inventory') }}
         </a>
         {% endif %}
 

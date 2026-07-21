@@ -30,13 +30,13 @@
     "menu_open_aria": "Ouvrir le menu",
     "work_hours_tasks": "Tâches",
     "calendar_group": "Calendrier",
-    "calendar_overview": "Aperçu",
     "calendar_community": "Calendrier communautaire",
     "calendar_birthdays": "Anniversaires",
     "calendar_council_presence": "Présence du conseil",
     "calendar_council_absence": "Absence du conseil",
     "integrations": "Intégrations",
-    "announcements": "Annonces"
+    "announcements": "Annonces",
+    "inventory": "Inventaire"
   },
   "errors": {
     "ticket_not_found": "Ticket non trouvé",
@@ -244,7 +244,9 @@
         "public_signup_api_name": "API publique d'inscription",
         "public_signup_api_desc": "Permet à un site externe (par ex. une extension WordPress) de soumettre des inscriptions aux chantiers collectifs sans connexion à Parcella. Désactivé par défaut car cela ouvre un point d'accès public en écriture ; le jeton d'accès se trouve sur la page Intégrations.",
         "announcements_name": "Annonces",
-        "announcements_desc": "Rédigez une actualité du club une seule fois et préparez-la pour le blog, l'e-mail aux membres et une affiche imprimée."
+        "announcements_desc": "Rédigez une actualité du club une seule fois et préparez-la pour le blog, l'e-mail aux membres et une affiche imprimée.",
+        "inventory_name": "Inventaire",
+        "inventory_desc": "Suit tout ce que le club possède (ainsi que les objets personnels que les membres entreposent sur le terrain du club), regroupés selon vos propres catégories, avec un système de prêt facultatif."
       },
       "region_header": "Région",
       "region_help": "Détermine le format des nombres et de l'adresse (par ex. séparateur de milliers, ordre du code postal et de la ville). Indépendant de la langue de l'interface.",
@@ -1016,7 +1018,8 @@
       "add_button": "Ajouter",
       "tasks_card_title": "Tâches",
       "manage_tasks_link": "Gérer les tâches",
-      "no_tasks": "Aucune tâche encore planifiée pour cette session."
+      "no_tasks": "Aucune tâche encore planifiée pour cette session.",
+      "attendee_sheet_link": "Liste des participants"
     },
     "session_form": {
       "title_edit": "Modifier la session",
@@ -1162,16 +1165,6 @@
   },
   "calendar": {
     "hub": {
-      "title": "Calendrier",
-      "community_title": "Calendrier communautaire",
-      "community_desc": "Assemblées des membres, inspections de parcelles et sessions de travail.",
-      "birthdays_title": "Anniversaires",
-      "birthdays_desc": "Anniversaires à venir des membres.",
-      "council_presence_title": "Présence du conseil",
-      "council_presence_desc": "Quand les membres du conseil seront sur place.",
-      "council_absence_title": "Absence du conseil",
-      "council_absence_desc": "Enregistrez votre propre absence (ex. vacances) pour que les autres le sachent.",
-      "view_button": "Afficher",
       "ics_public_label": "Lien ICS public (peut être intégré sur votre site public) :",
       "ics_private_label": "Lien ICS privé (à ne pas partager -- toute personne disposant de ce lien peut le consulter) :"
     },
@@ -1249,7 +1242,8 @@
       "entry_not_found": "Entrée introuvable",
       "invalid_token": "Jeton d'accès invalide ou manquant",
       "not_your_entry": "Vous ne pouvez supprimer que vos propres entrées"
-    }
+    },
+    "ics_subscribe_button": "S'abonner (ICS)"
   },
   "announcements": {
     "list": {
@@ -1304,6 +1298,120 @@
       "print_generated": "PDF généré",
       "print_too_long_status": "Trop long pour une page",
       "print_generate_button": "Générer le PDF"
+    }
+  },
+  "inventory": {
+    "list": {
+      "title": "Inventaire",
+      "active_loans_link": "Prêts en cours",
+      "manage_categories_link": "Gérer les catégories",
+      "new_item": "Nouvel objet",
+      "all_categories": "Toutes les catégories",
+      "include_retired": "Inclure les objets retirés",
+      "uncategorized": "Sans catégorie",
+      "col_name": "Nom",
+      "col_owner": "Propriétaire",
+      "col_storage": "Emplacement",
+      "col_quantity": "Quantité",
+      "col_value": "Valeur",
+      "retired_badge": "Retiré",
+      "borrowable_badge": "Empruntable",
+      "owner_member": "Propriété d'un membre",
+      "owner_club": "Propriété du club",
+      "empty": "Aucun objet dans l'inventaire pour le moment."
+    },
+    "categories": {
+      "title": "Catégories d'inventaire",
+      "error_missing_name": "Veuillez indiquer un nom de catégorie.",
+      "error_duplicate_name": "Une catégorie portant ce nom existe déjà.",
+      "name_placeholder": "p.ex. Aire de jeux, Clôtures, Serrures et clés",
+      "description_placeholder": "Description facultative",
+      "add_button": "Ajouter",
+      "col_name": "Nom",
+      "col_description": "Description",
+      "delete_confirm": "Supprimer cette catégorie ? Les objets qu'elle contient deviendront simplement sans catégorie, pas supprimés.",
+      "empty": "Aucune catégorie pour le moment."
+    },
+    "form": {
+      "title": "Objet d'inventaire",
+      "error_missing_name": "Veuillez indiquer un nom.",
+      "error_missing_owner_member": "Veuillez sélectionner à quel membre appartient cet objet.",
+      "label_name": "Nom",
+      "label_category": "Catégorie",
+      "no_category": "Aucune catégorie",
+      "label_description": "Description",
+      "label_storage_location": "Emplacement de stockage",
+      "ownership_header": "Propriété",
+      "owner_club_label": "Propriété du club",
+      "owner_member_label": "Propriété personnelle d'un membre",
+      "owner_hint": "Pour les objets que les membres entreposent sur le terrain du club mais possèdent personnellement -- toujours suivis ici (p.ex. pour l'assurance/la responsabilité).",
+      "label_owner_member": "Membre propriétaire",
+      "select_member": "Sélectionner un membre...",
+      "financials_header": "Finances",
+      "financials_hint": "La valeur actuelle est saisie/mise à jour manuellement à chaque vérification -- il n'y a pas de calcul d'amortissement automatique.",
+      "label_purchase_date": "Date d'achat",
+      "label_purchase_price": "Prix d'achat",
+      "label_current_value": "Valeur actuelle",
+      "label_replacement_cost": "Coût de remplacement",
+      "label_current_value_updated_at": "Valeur vérifiée pour la dernière fois le",
+      "current_value_updated_at_hint": "Pour rendre visible l'ancienneté de la valeur -- facultatif.",
+      "lending_header": "Prêt",
+      "label_quantity_total": "Quantité possédée",
+      "is_borrowable_label": "Les membres peuvent emprunter cet objet",
+      "is_borrowable_hint": "Active le système d'emprunt/retour pour cet objet.",
+      "label_default_loan_fee": "Frais de prêt suggérés",
+      "default_loan_fee_hint": "Pré-remplit les frais lors de l'emprunt ; toujours modifiable par prêt.",
+      "label_notes": "Notes",
+      "save_button": "Enregistrer",
+      "cancel_button": "Annuler"
+    },
+    "detail": {
+      "edit_button": "Modifier",
+      "retire_confirm": "Marquer cet objet comme retiré (plus possédé/en service) ? Il reste enregistré, mais exclu de la liste active par défaut.",
+      "retire_button": "Retirer",
+      "delete_confirm": "Supprimer définitivement cet objet et tout son historique de prêts ? Cette action est irréversible -- utilisez plutôt \"Retirer\" si vous voulez seulement indiquer qu'il n'est plus possédé.",
+      "delete_button": "Supprimer",
+      "retired_notice": "Cet objet est retiré -- plus possédé/en service.",
+      "overview_header": "Aperçu",
+      "field_category": "Catégorie",
+      "field_owner": "Propriétaire",
+      "field_storage_location": "Emplacement de stockage",
+      "field_quantity": "Quantité",
+      "available_suffix": "disponible(s)",
+      "field_description": "Description",
+      "field_notes": "Notes",
+      "financials_header": "Finances",
+      "field_purchase_date": "Date d'achat",
+      "field_purchase_price": "Prix d'achat",
+      "field_current_value": "Valeur actuelle",
+      "as_of": "au",
+      "field_replacement_cost": "Coût de remplacement",
+      "checkout_header": "Emprunter",
+      "checkout_member": "Membre",
+      "checkout_quantity": "Quantité",
+      "checkout_date": "Date",
+      "checkout_fee": "Frais",
+      "checkout_note": "Note",
+      "checkout_button": "Emprunter",
+      "none_available": "Rien de disponible à l'emprunt pour le moment.",
+      "loan_history_header": "Historique des prêts",
+      "loan_col_member": "Membre",
+      "loan_col_quantity": "Qté",
+      "loan_col_borrowed": "Emprunté",
+      "loan_col_returned": "Retourné",
+      "loan_col_fee": "Frais",
+      "outstanding_badge": "En cours",
+      "mark_returned_button": "Marquer comme retourné",
+      "no_loans": "Aucun prêt pour le moment."
+    },
+    "active_loans": {
+      "title": "Prêts en cours",
+      "col_item": "Objet",
+      "col_member": "Membre",
+      "col_quantity": "Qté",
+      "col_since": "Depuis",
+      "col_fee": "Frais",
+      "empty": "Rien n'est actuellement emprunté."
     }
   }
 }

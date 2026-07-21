@@ -35,6 +35,7 @@ MODULE_DEFAULTS: Dict[str, bool] = {
     "tickets": True,
     "purchase_requests": True,
     "calendar": True,
+    "inventory": True,
     # Unlike the modules above, this defaults to False: it opens a public,
     # unauthenticated-write HTTP endpoint (see app/routers/api_public.py),
     # which is a deliberate security-relevant choice a club must opt into,

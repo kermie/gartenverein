@@ -98,16 +98,47 @@ async def test_private_ics_feeds_require_correct_token(client, admin_user):
     wrong_token = await client.get("/calendar/birthdays.ics?token=not-the-real-token")
     assert wrong_token.status_code == 403
 
-    hub = await client.get("/calendar/")
-    assert hub.status_code == 200
+    # The token is now shown inline on each calendar page's own ICS
+    # subscribe dropdown (the hub page was removed -- see
+    # docs/module-calendar.md -- and is now just a redirect).
+    birthdays_page = await client.get("/calendar/birthdays")
+    assert birthdays_page.status_code == 200
     import re
-    match = re.search(r"birthdays\.ics\?token=([\w-]+)", hub.text)
-    assert match, "Expected the birthday ICS URL with a token on the calendar hub page"
+    match = re.search(r"birthdays\.ics\?token=([\w-]+)", birthdays_page.text)
+    assert match, "Expected the birthday ICS URL with a token on the birthdays page itself"
     real_token = match.group(1)
 
     correct = await client.get(f"/calendar/birthdays.ics?token={real_token}")
     assert correct.status_code == 200
     assert "BEGIN:VCALENDAR" in correct.text
+
+
+async def test_calendar_hub_redirects_to_community(client, admin_user):
+    """The old /calendar/ overview page was removed in favor of putting
+    each calendar's ICS link on its own page -- but the URL still
+    redirects rather than 404ing, for anyone with an old bookmark."""
+    await web_login(client, "admin@example.com")
+    response = await client.get("/calendar/", follow_redirects=False)
+    assert response.status_code == 302
+    assert response.headers["location"] == "/calendar/community"
+
+
+async def test_each_calendar_page_shows_its_own_ics_link(client, admin_user):
+    """Every sub-calendar carries its own ICS subscribe link now,
+    rather than all four being listed on a separate hub page."""
+    await web_login(client, "admin@example.com")
+
+    community = await client.get("/calendar/community")
+    assert "calendar/community.ics" in community.text
+
+    birthdays = await client.get("/calendar/birthdays")
+    assert "calendar/birthdays.ics?token=" in birthdays.text
+
+    presence = await client.get("/calendar/council-presence")
+    assert "calendar/council-presence.ics?token=" in presence.text
+
+    absence = await client.get("/calendar/council-absence")
+    assert "calendar/council-absence.ics?token=" in absence.text
 
 
 async def test_council_absence_self_service_permissions(client, admin_user):

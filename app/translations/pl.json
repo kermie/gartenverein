@@ -30,13 +30,13 @@
     "menu_open_aria": "Otwórz menu",
     "work_hours_tasks": "Zadania",
     "calendar_group": "Kalendarz",
-    "calendar_overview": "Przegląd",
     "calendar_community": "Kalendarz stowarzyszenia",
     "calendar_birthdays": "Urodziny",
     "calendar_council_presence": "Obecność zarządu",
     "calendar_council_absence": "Nieobecność zarządu",
     "integrations": "Integracje",
-    "announcements": "Ogłoszenia"
+    "announcements": "Ogłoszenia",
+    "inventory": "Inwentarz"
   },
   "errors": {
     "ticket_not_found": "Nie znaleziono zgłoszenia",
@@ -244,7 +244,9 @@
         "public_signup_api_name": "Publiczne API zgłoszeń",
         "public_signup_api_desc": "Umożliwia zewnętrznej stronie (np. wtyczce WordPress) przesyłanie zgłoszeń na dni robocze bez logowania do Parcella. Domyślnie wyłączone, ponieważ otwiera publiczny punkt zapisu; token dostępu znajdziesz na stronie Integracje.",
         "announcements_name": "Ogłoszenia",
-        "announcements_desc": "Twórz wiadomości dla klubu raz i przygotuj je do bloga, e-maila do członków oraz wydruku."
+        "announcements_desc": "Twórz wiadomości dla klubu raz i przygotuj je do bloga, e-maila do członków oraz wydruku.",
+        "inventory_name": "Inwentarz",
+        "inventory_desc": "Śledzi wszystko, co posiada klub (oraz przedmioty osobiste przechowywane przez członków na terenie klubu), pogrupowane we własne kategorie, z opcjonalnym systemem wypożyczeń."
       },
       "region_header": "Region",
       "region_help": "Określa format liczb i adresu (np. separator tysięcy, kolejność kodu pocztowego i miejscowości). Niezależnie od języka interfejsu.",
@@ -1016,7 +1018,8 @@
       "add_button": "Dodaj",
       "tasks_card_title": "Zadania",
       "manage_tasks_link": "Zarządzaj zadaniami",
-      "no_tasks": "Dla tego wpisu nie zaplanowano jeszcze żadnych zadań."
+      "no_tasks": "Dla tego wpisu nie zaplanowano jeszcze żadnych zadań.",
+      "attendee_sheet_link": "Lista uczestników"
     },
     "session_form": {
       "title_edit": "Edytuj wpis",
@@ -1162,16 +1165,6 @@
   },
   "calendar": {
     "hub": {
-      "title": "Kalendarz",
-      "community_title": "Kalendarz stowarzyszenia",
-      "community_desc": "Zebrania członków, kontrole działek i wpisy prac.",
-      "birthdays_title": "Urodziny",
-      "birthdays_desc": "Nadchodzące urodziny członków.",
-      "council_presence_title": "Obecność zarządu",
-      "council_presence_desc": "Kiedy członkowie zarządu będą na miejscu.",
-      "council_absence_title": "Nieobecność zarządu",
-      "council_absence_desc": "Wpisz własną nieobecność (np. urlop), aby inni wiedzieli.",
-      "view_button": "Pokaż",
       "ics_public_label": "Publiczny link ICS (można osadzić na publicznej stronie):",
       "ics_private_label": "Prywatny link ICS (nie udostępniaj -- każdy z tym linkiem może go zobaczyć):"
     },
@@ -1249,7 +1242,8 @@
       "entry_not_found": "Nie znaleziono wpisu",
       "invalid_token": "Nieprawidłowy lub brakujący token dostępu",
       "not_your_entry": "Możesz usuwać tylko własne wpisy"
-    }
+    },
+    "ics_subscribe_button": "Subskrybuj (ICS)"
   },
   "announcements": {
     "list": {
@@ -1304,6 +1298,120 @@
       "print_generated": "PDF wygenerowany",
       "print_too_long_status": "Za długie na jedną stronę",
       "print_generate_button": "Generuj PDF"
+    }
+  },
+  "inventory": {
+    "list": {
+      "title": "Inwentarz",
+      "active_loans_link": "Aktywne wypożyczenia",
+      "manage_categories_link": "Zarządzaj kategoriami",
+      "new_item": "Nowy przedmiot",
+      "all_categories": "Wszystkie kategorie",
+      "include_retired": "Uwzględnij wycofane przedmioty",
+      "uncategorized": "Bez kategorii",
+      "col_name": "Nazwa",
+      "col_owner": "Właściciel",
+      "col_storage": "Miejsce przechowywania",
+      "col_quantity": "Ilość",
+      "col_value": "Wartość",
+      "retired_badge": "Wycofany",
+      "borrowable_badge": "Do wypożyczenia",
+      "owner_member": "Własność członka",
+      "owner_club": "Własność klubu",
+      "empty": "Brak przedmiotów w inwentarzu."
+    },
+    "categories": {
+      "title": "Kategorie inwentarza",
+      "error_missing_name": "Podaj nazwę kategorii.",
+      "error_duplicate_name": "Kategoria o tej nazwie już istnieje.",
+      "name_placeholder": "np. Plac zabaw, Ogrodzenia, Zamki i klucze",
+      "description_placeholder": "Opcjonalny opis",
+      "add_button": "Dodaj",
+      "col_name": "Nazwa",
+      "col_description": "Opis",
+      "delete_confirm": "Usunąć tę kategorię? Przedmioty w niej pozostaną, tylko staną się bez kategorii.",
+      "empty": "Brak kategorii."
+    },
+    "form": {
+      "title": "Przedmiot inwentarza",
+      "error_missing_name": "Podaj nazwę.",
+      "error_missing_owner_member": "Wybierz, do którego członka to należy.",
+      "label_name": "Nazwa",
+      "label_category": "Kategoria",
+      "no_category": "Brak kategorii",
+      "label_description": "Opis",
+      "label_storage_location": "Miejsce przechowywania",
+      "ownership_header": "Własność",
+      "owner_club_label": "Własność klubu",
+      "owner_member_label": "Własność osobista członka",
+      "owner_hint": "Dla przedmiotów, które członkowie przechowują na terenie klubu, ale są ich osobistą własnością -- nadal ewidencjonowane tutaj (np. na potrzeby ubezpieczenia/odpowiedzialności).",
+      "label_owner_member": "Członek-właściciel",
+      "select_member": "Wybierz członka...",
+      "financials_header": "Finanse",
+      "financials_hint": "Bieżąca wartość jest wprowadzana/aktualizowana ręcznie przy każdej kontroli -- nie ma automatycznego obliczania amortyzacji.",
+      "label_purchase_date": "Data zakupu",
+      "label_purchase_price": "Cena zakupu",
+      "label_current_value": "Bieżąca wartość",
+      "label_replacement_cost": "Koszt wymiany",
+      "label_current_value_updated_at": "Wartość ostatnio sprawdzona",
+      "current_value_updated_at_hint": "Aby było widać, jak aktualna jest wartość -- opcjonalne.",
+      "lending_header": "Wypożyczanie",
+      "label_quantity_total": "Posiadana ilość",
+      "is_borrowable_label": "Członkowie mogą to wypożyczyć",
+      "is_borrowable_hint": "Włącza system wypożyczania/zwrotu dla tego przedmiotu.",
+      "label_default_loan_fee": "Sugerowana opłata za wypożyczenie",
+      "default_loan_fee_hint": "Wypełnia opłatę przy wypożyczeniu; można ją zmienić przy każdym wypożyczeniu.",
+      "label_notes": "Notatki",
+      "save_button": "Zapisz",
+      "cancel_button": "Anuluj"
+    },
+    "detail": {
+      "edit_button": "Edytuj",
+      "retire_confirm": "Oznaczyć ten przedmiot jako wycofany (już nie w posiadaniu/użyciu)? Pozostaje w ewidencji, ale domyślnie jest wykluczony z aktywnej listy.",
+      "retire_button": "Wycofaj",
+      "delete_confirm": "Trwale usunąć ten przedmiot i całą jego historię wypożyczeń? Tej operacji nie można cofnąć -- jeśli chcesz tylko oznaczyć, że go już nie posiadasz, użyj opcji \"Wycofaj\".",
+      "delete_button": "Usuń",
+      "retired_notice": "Ten przedmiot jest wycofany -- już nie w posiadaniu/użyciu.",
+      "overview_header": "Przegląd",
+      "field_category": "Kategoria",
+      "field_owner": "Właściciel",
+      "field_storage_location": "Miejsce przechowywania",
+      "field_quantity": "Ilość",
+      "available_suffix": "dostępne",
+      "field_description": "Opis",
+      "field_notes": "Notatki",
+      "financials_header": "Finanse",
+      "field_purchase_date": "Data zakupu",
+      "field_purchase_price": "Cena zakupu",
+      "field_current_value": "Bieżąca wartość",
+      "as_of": "stan na",
+      "field_replacement_cost": "Koszt wymiany",
+      "checkout_header": "Wypożycz",
+      "checkout_member": "Członek",
+      "checkout_quantity": "Ilość",
+      "checkout_date": "Data",
+      "checkout_fee": "Opłata",
+      "checkout_note": "Notatka",
+      "checkout_button": "Wypożycz",
+      "none_available": "Obecnie nic nie jest dostępne do wypożyczenia.",
+      "loan_history_header": "Historia wypożyczeń",
+      "loan_col_member": "Członek",
+      "loan_col_quantity": "Ilość",
+      "loan_col_borrowed": "Wypożyczono",
+      "loan_col_returned": "Zwrócono",
+      "loan_col_fee": "Opłata",
+      "outstanding_badge": "Niezwrócone",
+      "mark_returned_button": "Oznacz jako zwrócone",
+      "no_loans": "Brak wypożyczeń."
+    },
+    "active_loans": {
+      "title": "Aktywne wypożyczenia",
+      "col_item": "Przedmiot",
+      "col_member": "Członek",
+      "col_quantity": "Ilość",
+      "col_since": "Od",
+      "col_fee": "Opłata",
+      "empty": "Obecnie nic nie jest wypożyczone."
     }
   }
 }

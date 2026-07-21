@@ -30,13 +30,13 @@
     "menu_open_aria": "Menü öffnen",
     "work_hours_tasks": "Aufgaben",
     "calendar_group": "Kalender",
-    "calendar_overview": "Übersicht",
     "calendar_community": "Vereinskalender",
     "calendar_birthdays": "Geburtstage",
     "calendar_council_presence": "Vorstandspräsenz",
     "calendar_council_absence": "Vorstandsabwesenheit",
     "integrations": "Integrationen",
-    "announcements": "Mitteilungen"
+    "announcements": "Mitteilungen",
+    "inventory": "Inventar"
   },
   "errors": {
     "ticket_not_found": "Ticket nicht gefunden",
@@ -244,7 +244,9 @@
         "public_signup_api_name": "Öffentliche Anmelde-API",
         "public_signup_api_desc": "Ermöglicht einer externen Website (z. B. einem WordPress-Plugin), Anmeldungen zu Arbeitseinsätzen ohne Parcella-Login einzureichen. Standardmäßig deaktiviert, da dies einen öffentlichen Schreib-Endpunkt öffnet; das Zugriffs-Token findest du auf der Seite Integrationen.",
         "announcements_name": "Mitteilungen",
-        "announcements_desc": "Vereinsnachrichten einmal verfassen und für Blog, Mitglieder-E-Mail und Aushang vorbereiten."
+        "announcements_desc": "Vereinsnachrichten einmal verfassen und für Blog, Mitglieder-E-Mail und Aushang vorbereiten.",
+        "inventory_name": "Inventar",
+        "inventory_desc": "Erfasst alles, was der Verein besitzt (sowie persönliche Gegenstände, die Mitglieder auf dem Vereinsgelände lagern), gruppiert in eigene Kategorien, mit optionalem Verleihsystem für ausleihbare Gegenstände."
       },
       "region_header": "Region",
       "region_help": "Bestimmt Zahlen- und Adressformat (z.B. Tausendertrennzeichen, Reihenfolge von PLZ und Ort). Unabhängig von der Oberflächensprache.",
@@ -1016,7 +1018,8 @@
       "add_button": "Hinzufügen",
       "tasks_card_title": "Aufgaben",
       "manage_tasks_link": "Aufgaben verwalten",
-      "no_tasks": "Für diesen Einsatz sind noch keine Aufgaben eingeplant."
+      "no_tasks": "Für diesen Einsatz sind noch keine Aufgaben eingeplant.",
+      "attendee_sheet_link": "Teilnehmerliste"
     },
     "session_form": {
       "title_edit": "Einsatz bearbeiten",
@@ -1162,16 +1165,6 @@
   },
   "calendar": {
     "hub": {
-      "title": "Kalender",
-      "community_title": "Vereinskalender",
-      "community_desc": "Mitgliederversammlungen, Parzellenbegehungen und Arbeitseinsätze.",
-      "birthdays_title": "Geburtstage",
-      "birthdays_desc": "Anstehende Geburtstage von Mitgliedern.",
-      "council_presence_title": "Vorstandspräsenz",
-      "council_presence_desc": "Wann Vorstandsmitglieder vor Ort sind.",
-      "council_absence_title": "Vorstandsabwesenheit",
-      "council_absence_desc": "Eigene Abwesenheit (z.B. Urlaub) eintragen, damit andere Bescheid wissen.",
-      "view_button": "Anzeigen",
       "ics_public_label": "Öffentlicher ICS-Link (kann auf der öffentlichen Website eingebunden werden):",
       "ics_private_label": "Privater ICS-Link (nicht weitergeben -- jeder mit diesem Link kann ihn abrufen):"
     },
@@ -1249,7 +1242,8 @@
       "entry_not_found": "Eintrag nicht gefunden",
       "invalid_token": "Ungültiges oder fehlendes Zugriffstoken",
       "not_your_entry": "Sie können nur eigene Einträge löschen"
-    }
+    },
+    "ics_subscribe_button": "Abonnieren (ICS)"
   },
   "announcements": {
     "list": {
@@ -1304,6 +1298,120 @@
       "print_generated": "PDF erstellt",
       "print_too_long_status": "Zu lang für eine Seite",
       "print_generate_button": "PDF erstellen"
+    }
+  },
+  "inventory": {
+    "list": {
+      "title": "Inventar",
+      "active_loans_link": "Aktive Ausleihen",
+      "manage_categories_link": "Kategorien verwalten",
+      "new_item": "Neuer Gegenstand",
+      "all_categories": "Alle Kategorien",
+      "include_retired": "Ausgemusterte Gegenstände einbeziehen",
+      "uncategorized": "Ohne Kategorie",
+      "col_name": "Name",
+      "col_owner": "Eigentümer",
+      "col_storage": "Lagerort",
+      "col_quantity": "Menge",
+      "col_value": "Wert",
+      "retired_badge": "Ausgemustert",
+      "borrowable_badge": "Ausleihbar",
+      "owner_member": "Mitgliedseigentum",
+      "owner_club": "Vereinseigentum",
+      "empty": "Noch keine Inventargegenstände vorhanden."
+    },
+    "categories": {
+      "title": "Inventarkategorien",
+      "error_missing_name": "Bitte einen Kategorienamen angeben.",
+      "error_duplicate_name": "Eine Kategorie mit diesem Namen existiert bereits.",
+      "name_placeholder": "z.B. Spielplatz, Zäune, Schlösser & Schlüssel",
+      "description_placeholder": "Optionale Beschreibung",
+      "add_button": "Hinzufügen",
+      "col_name": "Name",
+      "col_description": "Beschreibung",
+      "delete_confirm": "Diese Kategorie löschen? Enthaltene Gegenstände werden nur kategorielos, nicht gelöscht.",
+      "empty": "Noch keine Kategorien vorhanden."
+    },
+    "form": {
+      "title": "Inventargegenstand",
+      "error_missing_name": "Bitte einen Namen angeben.",
+      "error_missing_owner_member": "Bitte auswählen, welchem Mitglied dies gehört.",
+      "label_name": "Name",
+      "label_category": "Kategorie",
+      "no_category": "Keine Kategorie",
+      "label_description": "Beschreibung",
+      "label_storage_location": "Lagerort",
+      "ownership_header": "Eigentum",
+      "owner_club_label": "Eigentum des Vereins",
+      "owner_member_label": "Persönliches Eigentum eines Mitglieds",
+      "owner_hint": "Für Gegenstände, die Mitglieder auf dem Vereinsgelände lagern, aber persönlich besitzen -- werden hier trotzdem erfasst (z.B. für Versicherungs-/Haftungszwecke).",
+      "label_owner_member": "Eigentümer (Mitglied)",
+      "select_member": "Mitglied auswählen...",
+      "financials_header": "Finanzen",
+      "financials_hint": "Der aktuelle Wert wird manuell eingegeben/aktualisiert, wann immer jemand prüft -- es gibt keine automatische Abschreibungsberechnung.",
+      "label_purchase_date": "Kaufdatum",
+      "label_purchase_price": "Kaufpreis",
+      "label_current_value": "Aktueller Wert",
+      "label_replacement_cost": "Wiederbeschaffungswert",
+      "label_current_value_updated_at": "Wert zuletzt geprüft am",
+      "current_value_updated_at_hint": "Damit erkennbar ist, wie aktuell der Wert ist -- optional.",
+      "lending_header": "Verleih",
+      "label_quantity_total": "Vorhandene Menge",
+      "is_borrowable_label": "Mitglieder können dies ausleihen",
+      "is_borrowable_hint": "Aktiviert das Ausleih-/Rückgabesystem für diesen Gegenstand.",
+      "label_default_loan_fee": "Vorgeschlagene Leihgebühr",
+      "default_loan_fee_hint": "Füllt die Gebühr beim Ausleihen vor; kann pro Ausleihe trotzdem geändert werden.",
+      "label_notes": "Notizen",
+      "save_button": "Speichern",
+      "cancel_button": "Abbrechen"
+    },
+    "detail": {
+      "edit_button": "Bearbeiten",
+      "retire_confirm": "Diesen Gegenstand als ausgemustert markieren (nicht mehr im Besitz/Einsatz)? Er bleibt erfasst, wird aber standardmäßig aus der aktiven Liste ausgeblendet.",
+      "retire_button": "Ausmustern",
+      "delete_confirm": "Diesen Gegenstand und seine gesamte Ausleihhistorie endgültig löschen? Dies kann nicht rückgängig gemacht werden -- nutzen Sie stattdessen \"Ausmustern\", wenn Sie nur markieren möchten, dass er nicht mehr im Besitz ist.",
+      "delete_button": "Löschen",
+      "retired_notice": "Dieser Gegenstand ist ausgemustert -- nicht mehr im Besitz/Einsatz.",
+      "overview_header": "Übersicht",
+      "field_category": "Kategorie",
+      "field_owner": "Eigentümer",
+      "field_storage_location": "Lagerort",
+      "field_quantity": "Menge",
+      "available_suffix": "verfügbar",
+      "field_description": "Beschreibung",
+      "field_notes": "Notizen",
+      "financials_header": "Finanzen",
+      "field_purchase_date": "Kaufdatum",
+      "field_purchase_price": "Kaufpreis",
+      "field_current_value": "Aktueller Wert",
+      "as_of": "Stand",
+      "field_replacement_cost": "Wiederbeschaffungswert",
+      "checkout_header": "Ausleihen",
+      "checkout_member": "Mitglied",
+      "checkout_quantity": "Menge",
+      "checkout_date": "Datum",
+      "checkout_fee": "Gebühr",
+      "checkout_note": "Notiz",
+      "checkout_button": "Ausleihen",
+      "none_available": "Aktuell nichts zum Ausleihen verfügbar.",
+      "loan_history_header": "Ausleihhistorie",
+      "loan_col_member": "Mitglied",
+      "loan_col_quantity": "Menge",
+      "loan_col_borrowed": "Ausgeliehen",
+      "loan_col_returned": "Zurückgegeben",
+      "loan_col_fee": "Gebühr",
+      "outstanding_badge": "Ausstehend",
+      "mark_returned_button": "Als zurückgegeben markieren",
+      "no_loans": "Noch keine Ausleihen."
+    },
+    "active_loans": {
+      "title": "Aktive Ausleihen",
+      "col_item": "Gegenstand",
+      "col_member": "Mitglied",
+      "col_quantity": "Menge",
+      "col_since": "Seit",
+      "col_fee": "Gebühr",
+      "empty": "Aktuell nichts ausgeliehen."
     }
   }
 }

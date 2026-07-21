@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}{{ t('inventory.list.title') }}{% endblock %}
+{% block page_title %}{{ t('inventory.list.title') }}{% endblock %}
+
+{% block topbar_actions %}
+<div class="d-flex gap-2 flex-wrap">
+    <a href="/inventory/loans/active" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left-right me-1"></i>{{ t('inventory.list.active_loans_link') }}
+    </a>
+    {% if user.role.value in ['admin', 'board'] %}
+    <a href="/inventory/categories/" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-tags me-1"></i>{{ t('inventory.list.manage_categories_link') }}
+    </a>
+    <a href="/inventory/new" class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>{{ t('inventory.list.new_item') }}
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<form method="get" action="/inventory/" class="d-flex gap-2 mb-3 flex-wrap">
+    <select name="category_id" class="form-select form-select-sm" style="max-width: 260px;" onchange="this.form.submit()">
+        <option value="">{{ t('inventory.list.all_categories') }}</option>
+        {% for category in categories %}
+        <option value="{{ category.id }}" {% if category.id == category_id %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+    </select>
+    <div class="form-check align-self-center">
+        <input class="form-check-input" type="checkbox" name="include_retired" value="true" id="include_retired"
+               {% if include_retired %}checked{% endif %} onchange="this.form.submit()">
+        <label class="form-check-label" for="include_retired">{{ t('inventory.list.include_retired') }}</label>
+    </div>
+</form>
+
+{% for category, items in grouped %}
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="bi bi-tag me-2"></i>{{ category.name if category else t('inventory.list.uncategorized') }}
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>{{ t('inventory.list.col_name') }}</th>
+                        <th>{{ t('inventory.list.col_owner') }}</th>
+                        <th>{{ t('inventory.list.col_storage') }}</th>
+                        <th>{{ t('inventory.list.col_quantity') }}</th>
+                        <th>{{ t('inventory.list.col_value') }}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="{% if item.retired_at %}text-muted{% endif %}">
+                        <td>
+                            <a href="/inventory/{{ item.id }}" class="text-decoration-none fw-semibold" style="color: var(--gv-gruen);">{{ item.name }}</a>
+                            {% if item.retired_at %}<span class="badge ms-1" style="background: #e5e7eb; color: #4b5563;">{{ t('inventory.list.retired_badge') }}</span>{% endif %}
+                            {% if item.is_borrowable %}<span class="badge ms-1" style="background: #dbeafe; color: #1e40af;">{{ t('inventory.list.borrowable_badge') }}</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if item.owner_type.value == 'MEMBER' %}
+                            <span class="text-muted" style="font-size: 0.85rem;">{{ t('inventory.list.owner_member') }}</span>
+                            {% else %}
+                            <span class="text-muted" style="font-size: 0.85rem;">{{ t('inventory.list.owner_club') }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted" style="font-size: 0.85rem;">{{ item.storage_location or '' }}</td>
+                        <td style="font-size: 0.85rem;">
+                            {% if item.is_borrowable %}
+                            {{ item.available_quantity }} / {{ item.quantity_total }}
+                            {% else %}
+                            {{ item.quantity_total }}
+                            {% endif %}
+                        </td>
+                        <td style="font-size: 0.85rem;">
+                            {% if item.current_value is not none %}{{ item.current_value|float|money }}{% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="/inventory/{{ item.id }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5 text-muted">
+        <i class="bi bi-box-seam d-block mb-2" style="font-size: 1.5rem;"></i>
+        {{ t('inventory.list.empty') }}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

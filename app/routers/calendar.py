@@ -60,16 +60,16 @@ def _ics_response(ical_bytes: bytes, filename: str) -> Response:
 
 
 # ---------------------------------------------------------------------------
-# Hub
+# Hub -- removed as a standalone overview page (redundant once every
+# sub-calendar links its own ICS feed directly, see below); kept as a
+# redirect so old bookmarks/links to /calendar/ still land somewhere
+# useful rather than 404ing.
 # ---------------------------------------------------------------------------
 
 @router.get("/", response_class=HTMLResponse)
 async def calendar_hub(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
-    token = await get_or_create_ics_token(db)
-    return templates.TemplateResponse("calendar/hub.html", {
-        "request": request, "user": user, "ics_token": token,
-    })
+    await require_user(request, db)
+    return RedirectResponse("/calendar/community", status_code=302)
 
 
 # ---------------------------------------------------------------------------
@@ -167,9 +167,11 @@ async def community_ics(request: Request, db: AsyncSession = Depends(get_db)):
 async def birthdays_overview(request: Request, db: AsyncSession = Depends(get_db)):
     user = await require_user(request, db)
     upcoming = await upcoming_birthdays(db, within_days=90)
+    ics_token = await get_or_create_ics_token(db)
     return templates.TemplateResponse("calendar/birthdays.html", {
         "request": request, "user": user, "upcoming": upcoming,
         "ROUND_BIRTHDAY_INTERVAL": ROUND_BIRTHDAY_INTERVAL,
+        "ics_token": ics_token,
     })
 
 
@@ -203,8 +205,10 @@ async def council_presence_overview(request: Request, db: AsyncSession = Depends
     users_result = await db.execute(select(User).where(User.is_active == True).order_by(User.name))
     all_users = users_result.scalars().all()
 
+    ics_token = await get_or_create_ics_token(db)
     return templates.TemplateResponse("calendar/council_presence.html", {
         "request": request, "user": user, "entries": entries, "all_users": all_users,
+        "ics_token": ics_token,
     })
 
 
@@ -268,8 +272,10 @@ async def council_absence_overview(request: Request, db: AsyncSession = Depends(
     )
     entries = result.scalars().all()
 
+    ics_token = await get_or_create_ics_token(db)
     return templates.TemplateResponse("calendar/council_absence.html", {
         "request": request, "user": user, "entries": entries,
+        "ics_token": ics_token,
     })
 
 

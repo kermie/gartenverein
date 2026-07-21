@@ -30,13 +30,13 @@
     "menu_open_aria": "Open Menu",
     "work_hours_tasks": "Tasks",
     "calendar_group": "Calendar",
-    "calendar_overview": "Overview",
     "calendar_community": "Community Calendar",
     "calendar_birthdays": "Birthdays",
     "calendar_council_presence": "Council Presence",
     "calendar_council_absence": "Council Absence",
     "integrations": "Integrations",
-    "announcements": "Announcements"
+    "announcements": "Announcements",
+    "inventory": "Inventory"
   },
   "errors": {
     "ticket_not_found": "Ticket not found",
@@ -244,7 +244,9 @@
         "public_signup_api_name": "Public signup API",
         "public_signup_api_desc": "Lets an external website (e.g. a WordPress plugin) submit work-session signups without a Parcella login. Off by default since it opens a public write endpoint; see the Integrations page for the access token.",
         "announcements_name": "Announcements",
-        "announcements_desc": "Author club news once and prepare it for the blog, member email, and a printable notice."
+        "announcements_desc": "Author club news once and prepare it for the blog, member email, and a printable notice.",
+        "inventory_name": "Inventory",
+        "inventory_desc": "Track everything the club owns (and personal items members store on club property), grouped into your own categories, with an optional lending system for borrowable items."
       },
       "region_header": "Region",
       "region_help": "Determines number and address format (e.g. thousands separator, order of postal code and city). Independent of the interface language.",
@@ -1016,7 +1018,8 @@
       "add_button": "Add",
       "tasks_card_title": "Tasks",
       "manage_tasks_link": "Manage Tasks",
-      "no_tasks": "No tasks scheduled for this session yet."
+      "no_tasks": "No tasks scheduled for this session yet.",
+      "attendee_sheet_link": "Attendee sheet"
     },
     "session_form": {
       "title_edit": "Edit Session",
@@ -1162,16 +1165,6 @@
   },
   "calendar": {
     "hub": {
-      "title": "Calendar",
-      "community_title": "Community Calendar",
-      "community_desc": "Member meetings, parcel inspections, and work sessions.",
-      "birthdays_title": "Birthdays",
-      "birthdays_desc": "Upcoming member birthdays.",
-      "council_presence_title": "Council Presence",
-      "council_presence_desc": "When council members will be on-site.",
-      "council_absence_title": "Council Absence",
-      "council_absence_desc": "Log your own absence (e.g. vacation) so others know you're away.",
-      "view_button": "View",
       "ics_public_label": "Public ICS link (safe to embed on your public website):",
       "ics_private_label": "Private ICS link (keep this to yourself -- anyone with this link can view it):"
     },
@@ -1249,7 +1242,8 @@
       "entry_not_found": "Entry not found",
       "invalid_token": "Invalid or missing access token",
       "not_your_entry": "You can only delete your own entries"
-    }
+    },
+    "ics_subscribe_button": "Subscribe (ICS)"
   },
   "announcements": {
     "list": {
@@ -1304,6 +1298,120 @@
       "print_generated": "PDF generated",
       "print_too_long_status": "Too long for one page",
       "print_generate_button": "Generate PDF"
+    }
+  },
+  "inventory": {
+    "list": {
+      "title": "Inventory",
+      "active_loans_link": "Active loans",
+      "manage_categories_link": "Manage categories",
+      "new_item": "New item",
+      "all_categories": "All categories",
+      "include_retired": "Include retired items",
+      "uncategorized": "Uncategorized",
+      "col_name": "Name",
+      "col_owner": "Owner",
+      "col_storage": "Storage",
+      "col_quantity": "Quantity",
+      "col_value": "Value",
+      "retired_badge": "Retired",
+      "borrowable_badge": "Borrowable",
+      "owner_member": "Member-owned",
+      "owner_club": "Club-owned",
+      "empty": "No inventory items yet."
+    },
+    "categories": {
+      "title": "Inventory Categories",
+      "error_missing_name": "Please provide a category name.",
+      "error_duplicate_name": "A category with this name already exists.",
+      "name_placeholder": "e.g. Playground, Fences, Locks & Keys",
+      "description_placeholder": "Optional description",
+      "add_button": "Add",
+      "col_name": "Name",
+      "col_description": "Description",
+      "delete_confirm": "Delete this category? Items in it will just become uncategorized, not deleted.",
+      "empty": "No categories yet."
+    },
+    "form": {
+      "title": "Inventory Item",
+      "error_missing_name": "Please provide a name.",
+      "error_missing_owner_member": "Please select which member owns this.",
+      "label_name": "Name",
+      "label_category": "Category",
+      "no_category": "No category",
+      "label_description": "Description",
+      "label_storage_location": "Storage location",
+      "ownership_header": "Ownership",
+      "owner_club_label": "Owned by the club",
+      "owner_member_label": "Owned personally by a member",
+      "owner_hint": "For items members store on club property but own personally -- still tracked here (e.g. for insurance/liability records).",
+      "label_owner_member": "Owning member",
+      "select_member": "Select a member...",
+      "financials_header": "Financials",
+      "financials_hint": "Current value is entered/updated manually whenever someone checks -- there's no automatic depreciation calculation.",
+      "label_purchase_date": "Purchase date",
+      "label_purchase_price": "Purchase price",
+      "label_current_value": "Current value",
+      "label_replacement_cost": "Replacement cost",
+      "label_current_value_updated_at": "Value last checked on",
+      "current_value_updated_at_hint": "So staleness is visible -- optional.",
+      "lending_header": "Lending",
+      "label_quantity_total": "Quantity owned",
+      "is_borrowable_label": "Members can borrow this",
+      "is_borrowable_hint": "Enables the checkout/return system for this item.",
+      "label_default_loan_fee": "Suggested loan fee",
+      "default_loan_fee_hint": "Pre-fills the fee when checking this item out; can still be changed per loan.",
+      "label_notes": "Notes",
+      "save_button": "Save",
+      "cancel_button": "Cancel"
+    },
+    "detail": {
+      "edit_button": "Edit",
+      "retire_confirm": "Mark this item as retired (no longer owned/in service)? It stays on record, just excluded from the active list by default.",
+      "retire_button": "Retire",
+      "delete_confirm": "Permanently delete this item and its entire loan history? This cannot be undone -- use \"Retire\" instead if you just want to mark it as no longer owned.",
+      "delete_button": "Delete",
+      "retired_notice": "This item is retired -- no longer owned/in service.",
+      "overview_header": "Overview",
+      "field_category": "Category",
+      "field_owner": "Owner",
+      "field_storage_location": "Storage location",
+      "field_quantity": "Quantity",
+      "available_suffix": "available",
+      "field_description": "Description",
+      "field_notes": "Notes",
+      "financials_header": "Financials",
+      "field_purchase_date": "Purchase date",
+      "field_purchase_price": "Purchase price",
+      "field_current_value": "Current value",
+      "as_of": "as of",
+      "field_replacement_cost": "Replacement cost",
+      "checkout_header": "Check out",
+      "checkout_member": "Member",
+      "checkout_quantity": "Quantity",
+      "checkout_date": "Date",
+      "checkout_fee": "Fee",
+      "checkout_note": "Note",
+      "checkout_button": "Check out",
+      "none_available": "None available to borrow right now.",
+      "loan_history_header": "Loan history",
+      "loan_col_member": "Member",
+      "loan_col_quantity": "Qty",
+      "loan_col_borrowed": "Borrowed",
+      "loan_col_returned": "Returned",
+      "loan_col_fee": "Fee",
+      "outstanding_badge": "Outstanding",
+      "mark_returned_button": "Mark returned",
+      "no_loans": "No loans yet."
+    },
+    "active_loans": {
+      "title": "Active Loans",
+      "col_item": "Item",
+      "col_member": "Member",
+      "col_quantity": "Qty",
+      "col_since": "Since",
+      "col_fee": "Fee",
+      "empty": "Nothing currently on loan."
     }
   }
 }

@@ -84,14 +84,28 @@ meaningfully complicate both the code and the "here's your calendar
 link" UX for very little real benefit at this scale. If per-user tokens
 are ever needed (e.g. a much larger association, or wanting to revoke
 one person's access without regenerating everyone's link), that's a
-contained change scoped to `app/ics_utils.py` and the calendar hub
-template.
+contained change scoped to `app/ics_utils.py` and each calendar page's
+ICS subscribe dropdown (see "No central hub page" below).
 
 **No member-ability data, again.** Same principle as the work-tasks
 feature (see its own ADR entry): nothing here stores or reasons about a
 member's health or ability. Council absence is a plain self-reported
 date range with an optional free-text note -- the person logging it
 decides what, if anything, to explain.
+
+**No central hub page.** `/calendar/` originally rendered an overview
+page listing all four calendars with a "View" button and ICS link for
+each -- since the nav sidebar already links directly to every
+sub-calendar, that page was pure duplication with an extra click in
+front of it. Removed in favor of each sub-calendar page showing its
+own ICS subscribe link directly (a small dropdown behind an RSS-style
+icon in the page's toolbar, using `calendar.hub.ics_public_label` /
+`ics_private_label` for the public/private distinction -- those two
+translation keys were kept even though the rest of the old hub's keys
+were removed, since they're still in active use). `/calendar/` itself
+still exists as a plain redirect to `/calendar/community` rather than
+disappearing outright, so an old bookmark or link still lands
+somewhere useful instead of 404ing.
 
 **Permission split:** creating/deleting community calendar entries and
 council presence slots requires Admin/Board (these are "official"

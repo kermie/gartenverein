@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ t('inventory.active_loans.title') }}{% endblock %}
+{% block page_title %}{{ t('inventory.active_loans.title') }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="/inventory/" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>{{ t('common.back') }}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>{{ t('inventory.active_loans.col_item') }}</th>
+                    <th>{{ t('inventory.active_loans.col_member') }}</th>
+                    <th>{{ t('inventory.active_loans.col_quantity') }}</th>
+                    <th>{{ t('inventory.active_loans.col_since') }}</th>
+                    <th>{{ t('inventory.active_loans.col_fee') }}</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loan in loans %}
+                <tr>
+                    <td><a href="/inventory/{{ loan.item.id }}" class="text-decoration-none" style="color: var(--gv-gruen);">{{ loan.item.name }}</a></td>
+                    <td>{{ loan.member.full_name }}</td>
+                    <td>{{ loan.quantity }}</td>
+                    <td>{{ loan.borrowed_date.isoformat() }}</td>
+                    <td>{{ loan.fee_charged|float|money if loan.fee_charged is not none else '-' }}</td>
+                    <td class="text-end">
+                        {% if user.role.value in ['admin', 'board'] %}
+                        <form method="post" action="/inventory/loans/{{ loan.id }}/return" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">{{ t('inventory.detail.mark_returned_button') }}</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-check-circle d-block mb-2" style="font-size: 1.5rem;"></i>
+                        {{ t('inventory.active_loans.empty') }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

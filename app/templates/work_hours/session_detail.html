@@ -7,6 +7,9 @@
     <a href="/work-hours/sessions/{{ session.id }}/edit" class="btn btn-sm btn-primary">
         <i class="bi bi-pencil me-1"></i>{{ t('work_hours.session_detail.edit_button') }}
     </a>
+    <a href="/work-hours/sessions/{{ session.id }}/attendee-sheet" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-file-earmark-pdf me-1"></i>{{ t('work_hours.session_detail.attendee_sheet_link') }}
+    </a>
     <form method="post" action="/work-hours/sessions/{{ session.id }}/delete" class="d-inline">
         <button type="submit" class="btn btn-sm btn-outline-danger"
                 onclick="return confirm('{{ t('work_hours.session_detail.delete_confirm', title=session.title) }}')">

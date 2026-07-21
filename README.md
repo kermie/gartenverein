@@ -115,6 +115,13 @@ version publicly available. Details and contribution guidelines in
   one-page branded PDF that auto-shortens and adds a QR code to the
   published blog post if the full text doesn't fit. Off by default,
   admin/board only. See `docs/module-announcements.md`.
+- ✅ Inventory module: an asset register for everything the club owns
+  (and personal items members store on club property, tracked with
+  the same financial fields for insurance/liability purposes), grouped
+  into freely-configurable categories, with a quantity-aware lending
+  system for borrowable items (checkout/return, a suggested per-loan
+  fee, a board-wide "who has what out right now" view). Full REST API
+  alongside the web UI. See `docs/module-inventory.md`.
 
 ## Planned (next phases)
 

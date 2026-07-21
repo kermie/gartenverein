@@ -132,4 +132,39 @@ cleanly but felt like over-engineering for what's currently a single
 field with this ambiguity; revisit if it becomes a real integration
 pain point.
 
+## Attendee sheet (PDF)
+
+`/work-hours/sessions/{id}/attendee-sheet` (button on the session
+detail page) generates a PDF via `app/session_attendee_sheet.py`
+(WeasyPrint): one row per registered participant, with parcel, member
+name, expected hours, any task assigned to them for this session, and
+a blank signature line. Meant for printing and bringing to the actual
+session, so the coordinator can confirm attendance/hours on paper
+rather than at a laptop.
+
+**Hours shown are a starting point, not a locked value.** If the
+participation has an `hours_completed` override, that's shown;
+otherwise it falls back to the session's `hours_per_participant`
+default; if neither exists, the field is blank. Either way it's meant
+to be corrected by hand on the printout to match what actually
+happened, then entered back into Parcella afterward -- this PDF
+doesn't feed back into the database itself.
+
+**A task field is left blank, not "Not assigned" or similar, when no
+task has been assigned to that participant yet** -- explicit product
+requirement, so the coordinator can write one in by hand on the
+printed page rather than the PDF asserting an absence that might just
+be "not decided yet."
+
+**Sorted by (current parcel, last name, first name)**, same ordering
+convention as the general-meeting sign-in sheet
+(`app/meeting_signin_sheet.py`) and the member list itself -- makes a
+specific attendee easy to find on a printed page by which garden plot
+they're from.
+
+**Multi-page, not one-page-constrained**, for the same reason as the
+meeting sign-in sheet: a real session's attendee count can exceed what
+fits on one page, and there's no sensible way to "shorten" a list of
+people who need to sign in.
+
 

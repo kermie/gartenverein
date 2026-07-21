@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}{{ t('inventory.form.title') }}{% endblock %}
+{% block page_title %}{{ t('inventory.form.title') }}{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-danger">
+    {% if error == 'missing_name' %}{{ t('inventory.form.error_missing_name') }}
+    {% elif error == 'missing_owner_member' %}{{ t('inventory.form.error_missing_owner_member') }}
+    {% endif %}
+</div>
+{% endif %}
+
+<form method="post" action="{% if item %}/inventory/{{ item.id }}/edit{% else %}/inventory/new{% endif %}">
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label">{{ t('inventory.form.label_name') }}</label>
+                    <input type="text" name="name" class="form-control" required value="{{ item.name if item else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ t('inventory.form.label_category') }}</label>
+                    <select name="category_id" class="form-select">
+                        <option value="">{{ t('inventory.form.no_category') }}</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if item and item.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3 mt-3">
+                <label class="form-label">{{ t('inventory.form.label_description') }}</label>
+                <textarea name="description" class="form-control" rows="2">{{ item.description if item else '' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">{{ t('inventory.form.label_storage_location') }}</label>
+                <input type="text" name="storage_location" class="form-control" value="{{ item.storage_location if item else '' }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">{{ t('inventory.form.ownership_header') }}</div>
+        <div class="card-body">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="owner_type" id="owner_club" value="CLUB"
+                       {% if not item or item.owner_type.value == 'CLUB' %}checked{% endif %}
+                       onchange="document.getElementById('owner_member_field').style.display='none';">
+                <label class="form-check-label" for="owner_club">{{ t('inventory.form.owner_club_label') }}</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="owner_type" id="owner_member" value="MEMBER"
+                       {% if item and item.owner_type.value == 'MEMBER' %}checked{% endif %}
+                       onchange="document.getElementById('owner_member_field').style.display='block';">
+                <label class="form-check-label" for="owner_member">{{ t('inventory.form.owner_member_label') }}</label>
+            </div>
+            <div class="form-text mb-2">{{ t('inventory.form.owner_hint') }}</div>
+
+            <div id="owner_member_field" style="display: {% if item and item.owner_type.value == 'MEMBER' %}block{% else %}none{% endif %};">
+                <label class="form-label">{{ t('inventory.form.label_owner_member') }}</label>
+                <select name="owner_member_id" class="form-select" style="max-width: 400px;">
+                    <option value="">{{ t('inventory.form.select_member') }}</option>
+                    {% for member in members %}
+                    <option value="{{ member.id }}" {% if item and item.owner_member_id == member.id %}selected{% endif %}>{{ member.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">{{ t('inventory.form.financials_header') }}</div>
+        <div class="card-body">
+            <p class="text-muted" style="font-size: 0.82rem;">{{ t('inventory.form.financials_hint') }}</p>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">{{ t('inventory.form.label_purchase_date') }}</label>
+                    <input type="date" name="purchase_date" class="form-control"
+                           value="{{ item.purchase_date.isoformat() if item and item.purchase_date else '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ t('inventory.form.label_purchase_price') }}</label>
+                    <input type="text" name="purchase_price" class="form-control"
+                           value="{{ item.purchase_price if item and item.purchase_price is not none else '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ t('inventory.form.label_current_value') }}</label>
+                    <input type="text" name="current_value" class="form-control"
+                           value="{{ item.current_value if item and item.current_value is not none else '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ t('inventory.form.label_replacement_cost') }}</label>
+                    <input type="text" name="replacement_cost" class="form-control"
+                           value="{{ item.replacement_cost if item and item.replacement_cost is not none else '' }}">
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-3">
+                    <label class="form-label">{{ t('inventory.form.label_current_value_updated_at') }}</label>
+                    <input type="date" name="current_value_updated_at" class="form-control"
+                           value="{{ item.current_value_updated_at.isoformat() if item and item.current_value_updated_at else '' }}">
+                    <div class="form-text">{{ t('inventory.form.current_value_updated_at_hint') }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">{{ t('inventory.form.lending_header') }}</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">{{ t('inventory.form.label_quantity_total') }}</label>
+                    <input type="number" name="quantity_total" class="form-control" min="1" step="1"
+                           value="{{ item.quantity_total if item else 1 }}">
+                </div>
+            </div>
+            <div class="form-check mt-3">
+                <input class="form-check-input" type="checkbox" name="is_borrowable" value="true" id="is_borrowable"
+                       {% if item and item.is_borrowable %}checked{% endif %}
+                       onchange="document.getElementById('loan_fee_field').style.display = this.checked ? 'block' : 'none';">
+                <label class="form-check-label" for="is_borrowable">{{ t('inventory.form.is_borrowable_label') }}</label>
+                <div class="form-text">{{ t('inventory.form.is_borrowable_hint') }}</div>
+            </div>
+            <div id="loan_fee_field" class="mt-2" style="display: {% if item and item.is_borrowable %}block{% else %}none{% endif %};">
+                <label class="form-label">{{ t('inventory.form.label_default_loan_fee') }}</label>
+                <input type="text" name="default_loan_fee" class="form-control" style="max-width: 200px;"
+                       value="{{ item.default_loan_fee if item and item.default_loan_fee is not none else '' }}">
+                <div class="form-text">{{ t('inventory.form.default_loan_fee_hint') }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <label class="form-label">{{ t('inventory.form.label_notes') }}</label>
+            <textarea name="notes" class="form-control" rows="2">{{ item.notes if item else '' }}</textarea>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg me-1"></i>{{ t('inventory.form.save_button') }}
+    </button>
+    <a href="{% if item %}/inventory/{{ item.id }}{% else %}/inventory/{% endif %}" class="btn btn-outline-secondary">{{ t('inventory.form.cancel_button') }}</a>
+</form>
+{% endblock %}

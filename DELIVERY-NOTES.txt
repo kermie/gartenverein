@@ -1,50 +1,88 @@
-DELIVERY NOTES -- General-meeting sign-in sheet (PDF)
+DELIVERY NOTES -- New module: Inventory
 ======================================================================
 
-New small feature, not part of the announcements module -- lives under
-Members, since it's really just a printable view of the member list.
-No migration, no new module flag (same permission level as the member
-list itself -- if you can see the member list, you can generate this).
+A full new module, not an extension of an existing one. One new
+migration, one new module flag (default ON, since nothing here is
+security-sensitive the way public_signup_api or announcements were).
 
 ## What it does
 
-New "Sign-in sheet" button on the Members list page. Takes you to a
-one-field form (an editable headline, pre-filled with "General meeting
-on <today's date>") and generates a PDF:
+Everything from your request:
 
-- Current residents only, grouped by parcel number
-- Parcel | Name | Signature (blank line) columns
-- Parcels with more than one current resident get one row per person,
-  with the parcel number shown once spanning all their rows
-- Branded header (your club logo/name) and footer, repeating on every
-  page
-- "Page X of Y" numbering, since a real roster can run several pages
-  -- unlike the announcement flyer, this is NOT limited to one page
+- **What things you own**: a list of inventory items, each with a
+  name, description, and storage location.
+- **Purchase price, current value, replacement cost**: all three
+  tracked per item, plus the purchase date. Current value is entered
+  and updated by hand whenever someone checks (with an optional "last
+  checked on" date so staleness is visible) -- as agreed, no automatic
+  depreciation formula guessing at a number for you.
+- **Freely configurable groups**: categories are just rows you create
+  yourself under Inventory -> Manage categories -- Playground, Fences,
+  Locks & Keys, Water Infrastructure, whatever you want, with no code
+  change needed to add or rename one.
+- **Personally-owned items stored on club property**: mark an item's
+  owner as a specific member instead of the club. As agreed, these get
+  the exact same financial fields as club-owned items, for your
+  insurance/liability records.
+- **Borrowing for a small fee**: mark an item as borrowable, set a
+  suggested fee, and set how many you have (e.g. 5 tents). Members can
+  then be checked out some quantity of it; the item's detail page
+  shows "3 of 5 available" and updates live as loans go out and come
+  back. A board-wide "Active Loans" page (linked from the top of the
+  Inventory page) shows everything currently checked out across every
+  item, in one place.
+
+Viewing the inventory is open to any logged-in member (same as the
+member list). Adding/editing items, managing categories, and checking
+items in/out needs an admin or board account.
+
+## A full REST API, alongside the web UI
+
+Every capability above is also available at `/api/v1/inventory/...`
+(categories, items, loans) -- same "API-first" rule this project
+already follows for every data-bearing module, so if you ever want to
+script something against your inventory (a yearly export, a check
+against your insurance policy, whatever), the API is already there.
+
+## Two real bugs found and fixed while building this
+
+Worth knowing about even though you'll never see them, since I want to
+be upfront rather than just say "it works":
+
+1. A route-ordering bug: the page for viewing a single item
+   (`/inventory/{some-id}`) was initially registered before the
+   categories/new-item/active-loans pages, which meant requests to
+   those specific pages would have been mistakenly treated as "look up
+   an item with the ID 'categories'" and 404'd. Fixed by reordering
+   the routes; caught by 3 new regression tests specifically covering
+   this.
+2. A subtle async bug in the API where saving an item and immediately
+   returning it in the response could crash with an internal error
+   (a "lazy-load" issue -- refreshing only part of the saved record
+   left another part in a state that isn't safe to read from
+   asynchronous code). Fixed by re-fetching the full record after
+   saving instead. Both are documented in detail in
+   docs/module-inventory.md if you're curious.
+
+## Testing
+
+15 new tests covering: category CRUD and the "delete a category never
+deletes its items" behavior, club- vs. member-owned items (and that a
+member-owned item without a specified owner is rejected), retired
+items being excluded from the default list, the full loan lifecycle
+(checkout reduces availability, checking out more than available is
+rejected, a non-borrowable item can't be checked out at all, returning
+restores availability, double-returning is rejected), the board-wide
+active-loans view, both route-ordering bugs above, and the
+admin-vs-viewer permission boundary. 92/92 across the whole suite, all
+passing against real PostgreSQL.
 
 ## To apply
 
 1. Unzip into your repo root.
-2. `docker compose up -d --build web` (no new dependency -- reuses
-   WeasyPrint from the print channel -- but keeps things consistent).
-3. No migration to run.
-4. Try it: Members -> Sign-in sheet.
-
-## A small refactor along the way
-
-`app/pdf_utils.py` is new -- it's the small "embed a local image as a
-base64 data URI" helper, factored out of `app/print_publisher.py` now
-that a second PDF generator needs the same thing. Both
-`print_publisher.py` and the new `meeting_signin_sheet.py` use it; pure
-refactor, no behavior change to the announcement print channel (its
-existing tests still pass unchanged).
-
-## Testing
-
-4 new tests: the form shows a sensible default headline, members are
-correctly grouped by parcel (including a shared parcel with two
-co-tenants, each getting their own signature line), former residents
-(ended parcel assignments) are excluded, and a blank headline falls
-back to the default rather than producing an empty title. One of these
-verifies actual PDF content via pypdf text extraction, not just "a PDF
-came back." 72/72 across the whole suite, all passing against real
-PostgreSQL.
+2. `docker compose up -d --build web` (no new system dependency, but
+   keeps things consistent).
+3. Run the new migration: `alembic upgrade head` takes you to
+   `0032_inventory` (three new tables, nothing existing touched).
+4. The module is on by default -- Inventory shows up in your nav
+   immediately. Start by creating a few categories, then add items.

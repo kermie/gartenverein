@@ -4,10 +4,11 @@ Pflichtstunden-Router: Arbeitseinsätze, Sponsorshipen, ClubRolen, Konfiguration
 import csv
 import io
 from datetime import date, datetime, timezone
+from pathlib import Path
 from typing import Optional, List
 
 from fastapi import APIRouter, Request, Form, Depends, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import selectinload
@@ -22,6 +23,9 @@ from app.models import (
 )
 from app.auth import require_user
 from app.i18n import t_for
+from app.branding import load_branding
+from app.l10n import load_current_region, format_number
+from app.session_attendee_sheet import render_session_attendee_sheet_pdf, AttendeeRow
 
 from app.module_flags import require_modul
 
@@ -456,6 +460,89 @@ async def einsatz_detail(
             "session_tasks": session_tasks,
             "TaskWorkload": TaskWorkload,
         },
+    )
+
+
+@router.get("/sessions/{session_id}/attendee-sheet")
+async def einsatz_teilnehmerliste_pdf(
+    session_id: str, request: Request, db: AsyncSession = Depends(get_db),
+):
+    """Generates the attendee sheet PDF for this session: registered
+    participants with parcel, expected hours, any task assigned to
+    them for this session, and a blank signature line -- meant for
+    printing and bringing to the actual session so the coordinator can
+    confirm attendance/hours on paper. Multi-page, like the general-
+    meeting sign-in sheet (app/meeting_signin_sheet.py) -- a big
+    session can have more attendees than fit on one page."""
+    await require_user(request, db)
+
+    result = await db.execute(
+        select(WorkSession)
+        .options(
+            selectinload(WorkSession.participations)
+            .selectinload(SessionParticipation.member)
+            .selectinload(Member.parcel_assignments)
+            .selectinload(MemberParcel.parcel)
+        )
+        .where(WorkSession.id == session_id)
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(status_code=404, detail=t_for(request, "work_hours.errors.session_not_found"))
+
+    # One task can be assigned to a participation; a participant could
+    # in principle have more than one (e.g. two small tasks) -- collect
+    # all of them per participation rather than assuming exactly one.
+    tasks_result = await db.execute(
+        select(WorkTask).where(WorkTask.session_id == session_id, WorkTask.assigned_participation_id.isnot(None))
+    )
+    tasks_by_participation = {}
+    for task in tasks_result.scalars().all():
+        tasks_by_participation.setdefault(task.assigned_participation_id, []).append(task.title)
+
+    region = await load_current_region(db)
+
+    def current_parcel_numbers(member: Member) -> str:
+        current = [pa.parcel.plot_number for pa in member.parcel_assignments if pa.assigned_until is None]
+        return "; ".join(current)
+
+    def sort_key(participation: SessionParticipation):
+        parcels = current_parcel_numbers(participation.member)
+        return (parcels, participation.member.last_name, participation.member.first_name)
+
+    rows = []
+    for participation in sorted(session.participations, key=sort_key):
+        hours_value = participation.hours_completed
+        if hours_value is None:
+            hours_value = session.hours_per_participant
+        hours_text = format_number(hours_value, region, decimals=1) if hours_value is not None else ""
+
+        task_titles = tasks_by_participation.get(participation.id, [])
+
+        rows.append(AttendeeRow(
+            parcel=current_parcel_numbers(participation.member),
+            member_name=participation.member.full_name,
+            hours=hours_text,
+            tasks="; ".join(task_titles),  # left blank if none assigned yet, per request
+        ))
+
+    subtitle_parts = [session.date.isoformat()]
+    if session.time_from:
+        time_range = session.time_from + (f" - {session.time_until}" if session.time_until else "")
+        subtitle_parts.append(time_range)
+    subtitle = ", ".join(subtitle_parts)
+
+    branding = await load_branding(db)
+    logo_path = Path("app" + branding["logo_url"]) if branding["logo_url"] else None
+
+    pdf_bytes = render_session_attendee_sheet_pdf(
+        session.title, subtitle, branding["club_name"], logo_path, rows,
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="attendee-sheet.pdf"'},
     )
 
 

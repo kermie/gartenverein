@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ t('inventory.categories.title') }}{% endblock %}
+{% block page_title %}{{ t('inventory.categories.title') }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="/inventory/" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>{{ t('common.back') }}
+</a>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-danger">
+    {% if error == 'missing_name' %}{{ t('inventory.categories.error_missing_name') }}
+    {% elif error == 'duplicate_name' %}{{ t('inventory.categories.error_duplicate_name') }}
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="post" action="/inventory/categories/new" class="row g-2">
+            <div class="col-md-4">
+                <input type="text" name="name" class="form-control" placeholder="{{ t('inventory.categories.name_placeholder') }}" required>
+            </div>
+            <div class="col-md-6">
+                <input type="text" name="description" class="form-control" placeholder="{{ t('inventory.categories.description_placeholder') }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">{{ t('inventory.categories.add_button') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>{{ t('inventory.categories.col_name') }}</th>
+                    <th>{{ t('inventory.categories.col_description') }}</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td class="fw-semibold">{{ category.name }}</td>
+                    <td class="text-muted" style="font-size: 0.85rem;">{{ category.description or '' }}</td>
+                    <td class="text-end">
+                        <form method="post" action="/inventory/categories/{{ category.id }}/delete" class="d-inline"
+                              onsubmit="return confirm('{{ t('inventory.categories.delete_confirm') }}');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="text-center py-4 text-muted">{{ t('inventory.categories.empty') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
