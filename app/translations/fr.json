@@ -246,7 +246,9 @@
         "announcements_name": "Annonces",
         "announcements_desc": "Rédigez une actualité du club une seule fois et préparez-la pour le blog, l'e-mail aux membres et une affiche imprimée.",
         "inventory_name": "Inventaire",
-        "inventory_desc": "Suit tout ce que le club possède (ainsi que les objets personnels que les membres entreposent sur le terrain du club), regroupés selon vos propres catégories, avec un système de prêt facultatif."
+        "inventory_desc": "Suit tout ce que le club possède (ainsi que les objets personnels que les membres entreposent sur le terrain du club), regroupés selon vos propres catégories, avec un système de prêt facultatif.",
+        "cloud_storage_name": "Stockage cloud",
+        "cloud_storage_desc": "Permet au conseil/à l'administrateur de parcourir, téléverser et télécharger des fichiers depuis un dossier Nextcloud pour chaque parcelle -- baux, demandes d'adhésion, correspondance des tickets. Configurez d'abord la connexion sous Admin -> Intégrations."
       },
       "region_header": "Région",
       "region_help": "Détermine le format des nombres et de l'adresse (par ex. séparateur de milliers, ordre du code postal et de la ville). Indépendant de la langue de l'interface.",

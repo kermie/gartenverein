@@ -246,7 +246,9 @@
         "announcements_name": "Mitteilungen",
         "announcements_desc": "Vereinsnachrichten einmal verfassen und für Blog, Mitglieder-E-Mail und Aushang vorbereiten.",
         "inventory_name": "Inventar",
-        "inventory_desc": "Erfasst alles, was der Verein besitzt (sowie persönliche Gegenstände, die Mitglieder auf dem Vereinsgelände lagern), gruppiert in eigene Kategorien, mit optionalem Verleihsystem für ausleihbare Gegenstände."
+        "inventory_desc": "Erfasst alles, was der Verein besitzt (sowie persönliche Gegenstände, die Mitglieder auf dem Vereinsgelände lagern), gruppiert in eigene Kategorien, mit optionalem Verleihsystem für ausleihbare Gegenstände.",
+        "cloud_storage_name": "Cloud-Speicher",
+        "cloud_storage_desc": "Ermöglicht Vorstand/Admin, für jede Parzelle einen Nextcloud-Ordner zu durchsuchen, hochzuladen und herunterzuladen -- Pachtverträge, Mitgliedsanträge, Ticket-Korrespondenz. Die Verbindung zuerst unter Admin -> Integrationen einrichten."
       },
       "region_header": "Region",
       "region_help": "Bestimmt Zahlen- und Adressformat (z.B. Tausendertrennzeichen, Reihenfolge von PLZ und Ort). Unabhängig von der Oberflächensprache.",

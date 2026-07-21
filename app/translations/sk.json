@@ -246,7 +246,9 @@
         "announcements_name": "Oznamy",
         "announcements_desc": "Napíšte správu pre klub raz a pripravte ju pre blog, e-mail členom a tlačené oznámenie.",
         "inventory_name": "Inventár",
-        "inventory_desc": "Eviduje všetko, čo klub vlastní (aj osobné veci, ktoré si členovia ukladajú na pozemku klubu), rozdelené do vlastných kategórií, s voliteľným systémom požičiavania."
+        "inventory_desc": "Eviduje všetko, čo klub vlastní (aj osobné veci, ktoré si členovia ukladajú na pozemku klubu), rozdelené do vlastných kategórií, s voliteľným systémom požičiavania.",
+        "cloud_storage_name": "Cloudové úložisko",
+        "cloud_storage_desc": "Umožňuje výboru/administrátorovi prehliadať, nahrávať a sťahovať súbory zo zložky Nextcloud pre každú záhradku -- nájomné zmluvy, členské žiadosti, korešpondenciu z ticketov. Najprv nastavte pripojenie v Admin -> Integrácie."
       },
       "region_header": "Región",
       "region_help": "Určuje formát čísel a adresy (napr. oddeľovač tisícov, poradie PSČ a mesta). Nezávisle od jazyka rozhrania.",

@@ -246,7 +246,9 @@
         "announcements_name": "Announcements",
         "announcements_desc": "Author club news once and prepare it for the blog, member email, and a printable notice.",
         "inventory_name": "Inventory",
-        "inventory_desc": "Track everything the club owns (and personal items members store on club property), grouped into your own categories, with an optional lending system for borrowable items."
+        "inventory_desc": "Track everything the club owns (and personal items members store on club property), grouped into your own categories, with an optional lending system for borrowable items.",
+        "cloud_storage_name": "Cloud storage",
+        "cloud_storage_desc": "Let board members browse, upload to, and download from a Nextcloud folder per parcel -- lease agreements, membership paperwork, ticket correspondence. Configure the connection under Admin -> Integrations first."
       },
       "region_header": "Region",
       "region_help": "Determines number and address format (e.g. thousands separator, order of postal code and city). Independent of the interface language.",

@@ -246,7 +246,9 @@
         "announcements_name": "Ogłoszenia",
         "announcements_desc": "Twórz wiadomości dla klubu raz i przygotuj je do bloga, e-maila do członków oraz wydruku.",
         "inventory_name": "Inwentarz",
-        "inventory_desc": "Śledzi wszystko, co posiada klub (oraz przedmioty osobiste przechowywane przez członków na terenie klubu), pogrupowane we własne kategorie, z opcjonalnym systemem wypożyczeń."
+        "inventory_desc": "Śledzi wszystko, co posiada klub (oraz przedmioty osobiste przechowywane przez członków na terenie klubu), pogrupowane we własne kategorie, z opcjonalnym systemem wypożyczeń.",
+        "cloud_storage_name": "Magazyn w chmurze",
+        "cloud_storage_desc": "Umożliwia zarządowi/administratorowi przeglądanie, przesyłanie i pobieranie plików z folderu Nextcloud dla każdej działki -- umowy dzierżawy, wnioski członkowskie, korespondencję ze zgłoszeń. Najpierw skonfiguruj połączenie w Admin -> Integracje."
       },
       "region_header": "Region",
       "region_help": "Określa format liczb i adresu (np. separator tysięcy, kolejność kodu pocztowego i miejscowości). Niezależnie od języka interfejsu.",

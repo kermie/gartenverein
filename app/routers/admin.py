@@ -206,6 +206,7 @@ MODULE_FELDER = [
     ("modul_inventory", "admin.settings.modules.inventory_name", "admin.settings.modules.inventory_desc"),
     ("modul_public_signup_api", "admin.settings.modules.public_signup_api_name", "admin.settings.modules.public_signup_api_desc"),
     ("modul_announcements", "admin.settings.modules.announcements_name", "admin.settings.modules.announcements_desc"),
+    ("modul_cloud_storage", "admin.settings.modules.cloud_storage_name", "admin.settings.modules.cloud_storage_desc"),
 ]
 
 
