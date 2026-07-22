@@ -363,6 +363,7 @@
                 <a href="/admin/" class="{% if '/admin/' == request.url.path %}aktiv{% endif %}">{{ t('nav.users') }}</a>
                 <a href="/admin/settings" class="{% if '/admin/settings' in request.url.path %}aktiv{% endif %}">{{ t('nav.settings') }}</a>
                 <a href="/admin/integrations" class="{% if '/admin/integrations' in request.url.path %}aktiv{% endif %}">{{ t('nav.integrations') }}</a>
+                <a href="/admin/sample-data" class="{% if '/admin/sample-data' in request.url.path %}aktiv{% endif %}">{{ t('nav.sample_data') }}</a>
             </div>
         </div>
         {% endif %}

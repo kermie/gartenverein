@@ -376,6 +376,30 @@ class ClubSetting(Base):
     # vereinsnummer, registergericht
 
 
+class SampleDataRecord(Base):
+    """
+    Tracks every row created by the admin "add sample data" feature
+    (see app/sample_data.py), so "remove all sample data" can delete
+    exactly what was generated -- never guessed by naming pattern, and
+    never anything an admin entered themselves. entity_type is a model
+    class name (e.g. "Member", "WorkSession"); removal looks each one
+    up via a fixed model registry, not dynamic imports.
+    """
+    __tablename__ = "sample_data_records"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    module: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    entity_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    entity_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    __table_args__ = (
+        UniqueConstraint("entity_type", "entity_id", name="uq_sample_data_record"),
+    )
+
+
 # ---------------------------------------------------------------------------
 # Work hours configuration (year-based)
 # ---------------------------------------------------------------------------

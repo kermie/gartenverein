@@ -23,6 +23,10 @@ from app.branding import save_logo_upload, remove_logo_file
 from app.config import settings
 from app.public_api_auth import get_or_create_public_api_token, regenerate_public_api_token
 from app.update_check import get_update_status, refresh_update_check_cache
+from app.sample_data import (
+    add_sample_data, remove_sample_data, sample_data_counts,
+    has_real_core_data, has_sample_data, SampleDataBlockedError, MODULES,
+)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 from app.templating import templates
@@ -66,6 +70,42 @@ async def update_check_now(request: Request, db: AsyncSession = Depends(get_db))
     await require_admin(request, db)
     await refresh_update_check_cache(db)
     return RedirectResponse("/admin/", status_code=302)
+
+
+# ---------------------------------------------------------------------------
+# Sample data: one-click demo data for a fresh setup, and one-click removal.
+# See app/sample_data.py and ADR 0037.
+# ---------------------------------------------------------------------------
+
+@router.get("/sample-data", response_class=HTMLResponse)
+async def sample_data_page(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await require_admin(request, db)
+
+    return templates.TemplateResponse("admin/sample_data.html", {
+        "request": request,
+        "user": user,
+        "has_sample": await has_sample_data(db),
+        "has_real_core_data": await has_real_core_data(db),
+        "counts": await sample_data_counts(db),
+        "modules": MODULES,
+    })
+
+
+@router.post("/sample-data/add")
+async def sample_data_add(request: Request, db: AsyncSession = Depends(get_db)):
+    await require_admin(request, db)
+    try:
+        await add_sample_data(db)
+    except SampleDataBlockedError as e:
+        return RedirectResponse(f"/admin/sample-data?fehler={urllib.parse.quote(str(e))}", status_code=302)
+    return RedirectResponse("/admin/sample-data?erfolg=1", status_code=302)
+
+
+@router.post("/sample-data/remove")
+async def sample_data_remove(request: Request, db: AsyncSession = Depends(get_db)):
+    await require_admin(request, db)
+    await remove_sample_data(db)
+    return RedirectResponse("/admin/sample-data?entfernt=1", status_code=302)
 
 
 @router.post("/invite")

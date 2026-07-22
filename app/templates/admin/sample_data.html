@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin.sample_data.title') }}{% endblock %}
+{% block page_title %}{{ t('admin.sample_data.title') }}{% endblock %}
+
+{% block content %}
+
+{% if request.query_params.get('erfolg') %}
+<div class="alert alert-success d-flex gap-2 align-items-center mb-3">
+    <i class="bi bi-check-circle-fill"></i> {{ t('admin.sample_data.added_message') }}
+</div>
+{% endif %}
+{% if request.query_params.get('entfernt') %}
+<div class="alert alert-success d-flex gap-2 align-items-center mb-3">
+    <i class="bi bi-check-circle-fill"></i> {{ t('admin.sample_data.removed_message') }}
+</div>
+{% endif %}
+{% if request.query_params.get('fehler') %}
+<div class="alert alert-danger d-flex gap-2 align-items-center mb-3">
+    <i class="bi bi-exclamation-circle-fill"></i> {{ request.query_params.get('fehler') }}
+</div>
+{% endif %}
+
+<div class="card mb-3">
+    <div class="card-header"><i class="bi bi-stack me-2"></i>{{ t('admin.sample_data.what_header') }}</div>
+    <div class="card-body">
+        <p class="text-muted">{{ t('admin.sample_data.what_intro') }}</p>
+        <ul class="text-muted" style="font-size: 0.9rem;">
+            <li>{{ t('admin.sample_data.what_core') }}</li>
+            <li>{{ t('admin.sample_data.what_work_hours') }}</li>
+            <li>{{ t('admin.sample_data.what_metering') }}</li>
+            <li>{{ t('admin.sample_data.what_insurance') }}</li>
+            <li>{{ t('admin.sample_data.what_tickets') }}</li>
+            <li>{{ t('admin.sample_data.what_purchase_requests') }}</li>
+            <li>{{ t('admin.sample_data.what_calendar') }}</li>
+            <li>{{ t('admin.sample_data.what_inventory') }}</li>
+            <li>{{ t('admin.sample_data.what_tasks') }}</li>
+        </ul>
+        <div class="form-text">{{ t('admin.sample_data.safety_note') }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><i class="bi bi-magic me-2"></i>{{ t('admin.sample_data.action_header') }}</div>
+    <div class="card-body">
+        {% if has_sample %}
+        <p>{{ t('admin.sample_data.currently_present') }}</p>
+        <table class="table table-sm" style="max-width: 420px;">
+            <tbody>
+                {% for module in modules %}
+                <tr>
+                    <td>{{ t('admin.sample_data.module_' + module) }}</td>
+                    <td class="text-end text-muted">{{ counts.get(module, 0) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <form method="post" action="/admin/sample-data/remove"
+              onsubmit="return confirm('{{ t('admin.sample_data.remove_confirm') }}');">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-trash3 me-1"></i>{{ t('admin.sample_data.remove_button') }}
+            </button>
+        </form>
+        {% elif has_real_core_data %}
+        <p class="text-muted">{{ t('admin.sample_data.blocked_real_data') }}</p>
+        {% else %}
+        <p class="text-muted">{{ t('admin.sample_data.fresh_install_hint') }}</p>
+        <form method="post" action="/admin/sample-data/add"
+              onsubmit="return confirm('{{ t('admin.sample_data.add_confirm') }}');">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-magic me-1"></i>{{ t('admin.sample_data.add_button') }}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -121,6 +121,30 @@ async def test_smoke_admin_pages_render_without_jinja_errors(client, admin_user)
     assert "UndefinedError" not in r_settings.text
 
 
+async def test_smoke_sample_data_page_add_and_remove_cycle(client, admin_user):
+    response = await client.post("/auth/login", data={"email": "admin@example.com", "password": "testpasswort123"})
+    assert response.status_code in (302, 303)
+
+    r_fresh = await client.get("/admin/sample-data")
+    assert r_fresh.status_code == 200
+    assert "UndefinedError" not in r_fresh.text
+
+    r_add = await client.post("/admin/sample-data/add")
+    assert r_add.status_code in (302, 303)
+
+    r_after_add = await client.get("/admin/sample-data")
+    assert r_after_add.status_code == 200
+    assert "UndefinedError" not in r_after_add.text
+    assert "DEMO-01" not in r_after_add.text  # page shows counts, not raw sample rows
+
+    r_remove = await client.post("/admin/sample-data/remove")
+    assert r_remove.status_code in (302, 303)
+
+    r_after_remove = await client.get("/admin/sample-data")
+    assert r_after_remove.status_code == 200
+    assert "UndefinedError" not in r_after_remove.text
+
+
 async def test_smoke_metering_pages_render_without_jinja_errors(client, admin_user):
     token = await login(client, "admin@example.com")
     headers = auth_header(token)
