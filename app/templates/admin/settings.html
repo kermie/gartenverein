@@ -112,6 +112,26 @@
 
     <div class="col-12">
         <div class="card">
+            <div class="card-header"><i class="bi bi-arrow-down-up me-2"></i>{{ t('admin.settings.nav_order_header') }}</div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size: 0.85rem;">
+                    {{ t('admin.settings.nav_order_help') }}
+                </p>
+                <div class="row g-3">
+                    {% for key, label, default in nav_order_fields %}
+                    <div class="col-md-4 col-sm-6">
+                        <label class="form-label" for="{{ key }}">{{ label }}</label>
+                        <input type="number" step="10" class="form-control" name="{{ key }}" id="{{ key }}"
+                               value="{{ settings_map.get(key, default) }}">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
             <div class="card-header"><i class="bi bi-arrow-repeat me-2"></i>{{ t('admin.settings.updates_header') }}</div>
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start gap-3 p-3"

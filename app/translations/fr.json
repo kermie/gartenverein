@@ -247,6 +247,8 @@
       "language_help": "S'applique à toute l'installation (tous les utilisateurs voient la même langue). Si une traduction manque pour un module donné, le texte allemand s'affiche automatiquement.",
       "module_header": "Domaines fonctionnels",
       "module_help": "Tous les clubs n'utilisent pas tous les domaines fonctionnels. Les modules désactivés disparaissent de la navigation -- les données sont conservées et réapparaissent une fois réactivés.",
+      "nav_order_header": "Ordre de navigation",
+      "nav_order_help": "Définit l'ordre des éléments de navigation dans la barre latérale. Les nombres les plus bas apparaissent en premier ; l'espacement de 100 laisse de la place pour insérer une nouvelle position entre deux existantes plus tard.",
       "updates_header": "Mises à jour",
       "updates_toggle_label": "Vérifier automatiquement les mises à jour",
       "updates_toggle_hint": "Vérifie périodiquement sur GitHub si une nouvelle version de Parcella a été publiée et affiche une notification sur le tableau de bord admin. Aucune donnée d'identification n'est transmise -- uniquement une consultation publique des versions.",

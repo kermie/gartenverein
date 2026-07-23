@@ -215,33 +215,51 @@
         <small>{{ t('nav.brand_subtitle') }}</small>
     </div>
     <div class="sidebar-nav">
+        {# Issue #60: nav items are rendered in the order set by the club
+           under /admin/settings (request.state.nav_order, see
+           app/nav_order.py) rather than a fixed sequence. Each item is a
+           self-contained macro (empty output if the viewer lacks the
+           module/permission for it) so the dispatch loop below can just
+           call them in sorted order without repeating visibility checks. #}
+        {% macro nav_dashboard(request) %}
         <a href="/" class="nav-top-link {% if request.url.path == '/' %}aktiv{% endif %}">
             <i class="bi bi-speedometer2"></i> {{ t('nav.dashboard') }}
         </a>
+        {% endmacro %}
 
+        {% macro nav_members(request) %}
         {% if has_perm(request, 'members_parcels') %}
         <a href="/members/" class="nav-top-link {% if '/members' in request.url.path %}aktiv{% endif %}">
             <i class="bi bi-people"></i> {{ t('nav.members') }}
         </a>
+        {% endif %}
+        {% endmacro %}
+
+        {% macro nav_parcels(request) %}
+        {% if has_perm(request, 'members_parcels') %}
         <a href="/parcels/" class="nav-top-link {% if '/parcels' in request.url.path %}aktiv{% endif %}">
             <i class="bi bi-grid-3x3"></i> {{ t('nav.parcels') }}
         </a>
         {% endif %}
+        {% endmacro %}
 
+        {% macro nav_tickets(request) %}
         {% if request.state.module_flags.tickets and has_perm(request, 'tickets') %}
         <a href="/tickets/" class="nav-top-link {% if '/tickets' in request.url.path %}aktiv{% endif %}">
             <i class="bi bi-ticket-perforated"></i> {{ t('nav.tickets') }}
         </a>
         {% endif %}
+        {% endmacro %}
 
+        {% macro nav_purchase_requests(request) %}
         {% if request.state.module_flags.purchase_requests and has_perm(request, 'purchase_requests') %}
         <a href="/purchase-requests/" class="nav-top-link {% if '/purchase-requests' in request.url.path %}aktiv{% endif %}">
             <i class="bi bi-cart"></i> {{ t('nav.purchase_requests') }}
         </a>
         {% endif %}
+        {% endmacro %}
 
-        <div id="nav-accordion">
-
+        {% macro nav_work_hours(request) %}
         {% if request.state.module_flags.work_hours and has_perm(request, 'work_hours') %}
         <div class="nav-group" data-group="work_hours">
             <button class="nav-group-toggle" type="button" data-bs-toggle="collapse"
@@ -266,7 +284,9 @@
             </div>
         </div>
         {% endif %}
+        {% endmacro %}
 
+        {% macro nav_water(request) %}
         {% if request.state.module_flags.water and has_perm(request, 'water') %}
         <div class="nav-group" data-group="water">
             <button class="nav-group-toggle" type="button" data-bs-toggle="collapse"
@@ -283,7 +303,9 @@
             </div>
         </div>
         {% endif %}
+        {% endmacro %}
 
+        {% macro nav_electricity(request) %}
         {% if request.state.module_flags.electricity and has_perm(request, 'electricity') %}
         <div class="nav-group" data-group="electricity">
             <button class="nav-group-toggle" type="button" data-bs-toggle="collapse"
@@ -300,7 +322,9 @@
             </div>
         </div>
         {% endif %}
+        {% endmacro %}
 
+        {% macro nav_insurance(request) %}
         {% if request.state.module_flags.insurance and has_perm(request, 'insurance') %}
         <div class="nav-group" data-group="insurance">
             <button class="nav-group-toggle" type="button" data-bs-toggle="collapse"
@@ -317,7 +341,9 @@
             </div>
         </div>
         {% endif %}
+        {% endmacro %}
 
+        {% macro nav_calendar(request) %}
         {% if request.state.module_flags.calendar and has_perm(request, 'calendar') %}
         <div class="nav-group" data-group="calendar">
             <button class="nav-group-toggle" type="button" data-bs-toggle="collapse"
@@ -334,24 +360,50 @@
             </div>
         </div>
         {% endif %}
+        {% endmacro %}
 
+        {% macro nav_announcements(request) %}
         {% if request.state.module_flags.announcements and is_full_access(request) %}
         <a href="/announcements/" class="nav-top-link {% if '/announcements' in request.url.path %}aktiv{% endif %}">
             <i class="bi bi-megaphone"></i> {{ t('nav.announcements') }}
         </a>
         {% endif %}
+        {% endmacro %}
 
+        {% macro nav_inventory(request) %}
         {% if request.state.module_flags.inventory and has_perm(request, 'inventory') %}
         <a href="/inventory/" class="nav-top-link {% if '/inventory' in request.url.path %}aktiv{% endif %}">
             <i class="bi bi-box-seam"></i> {{ t('nav.inventory') }}
         </a>
         {% endif %}
+        {% endmacro %}
 
+        {% macro nav_tasks(request) %}
         {% if request.state.module_flags.tasks and is_full_access(request) %}
         <a href="/tasks/" class="nav-top-link {% if '/tasks' in request.url.path %}aktiv{% endif %}">
             <i class="bi bi-kanban"></i> {{ t('nav.tasks') }}
         </a>
         {% endif %}
+        {% endmacro %}
+
+        <div id="nav-accordion">
+
+        {% for key, _order in request.state.nav_order | dictsort(by='value') %}
+            {% if key == 'dashboard' %}{{ nav_dashboard(request) }}
+            {% elif key == 'members' %}{{ nav_members(request) }}
+            {% elif key == 'parcels' %}{{ nav_parcels(request) }}
+            {% elif key == 'tickets' %}{{ nav_tickets(request) }}
+            {% elif key == 'purchase_requests' %}{{ nav_purchase_requests(request) }}
+            {% elif key == 'work_hours' %}{{ nav_work_hours(request) }}
+            {% elif key == 'water' %}{{ nav_water(request) }}
+            {% elif key == 'electricity' %}{{ nav_electricity(request) }}
+            {% elif key == 'insurance' %}{{ nav_insurance(request) }}
+            {% elif key == 'calendar' %}{{ nav_calendar(request) }}
+            {% elif key == 'announcements' %}{{ nav_announcements(request) }}
+            {% elif key == 'inventory' %}{{ nav_inventory(request) }}
+            {% elif key == 'tasks' %}{{ nav_tasks(request) }}
+            {% endif %}
+        {% endfor %}
 
         {% if is_system_admin(request) %}
         <div class="nav-group" data-group="administration">

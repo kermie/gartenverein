@@ -247,6 +247,8 @@
       "language_help": "Geldt voor de hele installatie (alle gebruikers zien dezelfde taal). Als een vertaling voor een bepaalde module ontbreekt, wordt automatisch de Duitse tekst getoond.",
       "module_header": "Functiegebieden",
       "module_help": "Niet elke vereniging gebruikt elk functiegebied. Uitgeschakelde modules verdwijnen uit de navigatie — de gegevens blijven behouden en verschijnen opnieuw zodra ze opnieuw worden ingeschakeld.",
+      "nav_order_header": "Navigatievolgorde",
+      "nav_order_help": "Bepaalt de volgorde van de navigatie-items in de zijbalk. Lagere getallen verschijnen eerst; de tussenruimte van 100 laat later ruimte om een nieuwe positie tussen twee bestaande in te voegen.",
       "updates_header": "Updates",
       "updates_toggle_label": "Automatisch op updates controleren",
       "updates_toggle_hint": "Controleert periodiek op GitHub of er een nieuwere Parcella-versie is uitgebracht en toont dan een melding op het adminmenu. Er worden geen inloggegevens verzonden -- alleen een openbare releasecontrole.",

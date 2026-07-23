@@ -21,6 +21,7 @@ from app.models import Ticket, TicketStatus
 from app.birthdays import upcoming_birthdays
 from app.auth import hash_password, get_current_user
 from app.module_flags import load_module_flags
+from app.nav_order import load_nav_order
 from app.i18n import load_translations, load_current_language, t_for
 from app.l10n import load_current_region, load_current_currency
 from app.branding import load_branding
@@ -139,6 +140,20 @@ async def modul_flags_middleware(request: Request, call_next):
     """
     async with AsyncSessionLocal() as db:
         request.state.module_flags = await load_module_flags(db)
+    response = await call_next(request)
+    return response
+
+
+@app.middleware("http")
+async def nav_order_middleware(request: Request, call_next):
+    """
+    Loads the club's configured sidebar nav order once per request (see
+    app/nav_order.py, issue #60) and stores it under
+    request.state.nav_order. base.html sorts its nav-item macros by
+    this instead of a fixed source order.
+    """
+    async with AsyncSessionLocal() as db:
+        request.state.nav_order = await load_nav_order(db)
     response = await call_next(request)
     return response
 

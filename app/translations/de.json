@@ -247,6 +247,8 @@
       "language_help": "Gilt für die gesamte Installation (alle Benutzer sehen dieselbe Sprache). Fehlt eine Übersetzung für ein bestimmtes Modul, wird automatisch die deutsche Zeichenkette angezeigt.",
       "module_header": "Funktionsbereiche",
       "module_help": "Nicht jeder Verein nutzt jeden Funktionsbereich. Deaktivierte Module verschwinden aus der Navigation – die Daten bleiben dabei erhalten und tauchen nach erneutem Aktivieren wieder auf.",
+      "nav_order_header": "Reihenfolge der Navigation",
+      "nav_order_help": "Legt die Reihenfolge der Navigationspunkte in der Seitenleiste fest. Kleinere Zahlen erscheinen zuerst; der Abstand von 100 lässt Raum, um später eine neue Position dazwischen einzufügen.",
       "updates_header": "Updates",
       "updates_toggle_label": "Automatisch nach Updates suchen",
       "updates_toggle_hint": "Prüft regelmäßig auf GitHub, ob eine neuere Parcella-Version veröffentlicht wurde, und zeigt ggf. einen Hinweis auf dem Admin-Dashboard an. Es werden keine Zugangsdaten übertragen -- nur eine öffentliche Abfrage der Releases.",

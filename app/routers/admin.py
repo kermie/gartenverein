@@ -29,6 +29,7 @@ from app.cloud_storage import load_nextcloud_configuration, NextcloudProvider, C
 from app.i18n import AVAILABLE_LANGUAGES, t_for
 from app.l10n import AVAILABLE_REGIONS, AVAILABLE_CURRENCIES
 from app.branding import save_logo_upload, remove_logo_file
+from app.nav_order import NAV_ORDER_DEFAULTS
 from app.config import settings
 from app.public_api_auth import get_or_create_public_api_token, regenerate_public_api_token
 from app.update_check import get_update_status, refresh_update_check_cache
@@ -553,6 +554,26 @@ MODULE_FIELDS = [
     ("modul_cloud_storage", "admin.settings.modules.cloud_storage_name", "admin.settings.modules.cloud_storage_desc"),
 ]
 
+# Issue #60: lets a club reorder its own sidebar. Keys follow the
+# convention "nav_order_<name>" (see app/nav_order.py); names/order
+# come from NAV_ORDER_DEFAULTS there, labels reuse the existing nav.*
+# translation keys the sidebar itself uses.
+NAV_ORDER_FIELDS = [
+    ("dashboard", "nav.dashboard"),
+    ("members", "nav.members"),
+    ("parcels", "nav.parcels"),
+    ("tickets", "nav.tickets"),
+    ("purchase_requests", "nav.purchase_requests"),
+    ("work_hours", "nav.work_hours_group"),
+    ("water", "nav.water"),
+    ("electricity", "nav.electricity"),
+    ("insurance", "nav.insurance"),
+    ("calendar", "nav.calendar_group"),
+    ("announcements", "nav.announcements"),
+    ("inventory", "nav.inventory"),
+    ("tasks", "nav.tasks"),
+]
+
 
 @router.get("/settings", response_class=HTMLResponse)
 async def settings_page(request: Request, db: AsyncSession = Depends(get_db)):
@@ -566,6 +587,10 @@ async def settings_page(request: Request, db: AsyncSession = Depends(get_db)):
         (key, t_for(request, name_key), t_for(request, desc_key))
         for key, name_key, desc_key in MODULE_FIELDS
     ]
+    resolved_nav_order_fields = [
+        (f"nav_order_{name}", t_for(request, label_key), NAV_ORDER_DEFAULTS[name])
+        for name, label_key in NAV_ORDER_FIELDS
+    ]
 
     return templates.TemplateResponse(
         "admin/settings.html",
@@ -575,6 +600,7 @@ async def settings_page(request: Request, db: AsyncSession = Depends(get_db)):
             "settings_map": settings_map,
             "fields": resolved_fields,
             "module_fields": resolved_module_fields,
+            "nav_order_fields": resolved_nav_order_fields,
             "available_languages": AVAILABLE_LANGUAGES,
             "available_regions": AVAILABLE_REGIONS,
             "available_currencies": AVAILABLE_CURRENCIES,
@@ -658,6 +684,27 @@ async def settings_save(
                 value=value,
                 description=description,
             ))
+
+    # Nav order: plain integers (issue #60). An empty or non-numeric
+    # field is skipped rather than stored, so a blank input falls back
+    # to NAV_ORDER_DEFAULTS (see app/nav_order.py's load_nav_order)
+    # instead of persisting a bad value.
+    for name, _label_key in NAV_ORDER_FIELDS:
+        key = f"nav_order_{name}"
+        value = form.get(key, "").strip()
+        if not value:
+            continue
+        try:
+            int(value)
+        except ValueError:
+            continue
+
+        result = await db.execute(select(ClubSetting).where(ClubSetting.key == key))
+        entry = result.scalar_one_or_none()
+        if entry:
+            entry.value = value
+        else:
+            db.add(ClubSetting(key=key, value=value, description=f"Sidebar nav position: {name}"))
 
     # Language: its own field (dropdown, no free text) -- validated
     # against the list of known languages, so no invalid code can end
