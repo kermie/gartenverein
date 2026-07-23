@@ -57,7 +57,7 @@ async def _load_with_details(db: AsyncSession, request_id: str) -> Optional[Purc
 @router.get("/", response_class=HTMLResponse)
 async def purchase_requests_overview(
     request: Request,
-    filter: str = "offen",
+    filter: str = "open",
     db: AsyncSession = Depends(get_db),
 ):
     user = await require_permission(request, db, "purchase_requests", "read")
@@ -71,13 +71,13 @@ async def purchase_requests_overview(
         .order_by(PurchaseRequest.created_at.desc())
     )
 
-    if filter == "offen":
+    if filter == "open":
         query = query.where(PurchaseRequest.status == PurchaseRequestStatus.OPEN)
-    elif filter == "genehmigt":
+    elif filter == "approved":
         query = query.where(PurchaseRequest.status == PurchaseRequestStatus.APPROVED)
-    elif filter == "abgelehnt":
+    elif filter == "rejected":
         query = query.where(PurchaseRequest.status == PurchaseRequestStatus.REJECTED)
-    # "alle": no filter
+    # "all": no filter
 
     result = await db.execute(query)
     purchase_requests = result.scalars().all()
@@ -108,17 +108,17 @@ async def purchase_request_create(
     justification: str = Form(...),
     link: str = Form(""),
     estimated_cost_eur: str = Form(""),
-    fuer_andere_person: bool = Form(False),
+    for_other_person: bool = Form(False),
     requester_name: str = Form(""),
     requester_email: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
     user = await require_permission(request, db, "purchase_requests", "write")
 
-    kosten = None
+    estimated_cost = None
     if estimated_cost_eur.strip():
         try:
-            kosten = float(estimated_cost_eur.replace(",", "."))
+            estimated_cost = float(estimated_cost_eur.replace(",", "."))
         except ValueError:
             pass
 
@@ -126,11 +126,11 @@ async def purchase_request_create(
         title=title.strip(),
         justification=justification.strip(),
         link=link.strip() or None,
-        estimated_cost_eur=kosten,
+        estimated_cost_eur=estimated_cost,
         created_by_id=user.id,
     )
 
-    if fuer_andere_person and requester_email.strip():
+    if for_other_person and requester_email.strip():
         purchase_request.requester_name = requester_name.strip() or None
         purchase_request.requester_email = requester_email.strip().lower()
         purchase_request.confirmation_token = serializer.dumps(
@@ -144,19 +144,19 @@ async def purchase_request_create(
 
     if purchase_request.confirmation_token:
         base_url = str(request.base_url).rstrip("/")
-        bestaetigungslink = f"{base_url}/purchase-requests/confirm/{purchase_request.confirmation_token}"
-        betreff = f"Bitte bestätigen: Einkaufswunsch „{purchase_request.title}“"
+        confirmation_link = f"{base_url}/purchase-requests/confirm/{purchase_request.confirmation_token}"
+        subject = f"Bitte bestätigen: Einkaufswunsch „{purchase_request.title}“"
         html = f"""
         <html><body style="font-family: sans-serif;">
         <p>Hallo {purchase_request.requester_name or ''},</p>
         <p>{user.name} hat in Ihrem Namen folgenden Einkaufswunsch im {settings.app_name} erfasst:</p>
         <p><strong>{purchase_request.title}</strong><br>{purchase_request.justification}</p>
         <p>Bitte bestätigen Sie, dass diese Angaben korrekt sind:</p>
-        <p><a href="{bestaetigungslink}" style="background: #2d6a4f; color: white; padding: 10px 20px;
+        <p><a href="{confirmation_link}" style="background: #2d6a4f; color: white; padding: 10px 20px;
            text-decoration: none; border-radius: 4px;">Angaben bestätigen</a></p>
         </body></html>
         """
-        await send_email(purchase_request.requester_email, betreff, html, db=db)
+        await send_email(purchase_request.requester_email, subject, html, db=db)
 
     await db.commit()
     return RedirectResponse(f"/purchase-requests/{purchase_request.id}", status_code=302)
@@ -173,16 +173,16 @@ async def purchase_request_detail(request_id: str, request: Request, db: AsyncSe
     if not pr:
         raise HTTPException(status_code=404, detail=t_for(request, "errors.purchase_request_not_found"))
 
-    ist_vorstand = getattr(request.state, "is_full_access", False)
-    hat_bereits_freigegeben = any(a.user_id == user.id for a in pr.approvals)
-    ist_antragsteller = pr.requested_by_id == user.id or pr.created_by_id == user.id
+    is_board_member = getattr(request.state, "is_full_access", False)
+    has_already_approved = any(a.user_id == user.id for a in pr.approvals)
+    is_requester = pr.requested_by_id == user.id or pr.created_by_id == user.id
 
     return templates.TemplateResponse("purchase_requests/detail.html", {
         "request": request, "user": user, "pr": pr,
         "required_approvals": _REQUIRED_APPROVALS,
-        "ist_vorstand": ist_vorstand,
-        "hat_bereits_freigegeben": hat_bereits_freigegeben,
-        "ist_antragsteller": ist_antragsteller,
+        "is_board_member": is_board_member,
+        "has_already_approved": has_already_approved,
+        "is_requester": is_requester,
         "PurchaseRequestStatus": PurchaseRequestStatus,
     })
 
@@ -213,8 +213,8 @@ async def purchase_request_approve(request_id: str, request: Request, db: AsyncS
     db.add(PurchaseRequestApproval(purchase_request_id=request_id, user_id=user.id))
     await db.flush()
 
-    neue_anzahl = len(pr.approvals) + 1  # +1 since not yet reloaded
-    if neue_anzahl >= _REQUIRED_APPROVALS:
+    new_count = len(pr.approvals) + 1  # +1 since not yet reloaded
+    if new_count >= _REQUIRED_APPROVALS:
         pr.status = PurchaseRequestStatus.APPROVED
         pr.approved_at = datetime.now(timezone.utc)
 

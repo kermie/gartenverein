@@ -4,11 +4,11 @@
 
 {% block content %}
 
-{% if request.query_params.get('erfolg') %}
+{% if request.query_params.get('success') %}
 <div class="alert alert-success">{{ t('admin.integrations.token_regenerated') }}</div>
 {% endif %}
 
-{% if not modul_aktiv %}
+{% if not module_active %}
 <div class="alert alert-warning">
     {{ t('admin.integrations.module_disabled_notice') }}
     <a href="/admin/settings">{{ t('admin.integrations.module_disabled_link') }}</a>

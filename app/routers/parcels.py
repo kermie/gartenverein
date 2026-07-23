@@ -1,5 +1,5 @@
 """
-Parzellen-Router: Liste, Anlegen, Bearbeiten, Zuordnungen, CSV-Import/Export.
+Parcels router: list, create, edit, assignments, CSV import/export.
 """
 import csv
 import io
@@ -116,16 +116,16 @@ async def parcel_create(
             status_code=400,
         )
 
-    flaeche = None
+    area = None
     if area_sqm.strip():
         try:
-            flaeche = float(area_sqm.replace(",", "."))
+            area = float(area_sqm.replace(",", "."))
         except ValueError:
             pass
 
     parcel = Parcel(
         plot_number=plot_number.strip().upper(),
-        area_sqm=flaeche,
+        area_sqm=area,
         notes=notes.strip() or None,
     )
     db.add(parcel)
@@ -147,12 +147,12 @@ async def parcel_detail(
         raise HTTPException(status_code=404, detail=t_for(request, "parcels.errors.parcel_not_found"))
 
     # All members, for assignment
-    mitglieder_result = await db.execute(
+    members_result = await db.execute(
         select(Member)
         .where(active_member_filter())
         .order_by(Member.last_name, Member.first_name)
     )
-    all_members = mitglieder_result.scalars().all()
+    all_members = members_result.scalars().all()
     # Compact list for the searchable select field in the template
     # (JSON-serializable, instead of juggling map/zip in Jinja)
     all_members_json = [{"id": m.id, "name": m.full_name} for m in all_members]
@@ -246,15 +246,15 @@ async def parcel_update(
         ["plot_number", "area_sqm", "status", "termination_note", "notes"]
     )
 
-    flaeche = None
+    area = None
     if area_sqm.strip():
         try:
-            flaeche = float(area_sqm.replace(",", "."))
+            area = float(area_sqm.replace(",", "."))
         except ValueError:
             pass
 
     parcel.plot_number = plot_number.strip().upper()
-    parcel.area_sqm = flaeche
+    parcel.area_sqm = area
     parcel.notes = notes.strip() or None
 
     if status in [s.value for s in ParcelStatus]:
@@ -288,14 +288,14 @@ async def parcel_permanently_delete(
     await db.delete(parcel)
     await db.commit()
     import urllib.parse
-    meldung = urllib.parse.quote(
+    message = urllib.parse.quote(
         t_for(request, "parcels.list.delete_permanently_message", plot_number=parcel.plot_number)
     )
-    return RedirectResponse(f"/parcels/?meldung={meldung}", status_code=302)
+    return RedirectResponse(f"/parcels/?message={message}", status_code=302)
 
 
 # ---------------------------------------------------------------------------
-# Mitglieder-Zuordnung
+# Member assignment
 # ---------------------------------------------------------------------------
 
 @router.post("/{parcel_id}/member/assign")
@@ -576,7 +576,7 @@ async def parcels_export_csv(request: Request, db: AsyncSession = Depends(get_db
     ])
 
     for p in parcels:
-        mitglieder_str = "; ".join(
+        members_str = "; ".join(
             f"{z.member.full_name}{'*' if z.is_invoice_address else ''}"
             for z in sorted(p.member_assignments, key=lambda z: (not z.is_invoice_address, z.member.full_name))
         )
@@ -585,7 +585,7 @@ async def parcels_export_csv(request: Request, db: AsyncSession = Depends(get_db
             str(p.area_sqm).replace(".", ",") if p.area_sqm else "",
             p.status.value,
             p.termination_note or "",
-            mitglieder_str,
+            members_str,
             p.notes or "",
         ])
 
@@ -598,22 +598,22 @@ async def parcels_export_csv(request: Request, db: AsyncSession = Depends(get_db
 
 
 # ---------------------------------------------------------------------------
-# CSV-Import
+# CSV import
 # ---------------------------------------------------------------------------
 
 @router.post("/import/csv")
 async def parcels_import_csv(
     request: Request,
-    datei: UploadFile = File(...),
+    file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ):
     await require_permission(request, db, "members_parcels", "write")
 
-    inhalt = await datei.read()
+    content = await file.read()
     try:
-        text = inhalt.decode("utf-8-sig")  # BOM-safe
+        text = content.decode("utf-8-sig")  # BOM-safe
     except UnicodeDecodeError:
-        text = inhalt.decode("latin-1")
+        text = content.decode("latin-1")
 
     try:
         delimiter = csv.Sniffer().sniff(text[:2048], delimiters=";,").delimiter
@@ -624,53 +624,53 @@ async def parcels_import_csv(
     if reader.fieldnames:
         reader.fieldnames = [f.strip() if f else f for f in reader.fieldnames]
 
-    erstellt = 0
-    uebersprungen = 0
-    fehlende_gartennummer = 0
+    created = 0
+    skipped = 0
+    missing_plot_number = 0
 
-    for zeile in reader:
-        plot_number = (zeile.get("Gartennummer") or "").strip().upper()
+    for row in reader:
+        plot_number = (row.get("Gartennummer") or "").strip().upper()
         if not plot_number:
-            fehlende_gartennummer += 1
+            missing_plot_number += 1
             continue
 
         existing = await db.execute(
             select(Parcel).where(Parcel.plot_number == plot_number)
         )
         if existing.scalar_one_or_none():
-            uebersprungen += 1
+            skipped += 1
             continue
 
-        flaeche = None
-        flaeche_str = (zeile.get("Fläche (qm)") or "").replace(",", ".").strip()
-        if flaeche_str:
+        area = None
+        area_str = (row.get("Fläche (qm)") or "").replace(",", ".").strip()
+        if area_str:
             try:
-                flaeche = float(flaeche_str)
+                area = float(area_str)
             except ValueError:
                 pass
 
-        status_str = (zeile.get("Status") or "ACTIVE").strip().upper()
+        status_str = (row.get("Status") or "ACTIVE").strip().upper()
         status = ParcelStatus.ACTIVE
         if status_str in [s.value for s in ParcelStatus]:
             status = ParcelStatus(status_str)
 
         parcel = Parcel(
             plot_number=plot_number,
-            area_sqm=flaeche,
+            area_sqm=area,
             status=status,
-            notes=(zeile.get("Notizen") or "").strip() or None,
+            notes=(row.get("Notizen") or "").strip() or None,
         )
         db.add(parcel)
-        erstellt += 1
+        created += 1
 
     await db.commit()
 
-    meldung = t_for(request, "parcels.list.csv_import_summary", created=erstellt, skipped=uebersprungen)
-    if fehlende_gartennummer:
-        meldung += t_for(request, "parcels.list.csv_import_missing_plot_number", count=fehlende_gartennummer)
+    message = t_for(request, "parcels.list.csv_import_summary", created=created, skipped=skipped)
+    if missing_plot_number:
+        message += t_for(request, "parcels.list.csv_import_missing_plot_number", count=missing_plot_number)
 
     import urllib.parse
     return RedirectResponse(
-        f"/parcels/?meldung={urllib.parse.quote(meldung)}",
+        f"/parcels/?message={urllib.parse.quote(message)}",
         status_code=302,
     )

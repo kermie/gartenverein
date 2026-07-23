@@ -70,21 +70,21 @@ async def members_list(
         # inactive members, just applied to the parcel's tenant history.
         # "City" was deliberately removed, since searching by it wasn't
         # used in practice.
-        parzellen_bedingung = Parcel.plot_number.ilike(f"%{search}%")
+        parcel_condition = Parcel.plot_number.ilike(f"%{search}%")
         if not include_inactive:
-            parzellen_bedingung = and_(
-                parzellen_bedingung, MemberParcel.assigned_until.is_(None)
+            parcel_condition = and_(
+                parcel_condition, MemberParcel.assigned_until.is_(None)
             )
-        parzellen_treffer = (
+        parcel_matches = (
             select(MemberParcel.member_id)
             .join(Parcel, MemberParcel.parcel_id == Parcel.id)
-            .where(parzellen_bedingung)
+            .where(parcel_condition)
         )
         query = query.where(
             or_(
                 Member.first_name.ilike(f"%{search}%"),
                 Member.last_name.ilike(f"%{search}%"),
-                Member.id.in_(parzellen_treffer),
+                Member.id.in_(parcel_matches),
             )
         )
 
@@ -186,7 +186,7 @@ async def member_create(
 ):
     user = await require_permission(request, db, "members_parcels", "write")
 
-    def parse_datum(s: str) -> Optional[date]:
+    def parse_date(s: str) -> Optional[date]:
         if s:
             try:
                 return date.fromisoformat(s)
@@ -200,10 +200,10 @@ async def member_create(
         street=street.strip() or None,
         postal_code=postal_code.strip() or None,
         city=city.strip() or None,
-        date_of_birth=parse_datum(date_of_birth),
+        date_of_birth=parse_date(date_of_birth),
         iban=iban.strip() or None,
-        member_since=parse_datum(member_since),
-        member_until=parse_datum(member_until),
+        member_since=parse_date(member_since),
+        member_until=parse_date(member_until),
         email_notifications=email_notifications,
         notes=notes.strip() or None,
     )
@@ -226,10 +226,10 @@ async def member_detail(
         raise HTTPException(status_code=404, detail=t_for(request, "members.errors.member_not_found"))
 
     # All active parcels, for assignment
-    parzellen_result = await db.execute(
+    parcels_result = await db.execute(
         select(Parcel).order_by(Parcel.plot_number)
     )
-    all_parcels = parzellen_result.scalars().all()
+    all_parcels = parcels_result.scalars().all()
 
     return templates.TemplateResponse(
         "members/detail.html",
@@ -283,7 +283,7 @@ async def member_update(
     if not member:
         raise HTTPException(status_code=404)
 
-    def parse_datum(s: str) -> Optional[date]:
+    def parse_date(s: str) -> Optional[date]:
         if s:
             try:
                 return date.fromisoformat(s)
@@ -296,10 +296,10 @@ async def member_update(
     member.street = street.strip() or None
     member.postal_code = postal_code.strip() or None
     member.city = city.strip() or None
-    member.date_of_birth = parse_datum(date_of_birth)
+    member.date_of_birth = parse_date(date_of_birth)
     member.iban = iban.strip() or None
-    member.member_since = parse_datum(member_since)
-    member.member_until = parse_datum(member_until)
+    member.member_since = parse_date(member_since)
+    member.member_until = parse_date(member_until)
     member.email_notifications = email_notifications
     member.notes = notes.strip() or None
 
@@ -327,10 +327,10 @@ async def member_delete(
     member.deleted_at = datetime.now(timezone.utc)
     await db.commit()
 
-    meldung = t_for(request, "members.detail.deleted_message", name=member.full_name)
+    message = t_for(request, "members.detail.deleted_message", name=member.full_name)
     import urllib.parse
     return RedirectResponse(
-        f"/members/?meldung={urllib.parse.quote(meldung)}", status_code=302
+        f"/members/?message={urllib.parse.quote(message)}", status_code=302
     )
 
 
@@ -453,7 +453,7 @@ async def members_export_csv(request: Request, db: AsyncSession = Depends(get_db
 
     for m in members:
         emails = "; ".join(e.address for e in m.email_addresses)
-        telefone = "; ".join(t.number for t in m.phone_numbers)
+        phones = "; ".join(t.number for t in m.phone_numbers)
         parcels = "; ".join(z.parcel.plot_number for z in m.parcel_assignments)
         writer.writerow([
             m.first_name, m.last_name, m.street or "", m.postal_code or "", m.city or "",
@@ -462,7 +462,7 @@ async def members_export_csv(request: Request, db: AsyncSession = Depends(get_db
             m.member_since.isoformat() if m.member_since else "",
             m.member_until.isoformat() if m.member_until else "",
             "Ja" if m.email_notifications else "Nein",
-            emails, telefone, parcels,
+            emails, phones, parcels,
             m.notes or "",
         ])
 
@@ -507,11 +507,11 @@ async def members_import_csv(
     if reader.fieldnames:
         reader.fieldnames = [f.strip() if f else f for f in reader.fieldnames]
 
-    erstellt = 0
-    aktualisiert = 0
-    fehler = []
+    created = 0
+    updated = 0
+    errors = []
 
-    def parse_datum(s: str) -> Optional[date]:
+    def parse_date(s: str) -> Optional[date]:
         s = s.strip()
         for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%d.%m.%y"):
             try:
@@ -520,16 +520,16 @@ async def members_import_csv(
                 continue
         return None
 
-    for zeilennr, zeile in enumerate(reader, start=2):
-        first_name = (zeile.get("Vorname") or "").strip()
-        last_name = (zeile.get("Nachname") or "").strip()
+    for row_number, row in enumerate(reader, start=2):
+        first_name = (row.get("Vorname") or "").strip()
+        last_name = (row.get("Nachname") or "").strip()
 
         if not first_name or not last_name:
-            fehler.append(f"Zeile {zeilennr}: Vor- oder Nachname fehlt – übersprungen.")
+            errors.append(f"Zeile {row_number}: Vor- oder Nachname fehlt – übersprungen.")
             continue
 
         # Duplicate detection: same first + last name + date of birth
-        date_of_birth = parse_datum(zeile.get("Geburtsdatum") or "")
+        date_of_birth = parse_date(row.get("Geburtsdatum") or "")
         existing_query = select(Member).where(
             Member.first_name == first_name,
             Member.last_name == last_name,
@@ -541,71 +541,71 @@ async def members_import_csv(
         existing_result = await db.execute(existing_query)
         existing = existing_result.scalars().first()
 
-        email_ben_str = (zeile.get("E-Mail-Benachrichtigungen") or "Ja").strip().lower()
-        email_notifications = email_ben_str not in ("nein", "no", "false", "0")
+        email_notifications_str = (row.get("E-Mail-Benachrichtigungen") or "Ja").strip().lower()
+        email_notifications = email_notifications_str not in ("nein", "no", "false", "0")
 
-        felder = dict(
+        fields = dict(
             first_name=first_name,
             last_name=last_name,
-            street=(zeile.get("Strasse") or "").strip() or None,
-            postal_code=(zeile.get("PLZ") or "").strip() or None,
-            city=(zeile.get("Ort") or "").strip() or None,
+            street=(row.get("Strasse") or "").strip() or None,
+            postal_code=(row.get("PLZ") or "").strip() or None,
+            city=(row.get("Ort") or "").strip() or None,
             date_of_birth=date_of_birth,
-            iban=(zeile.get("IBAN") or "").strip() or None,
-            member_since=parse_datum(zeile.get("Member seit") or ""),
-            member_until=parse_datum(zeile.get("Member bis") or ""),
+            iban=(row.get("IBAN") or "").strip() or None,
+            member_since=parse_date(row.get("Member seit") or ""),
+            member_until=parse_date(row.get("Member bis") or ""),
             email_notifications=email_notifications,
-            notes=(zeile.get("Notizen") or "").strip() or None,
+            notes=(row.get("Notizen") or "").strip() or None,
         )
 
         if existing:
             # Update the existing member
-            for k, v in felder.items():
+            for k, v in fields.items():
                 setattr(existing, k, v)
             member = existing
-            aktualisiert += 1
+            updated += 1
         else:
-            member = Member(**felder)
+            member = Member(**fields)
             db.add(member)
             await db.flush()  # generate ID for sub-entries
-            erstellt += 1
+            created += 1
 
         # Email addresses (semicolon-separated in one cell)
-        emails_str = (zeile.get("E-Mail-Adressen") or "").strip()
+        emails_str = (row.get("E-Mail-Adressen") or "").strip()
         if emails_str and not existing:
-            for i, adresse in enumerate(emails_str.split(";")):
-                adresse = adresse.strip().lower()
-                if adresse:
+            for i, email_address in enumerate(emails_str.split(";")):
+                email_address = email_address.strip().lower()
+                if email_address:
                     db.add(MemberEmail(
                         member_id=member.id,
-                        address=adresse,
+                        address=email_address,
                         is_primary=(i == 0),
                     ))
 
         # Phone numbers (semicolon-separated in one cell)
-        telefone_str = (zeile.get("Telefonnummern") or "").strip()
-        if telefone_str and not existing:
-            for i, nummer in enumerate(telefone_str.split(";")):
-                nummer = nummer.strip()
-                if nummer:
+        phones_str = (row.get("Telefonnummern") or "").strip()
+        if phones_str and not existing:
+            for i, phone_number in enumerate(phones_str.split(";")):
+                phone_number = phone_number.strip()
+                if phone_number:
                     db.add(MemberPhone(
                         member_id=member.id,
-                        number=nummer,
+                        number=phone_number,
                         is_primary=(i == 0),
                     ))
 
     await db.commit()
 
-    meldung = t_for(request, "members.list.csv_import_summary", created=erstellt, updated=aktualisiert)
-    if fehler:
-        meldung += t_for(request, "members.list.csv_import_errors_suffix", count=len(fehler))
+    message = t_for(request, "members.list.csv_import_summary", created=created, updated=updated)
+    if errors:
+        message += t_for(request, "members.list.csv_import_errors_suffix", count=len(errors))
         # Show the first few error details so the cause is visible right away
-        meldung += " – " + " | ".join(fehler[:3])
-        if len(fehler) > 3:
-            meldung += t_for(request, "members.list.csv_import_more_errors", count=len(fehler) - 3)
+        message += " – " + " | ".join(errors[:3])
+        if len(errors) > 3:
+            message += t_for(request, "members.list.csv_import_more_errors", count=len(errors) - 3)
 
     import urllib.parse
     return RedirectResponse(
-        f"/members/?meldung={urllib.parse.quote(meldung)}",
+        f"/members/?message={urllib.parse.quote(message)}",
         status_code=302,
     )

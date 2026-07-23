@@ -1,5 +1,5 @@
 """
-Admin-Router: Benutzerverwaltung, Einladungen, Vereinseinstellungen.
+Admin router: user management, invitations, club settings.
 """
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -150,15 +150,15 @@ async def sample_data_add(request: Request, db: AsyncSession = Depends(get_db)):
     try:
         await add_sample_data(db)
     except SampleDataBlockedError as e:
-        return RedirectResponse(f"/admin/sample-data?fehler={urllib.parse.quote(str(e))}", status_code=302)
-    return RedirectResponse("/admin/sample-data?erfolg=1", status_code=302)
+        return RedirectResponse(f"/admin/sample-data?error={urllib.parse.quote(str(e))}", status_code=302)
+    return RedirectResponse("/admin/sample-data?success=1", status_code=302)
 
 
 @router.post("/sample-data/remove")
 async def sample_data_remove(request: Request, db: AsyncSession = Depends(get_db)):
     await require_system_admin(request, db)
     await remove_sample_data(db)
-    return RedirectResponse("/admin/sample-data?entfernt=1", status_code=302)
+    return RedirectResponse("/admin/sample-data?removed=1", status_code=302)
 
 
 @router.post("/invite")
@@ -180,7 +180,7 @@ async def user_invite(
     existing = await db.execute(select(User).where(User.email == email))
     if existing.scalar_one_or_none():
         return RedirectResponse(
-            f"/admin/?fehler={urllib.parse.quote(t_for(request, 'errors.email_already_registered'))}",
+            f"/admin/?error={urllib.parse.quote(t_for(request, 'errors.email_already_registered'))}",
             status_code=302,
         )
 
@@ -249,7 +249,7 @@ async def user_invite(
         )
 
     return RedirectResponse(
-        f"/admin/?erfolg={urllib.parse.quote(t_for(request, 'errors.invitation_sent'))}",
+        f"/admin/?success={urllib.parse.quote(t_for(request, 'errors.invitation_sent'))}",
         status_code=302,
     )
 
@@ -264,7 +264,7 @@ async def user_deactivate(
 
     if user_id == admin.id:
         return RedirectResponse(
-            f"/admin/?fehler={urllib.parse.quote(t_for(request, 'errors.own_account_cannot_deactivate'))}",
+            f"/admin/?error={urllib.parse.quote(t_for(request, 'errors.own_account_cannot_deactivate'))}",
             status_code=302,
         )
 
@@ -277,7 +277,7 @@ async def user_deactivate(
             and await is_last_admin(db, target.id)
         ):
             return RedirectResponse(
-                f"/admin/?fehler={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
+                f"/admin/?error={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
                 status_code=302,
             )
         target.is_active = not target.is_active
@@ -354,14 +354,14 @@ async def user_edit(
 
     if not name:
         return RedirectResponse(
-            f"/admin/users/{user_id}/edit?fehler={urllib.parse.quote(t_for(request, 'errors.name_required'))}",
+            f"/admin/users/{user_id}/edit?error={urllib.parse.quote(t_for(request, 'errors.name_required'))}",
             status_code=302,
         )
 
     existing = await db.execute(select(User).where(User.email == email, User.id != user_id))
     if existing.scalar_one_or_none():
         return RedirectResponse(
-            f"/admin/users/{user_id}/edit?fehler={urllib.parse.quote(t_for(request, 'errors.email_already_registered'))}",
+            f"/admin/users/{user_id}/edit?error={urllib.parse.quote(t_for(request, 'errors.email_already_registered'))}",
             status_code=302,
         )
 
@@ -374,7 +374,7 @@ async def user_edit(
             and await is_last_admin(db, target.id)
         ):
             return RedirectResponse(
-                f"/admin/users/{user_id}/edit?fehler={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
+                f"/admin/users/{user_id}/edit?error={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
                 status_code=302,
             )
         target.role = new_role
@@ -384,7 +384,7 @@ async def user_edit(
     await db.commit()
 
     return RedirectResponse(
-        f"/admin/?erfolg={urllib.parse.quote(t_for(request, 'errors.user_updated'))}",
+        f"/admin/?success={urllib.parse.quote(t_for(request, 'errors.user_updated'))}",
         status_code=302,
     )
 
@@ -399,7 +399,7 @@ async def user_delete(
 
     if user_id == admin.id:
         return RedirectResponse(
-            f"/admin/?fehler={urllib.parse.quote(t_for(request, 'errors.own_account_cannot_deactivate'))}",
+            f"/admin/?error={urllib.parse.quote(t_for(request, 'errors.own_account_cannot_deactivate'))}",
             status_code=302,
         )
 
@@ -414,13 +414,13 @@ async def user_delete(
         and await is_last_admin(db, target.id)
     ):
         return RedirectResponse(
-            f"/admin/?fehler={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
+            f"/admin/?error={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
             status_code=302,
         )
 
     if await _user_has_history(db, target.id):
         return RedirectResponse(
-            f"/admin/users/{user_id}/edit?fehler={urllib.parse.quote(t_for(request, 'errors.user_has_history_cannot_delete'))}",
+            f"/admin/users/{user_id}/edit?error={urllib.parse.quote(t_for(request, 'errors.user_has_history_cannot_delete'))}",
             status_code=302,
         )
 
@@ -428,13 +428,13 @@ async def user_delete(
     await db.commit()
 
     return RedirectResponse(
-        f"/admin/?erfolg={urllib.parse.quote(t_for(request, 'errors.user_deleted'))}",
+        f"/admin/?success={urllib.parse.quote(t_for(request, 'errors.user_deleted'))}",
         status_code=302,
     )
 
 
 # ---------------------------------------------------------------------------
-# Vereinseinstellungen
+# Club settings
 # ---------------------------------------------------------------------------
 
 SETTINGS_FIELDS = [
@@ -489,8 +489,8 @@ async def settings_page(request: Request, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(ClubSetting))
     settings_map = {e.key: e.value for e in result.scalars().all()}
 
-    resolved_felder = [(key, t_for(request, label_key)) for key, label_key in SETTINGS_FIELDS]
-    resolved_module_felder = [
+    resolved_fields = [(key, t_for(request, label_key)) for key, label_key in SETTINGS_FIELDS]
+    resolved_module_fields = [
         (key, t_for(request, name_key), t_for(request, desc_key))
         for key, name_key, desc_key in MODULE_FIELDS
     ]
@@ -500,9 +500,9 @@ async def settings_page(request: Request, db: AsyncSession = Depends(get_db)):
         {
             "request": request,
             "user": user,
-            "einstellungen": settings_map,
-            "felder": resolved_felder,
-            "module_felder": resolved_module_felder,
+            "settings_map": settings_map,
+            "fields": resolved_fields,
+            "module_fields": resolved_module_fields,
             "available_languages": AVAILABLE_LANGUAGES,
             "available_regions": AVAILABLE_REGIONS,
             "available_currencies": AVAILABLE_CURRENCIES,
@@ -568,8 +568,8 @@ async def settings_save(
                 description=description,
             ))
 
-    # Modul-Umschalter: Checkboxen senden bei "aus" gar keinen Wert im
-    # Formular, daher explizit "true"/"false" statt nur form.get(...).
+    # Module toggles: an unchecked checkbox sends no value at all in the
+    # form, hence explicit "true"/"false" instead of just form.get(...).
     for key, description, _hint in MODULE_FIELDS:
         value = "true" if key in form else "false"
 
@@ -636,7 +636,7 @@ async def settings_save(
     await db.commit()
     if logo_error:
         return RedirectResponse(f"/admin/settings?logo_error={logo_error}", status_code=302)
-    return RedirectResponse("/admin/settings?erfolg=1", status_code=302)
+    return RedirectResponse("/admin/settings?success=1", status_code=302)
 
 
 # ---------------------------------------------------------------------------
@@ -648,13 +648,13 @@ async def settings_save(
 # ---------------------------------------------------------------------------
 
 @router.get("/integrations", response_class=HTMLResponse)
-async def integrations_seite(request: Request, db: AsyncSession = Depends(get_db)):
+async def integrations_page(request: Request, db: AsyncSession = Depends(get_db)):
     user = await require_system_admin(request, db)
     token = await get_or_create_public_api_token(db)
 
     result = await db.execute(select(ClubSetting).where(ClubSetting.key == "modul_public_signup_api"))
     entry = result.scalar_one_or_none()
-    modul_aktiv = (entry.value.strip().lower() in ("true", "1", "ja", "an")) if entry else False
+    module_active = (entry.value.strip().lower() in ("true", "1", "ja", "an")) if entry else False
 
     wordpress_result = await db.execute(
         select(ClubSetting).where(ClubSetting.key.in_(["wordpress_site_url", "wordpress_username", "wordpress_app_password"]))
@@ -668,14 +668,14 @@ async def integrations_seite(request: Request, db: AsyncSession = Depends(get_db
 
     cloud_storage_entry_result = await db.execute(select(ClubSetting).where(ClubSetting.key == "modul_cloud_storage"))
     cloud_storage_entry = cloud_storage_entry_result.scalar_one_or_none()
-    cloud_storage_aktiv = (
+    cloud_storage_active = (
         cloud_storage_entry.value.strip().lower() in ("true", "1", "ja", "an")
     ) if cloud_storage_entry else False
 
     return templates.TemplateResponse("admin/integrations.html", {
         "request": request, "user": user,
         "api_token": token,
-        "modul_aktiv": modul_aktiv,
+        "module_active": module_active,
         "base_url": str(request.base_url).rstrip("/"),
         "wordpress_site_url": wordpress_stored.get("wordpress_site_url", ""),
         "wordpress_username": wordpress_stored.get("wordpress_username", ""),
@@ -689,15 +689,15 @@ async def integrations_seite(request: Request, db: AsyncSession = Depends(get_db
         "nextcloud_saved": request.query_params.get("nextcloud_saved"),
         "nextcloud_test_result": request.query_params.get("nextcloud_test"),
         "nextcloud_test_message": request.query_params.get("nextcloud_test_message"),
-        "cloud_storage_aktiv": cloud_storage_aktiv,
+        "cloud_storage_active": cloud_storage_active,
     })
 
 
 @router.post("/integrations/regenerate-token")
-async def integrations_token_neu(request: Request, db: AsyncSession = Depends(get_db)):
+async def integrations_token_regenerate(request: Request, db: AsyncSession = Depends(get_db)):
     await require_system_admin(request, db)
     await regenerate_public_api_token(db)
-    return RedirectResponse("/admin/integrations?erfolg=1", status_code=302)
+    return RedirectResponse("/admin/integrations?success=1", status_code=302)
 
 
 async def _upsert_club_setting(db: AsyncSession, key: str, value: Optional[str], description: str = "") -> None:
@@ -710,7 +710,7 @@ async def _upsert_club_setting(db: AsyncSession, key: str, value: Optional[str],
 
 
 @router.post("/integrations/wordpress")
-async def integrations_wordpress_speichern(request: Request, db: AsyncSession = Depends(get_db)):
+async def integrations_wordpress_save(request: Request, db: AsyncSession = Depends(get_db)):
     """Saves the WordPress blog-draft credentials. Same "blank
     Application Password field = leave the existing one unchanged"
     convention as SMTP -- site URL and username are always overwritten
@@ -735,7 +735,7 @@ async def integrations_wordpress_speichern(request: Request, db: AsyncSession = 
 
 
 @router.post("/integrations/wordpress/test")
-async def integrations_wordpress_testen(request: Request, db: AsyncSession = Depends(get_db)):
+async def integrations_wordpress_test(request: Request, db: AsyncSession = Depends(get_db)):
     """Tests WordPress connectivity using whatever is currently in the
     form -- freshly typed values if provided, falling back to the
     already-saved configuration for any field left blank (same
@@ -773,7 +773,7 @@ async def integrations_wordpress_testen(request: Request, db: AsyncSession = Dep
 
 
 @router.post("/integrations/nextcloud")
-async def integrations_nextcloud_speichern(request: Request, db: AsyncSession = Depends(get_db)):
+async def integrations_nextcloud_save(request: Request, db: AsyncSession = Depends(get_db)):
     """Saves the Nextcloud cloud-storage credentials. Same "blank
     Application Password field = leave the existing one unchanged"
     convention as SMTP and WordPress -- base URL and username are
@@ -798,7 +798,7 @@ async def integrations_nextcloud_speichern(request: Request, db: AsyncSession = 
 
 
 @router.post("/integrations/nextcloud/test")
-async def integrations_nextcloud_testen(request: Request, db: AsyncSession = Depends(get_db)):
+async def integrations_nextcloud_test(request: Request, db: AsyncSession = Depends(get_db)):
     """Tests Nextcloud connectivity using whatever is currently in the
     form -- freshly typed values if provided, falling back to the
     already-saved configuration for any field left blank (same

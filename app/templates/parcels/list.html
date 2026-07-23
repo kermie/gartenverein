@@ -22,9 +22,9 @@
 
 {% block content %}
 
-{% if request.query_params.get('meldung') %}
+{% if request.query_params.get('message') %}
 <div class="alert alert-info d-flex gap-2 align-items-center mb-3">
-    <i class="bi bi-info-circle-fill"></i> {{ request.query_params.get('meldung') }}
+    <i class="bi bi-info-circle-fill"></i> {{ request.query_params.get('message') }}
 </div>
 {% endif %}
 
@@ -84,8 +84,8 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% set aktuelle_paechter = p.member_assignments | selectattr('assigned_until', 'none') | list %}
-                            {% for z in aktuelle_paechter %}
+                            {% set current_tenants = p.member_assignments | selectattr('assigned_until', 'none') | list %}
+                            {% for z in current_tenants %}
                             <a href="/members/{{ z.member.id }}" class="text-decoration-none"
                                style="color: var(--gv-gruen);">
                                 {{ z.member.first_name }} {{ z.member.last_name }}
@@ -118,8 +118,8 @@
     {% if parcels %}
     <div class="card-footer text-muted" style="font-size: 0.82rem;">
         {{ parcels | length }} {{ t('parcels.list.count_suffix_singular') if parcels | length == 1 else t('parcels.list.count_suffix_plural') }}
-        {% set gesamt_flaeche = parcels | selectattr('area_sqm') | sum(attribute='area_sqm') %}
-        {% if gesamt_flaeche > 0 %}{{ t('parcels.list.total_area_suffix', area='%g' % gesamt_flaeche) }}{% endif %}
+        {% set total_area = parcels | selectattr('area_sqm') | sum(attribute='area_sqm') %}
+        {% if total_area > 0 %}{{ t('parcels.list.total_area_suffix', area='%g' % total_area) }}{% endif %}
     </div>
     {% endif %}
 </div>
@@ -135,7 +135,7 @@
             <div class="modal-body">
                 <form method="post" action="/parcels/import/csv" enctype="multipart/form-data"
                       class="d-flex gap-2 align-items-center">
-                    <input type="file" name="datei" accept=".csv" class="form-control form-control-sm" required style="max-width: 300px;">
+                    <input type="file" name="file" accept=".csv" class="form-control form-control-sm" required style="max-width: 300px;">
                     <button type="submit" class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-upload me-1"></i>{{ t('parcels.list.csv_import_button') }}
                     </button>

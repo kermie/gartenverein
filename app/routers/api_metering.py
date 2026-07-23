@@ -33,7 +33,7 @@ def create_metering_api_router(
         dependencies=[Depends(require_module(modul_name))],
     )
 
-    async def _lade_zaehlpunkt(db: AsyncSession, metering_point_id: str) -> Optional[MeteringPoint]:
+    async def _load_metering_point(db: AsyncSession, metering_point_id: str) -> Optional[MeteringPoint]:
         result = await db.execute(
             select(MeteringPoint)
             .options(selectinload(MeteringPoint.meters).selectinload(Meter.readings))
@@ -42,7 +42,7 @@ def create_metering_api_router(
         return result.scalar_one_or_none()
 
     @router.get("/metering-points", response_model=List[MeteringPointOut], summary="List metering points")
-    async def zaehlpunkte_auflisten(
+    async def list_metering_points(
         type: Optional[str] = Query(None, description="MAIN_METER, PARCEL, or CLUB"),
         db: AsyncSession = Depends(get_db),
         user: User = Depends(get_current_api_user),
@@ -57,12 +57,12 @@ def create_metering_api_router(
         "/metering-points/{metering_point_id}", response_model=MeteringPointDetailOut,
         summary="Retrieve metering point incl. meter history",
     )
-    async def zaehlpunkt_abrufen(
+    async def get_metering_point(
         metering_point_id: str,
         db: AsyncSession = Depends(get_db),
         user: User = Depends(get_current_api_user),
     ):
-        zp = await _lade_zaehlpunkt(db, metering_point_id)
+        zp = await _load_metering_point(db, metering_point_id)
         if not zp:
             raise HTTPException(status_code=404, detail="Metering point not found")
         out = MeteringPointDetailOut.model_validate(zp)
@@ -75,7 +75,7 @@ def create_metering_api_router(
         summary="Create metering point",
         description="Creates a metering point including its first meter in a single step.",
     )
-    async def zaehlpunkt_erstellen(
+    async def create_metering_point(
         daten: MeteringPointCreate,
         db: AsyncSession = Depends(get_db),
         user: User = Depends(require_write_access),
@@ -87,22 +87,22 @@ def create_metering_api_router(
         db.add(zp)
         await db.flush()
 
-        zaehler = Meter(
+        meter = Meter(
             metering_point_id=zp.id, number=daten.number, is_active=True,
             calibrated_until=daten.calibrated_until, installed_at=daten.installed_at,
             initial_reading=daten.initial_reading,
         )
-        db.add(zaehler)
+        db.add(meter)
         await db.commit()
 
-        zp = await _lade_zaehlpunkt(db, zp.id)
+        zp = await _load_metering_point(db, zp.id)
         out = MeteringPointDetailOut.model_validate(zp)
         out.current_meter = zp.current_meter
         out.former_meters = []
         return out
 
     @router.put("/metering-points/{metering_point_id}", response_model=MeteringPointOut, summary="Update metering point")
-    async def zaehlpunkt_aktualisieren(
+    async def update_metering_point(
         metering_point_id: str,
         daten: MeteringPointUpdate,
         db: AsyncSession = Depends(get_db),
@@ -115,8 +115,8 @@ def create_metering_api_router(
         if not zp:
             raise HTTPException(status_code=404, detail="Metering point not found")
 
-        for feld, value in daten.model_dump(exclude_unset=True).items():
-            setattr(zp, feld, value)
+        for field, value in daten.model_dump(exclude_unset=True).items():
+            setattr(zp, field, value)
 
         await db.commit()
         await db.refresh(zp)
@@ -126,7 +126,7 @@ def create_metering_api_router(
         "/metering-points/{metering_point_id}", status_code=status.HTTP_204_NO_CONTENT,
         summary="Delete metering point", description="Also deletes all meters and readings (cascade).",
     )
-    async def zaehlpunkt_loeschen(
+    async def delete_metering_point(
         metering_point_id: str,
         db: AsyncSession = Depends(get_db),
         user: User = Depends(require_write_access),
@@ -144,47 +144,50 @@ def create_metering_api_router(
         summary="Exchange meter",
         description="Deactivates the current meter (removal date) and creates a new one.",
     )
-    async def zaehler_tauschen(
+    async def exchange_meter(
         metering_point_id: str,
         daten: MeterSwapRequest,
         db: AsyncSession = Depends(get_db),
         user: User = Depends(require_write_access),
     ):
-        zp = await _lade_zaehlpunkt(db, metering_point_id)
+        zp = await _load_metering_point(db, metering_point_id)
         if not zp:
             raise HTTPException(status_code=404, detail="Metering point not found")
 
-        alter = zp.current_meter
-        if alter:
-            alter.is_active = False
-            alter.removed_at = daten.removed_at
+        old_meter = zp.current_meter
+        if old_meter:
+            old_meter.is_active = False
+            old_meter.removed_at = daten.removed_at
 
-        neuer = Meter(
+        # NOTE: MeterSwapRequest.neue_nummer is a public API schema field
+        # (app/schemas.py) -- left as-is, renaming it would be a breaking
+        # API change, out of scope for this internal-naming cleanup.
+        new_meter = Meter(
             metering_point_id=metering_point_id, number=daten.neue_nummer, is_active=True,
             calibrated_until=daten.calibrated_until, installed_at=daten.installed_at,
             initial_reading=daten.initial_reading,
         )
-        db.add(neuer)
+        db.add(new_meter)
         await db.commit()
-        await db.refresh(neuer)
-        return neuer
+        await db.refresh(new_meter)
+        return new_meter
 
     @router.get(
         "/metering-points/{metering_point_id}/readings", response_model=List[MeterReadingOut],
         summary="List meter readings",
     )
-    async def zaehlerstaende_auflisten(
+    async def list_meter_readings(
         metering_point_id: str,
         db: AsyncSession = Depends(get_db),
         user: User = Depends(get_current_api_user),
     ):
-        zp = await _lade_zaehlpunkt(db, metering_point_id)
+        zp = await _load_metering_point(db, metering_point_id)
         if not zp:
             raise HTTPException(status_code=404, detail="Metering point not found")
-        zaehler = zp.current_meter
-        if not zaehler:
+        meter = zp.current_meter
+        if not meter:
             return []
-        return sorted(zaehler.readings, key=lambda z: z.year, reverse=True)
+        return sorted(meter.readings, key=lambda z: z.year, reverse=True)
 
     @router.post(
         "/metering-points/{metering_point_id}/readings", response_model=MeterReadingOut,
@@ -192,24 +195,24 @@ def create_metering_api_router(
         description="Creates a new reading or updates the existing one for the same year. "
                     "Checks plausibility (the reading must not decrease).",
     )
-    async def ablesung_erstellen(
+    async def create_reading(
         metering_point_id: str,
         daten: MeterReadingCreate,
         db: AsyncSession = Depends(get_db),
         user: User = Depends(require_write_access),
     ):
-        zp = await _lade_zaehlpunkt(db, metering_point_id)
+        zp = await _load_metering_point(db, metering_point_id)
         if not zp:
             raise HTTPException(status_code=404, detail="Metering point not found")
-        zaehler = zp.current_meter
-        if not zaehler:
+        meter = zp.current_meter
+        if not meter:
             raise HTTPException(status_code=400, detail="No active meter for this metering point")
 
-        fehler = check_monotonicity(zaehler, daten.year, daten.reading)
-        if fehler:
-            raise HTTPException(status_code=422, detail=format_monotonicity_error_de(*fehler))
+        error = check_monotonicity(meter, daten.year, daten.reading)
+        if error:
+            raise HTTPException(status_code=422, detail=format_monotonicity_error_de(*error))
 
-        existing = next((z for z in zaehler.readings if z.year == daten.year), None)
+        existing = next((z for z in meter.readings if z.year == daten.year), None)
         if existing:
             existing.reading = daten.reading
             existing.date = daten.date
@@ -219,35 +222,35 @@ def create_metering_api_router(
             await db.refresh(existing)
             return existing
 
-        neuer_stand = MeterReading(
-            meter_id=zaehler.id, year=daten.year, date=daten.date,
+        new_reading = MeterReading(
+            meter_id=meter.id, year=daten.year, date=daten.date,
             reading=daten.reading, note=daten.note, recorded_by_id=user.id,
         )
-        db.add(neuer_stand)
+        db.add(new_reading)
         await db.commit()
-        await db.refresh(neuer_stand)
-        return neuer_stand
+        await db.refresh(new_reading)
+        return new_reading
 
     @router.delete(
         "/readings/{reading_id}", status_code=status.HTTP_204_NO_CONTENT,
         summary="Delete reading",
     )
-    async def zaehlerstand_loeschen(
+    async def delete_reading(
         reading_id: str,
         db: AsyncSession = Depends(get_db),
         user: User = Depends(require_write_access),
     ):
         result = await db.execute(select(MeterReading).where(MeterReading.id == reading_id))
-        zs = result.scalar_one_or_none()
-        if zs:
-            await db.delete(zs)
+        reading_entry = result.scalar_one_or_none()
+        if reading_entry:
+            await db.delete(reading_entry)
             await db.commit()
 
     @router.get(
         "/evaluation/{year}", response_model=List[ConsumptionRowOut],
         summary="Consumption report for a year",
     )
-    async def auswertung(
+    async def evaluation(
         year: int,
         type: Optional[str] = Query(None, description="Filter by MAIN_METER, PARCEL, or CLUB"),
         db: AsyncSession = Depends(get_db),
@@ -263,15 +266,15 @@ def create_metering_api_router(
         result = await db.execute(query)
         metering_points = result.scalars().all()
 
-        zeilen = []
+        rows = []
         for zp in metering_points:
-            zaehler = zp.current_meter
-            consumption = calculate_consumption(zaehler, year) if zaehler else None
-            zeilen.append(ConsumptionRowOut(
+            meter = zp.current_meter
+            consumption = calculate_consumption(meter, year) if meter else None
+            rows.append(ConsumptionRowOut(
                 metering_point_id=zp.id, label=zp.display_name,
-                meter_number=zaehler.number if zaehler else None,
+                meter_number=meter.number if meter else None,
                 consumption=consumption,
             ))
-        return zeilen
+        return rows
 
     return router

@@ -1,5 +1,5 @@
 """
-API-Router: Authentifizierung (JWT-Token-Ausgabe).
+API router: authentication (JWT token issuance).
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/api/v1/auth", tags=["API: Auth"])
         "with a JSON body (for programmatic clients, see /api/v1/auth/login)."
     ),
 )
-async def token_anfordern(
+async def request_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db),
 ):
@@ -62,5 +62,5 @@ async def login_json(
     response_model=UserOut,
     summary="Retrieve own user profile",
 )
-async def eigenes_profil(user: User = Depends(get_current_api_user)):
+async def get_own_profile(user: User = Depends(get_current_api_user)):
     return user

@@ -3,7 +3,7 @@
 {% block page_title %}{{ t('admin.settings.heading') }}{% endblock %}
 
 {% block content %}
-{% if request.query_params.get('erfolg') %}
+{% if request.query_params.get('success') %}
 <div class="alert alert-success d-flex gap-2 align-items-center mb-3">
     <i class="bi bi-check-circle-fill"></i> {{ t('admin.settings.saved_message') }}
 </div>
@@ -36,7 +36,7 @@
                 </p>
                 <select name="language" class="form-select" style="max-width: 280px;">
                     {% for code, label in available_languages.items() %}
-                    <option value="{{ code }}" {% if einstellungen.get('language', 'en') == code %}selected{% endif %}>
+                    <option value="{{ code }}" {% if settings_map.get('language', 'en') == code %}selected{% endif %}>
                         {{ label }}
                     </option>
                     {% endfor %}
@@ -57,7 +57,7 @@
                         </p>
                         <select name="region" class="form-select" style="max-width: 280px;">
                             {% for code, label in available_regions.items() %}
-                            <option value="{{ code }}" {% if einstellungen.get('region', 'de_DE') == code %}selected{% endif %}>
+                            <option value="{{ code }}" {% if settings_map.get('region', 'de_DE') == code %}selected{% endif %}>
                                 {{ label }}
                             </option>
                             {% endfor %}
@@ -70,7 +70,7 @@
                         </p>
                         <select name="currency" class="form-select" style="max-width: 280px;">
                             {% for code, label in available_currencies.items() %}
-                            <option value="{{ code }}" {% if einstellungen.get('currency', 'EUR') == code %}selected{% endif %}>
+                            <option value="{{ code }}" {% if settings_map.get('currency', 'EUR') == code %}selected{% endif %}>
                                 {{ label }}
                             </option>
                             {% endfor %}
@@ -89,18 +89,18 @@
                     {{ t('admin.settings.module_help') }}
                 </p>
                 <div class="row g-3">
-                    {% for schluessel, name, hinweis in module_felder %}
+                    {% for key, name, hint in module_fields %}
                     <div class="col-md-6">
                         <div class="d-flex justify-content-between align-items-start gap-3 p-3"
                              style="background: #f8faf9; border-radius: 8px;">
                             <div>
-                                <label class="fw-semibold d-block" for="{{ schluessel }}">{{ name }}</label>
-                                <div class="text-muted" style="font-size: 0.8rem;">{{ hinweis }}</div>
+                                <label class="fw-semibold d-block" for="{{ key }}">{{ name }}</label>
+                                <div class="text-muted" style="font-size: 0.8rem;">{{ hint }}</div>
                             </div>
                             <div class="form-check form-switch mb-0 flex-shrink-0">
                                 <input class="form-check-input" type="checkbox" role="switch"
-                                       name="{{ schluessel }}" id="{{ schluessel }}"
-                                       {% if einstellungen.get(schluessel, 'true') in ('true', '1', 'ja', 'an') %}checked{% endif %}>
+                                       name="{{ key }}" id="{{ key }}"
+                                       {% if settings_map.get(key, 'true') in ('true', '1', 'ja', 'an') %}checked{% endif %}>
                             </div>
                         </div>
                     </div>
@@ -123,7 +123,7 @@
                     <div class="form-check form-switch mb-0 flex-shrink-0">
                         <input class="form-check-input" type="checkbox" role="switch"
                                name="update_check_enabled" id="update_check_enabled"
-                               {% if einstellungen.get('update_check_enabled', 'true') in ('true', '1', 'ja', 'an') %}checked{% endif %}>
+                               {% if settings_map.get('update_check_enabled', 'true') in ('true', '1', 'ja', 'an') %}checked{% endif %}>
                     </div>
                 </div>
             </div>
@@ -156,11 +156,11 @@
                     </div>
                     {% endif %}
                 </div>
-                {% for schluessel, label in felder[:6] %}
+                {% for key, label in fields[:6] %}
                 <div class="mb-3">
                     <label class="form-label fw-semibold">{{ label }}</label>
-                    <input type="text" name="{{ schluessel }}" class="form-control"
-                           value="{{ einstellungen.get(schluessel, '') or '' }}">
+                    <input type="text" name="{{ key }}" class="form-control"
+                           value="{{ settings_map.get(key, '') or '' }}">
                 </div>
                 {% endfor %}
             </div>
@@ -171,12 +171,12 @@
         <div class="card mb-3">
             <div class="card-header"><i class="bi bi-rulers me-2"></i>{{ t('admin.settings.areas_header') }}</div>
             <div class="card-body">
-                {% for schluessel, label in felder[6:10] %}
+                {% for key, label in fields[6:10] %}
                 <div class="mb-3">
                     <label class="form-label fw-semibold">{{ label }}</label>
-                    <input type="text" name="{{ schluessel }}" class="form-control"
+                    <input type="text" name="{{ key }}" class="form-control"
                            placeholder="0.00"
-                           value="{{ einstellungen.get(schluessel, '') or '' }}">
+                           value="{{ settings_map.get(key, '') or '' }}">
                 </div>
                 {% endfor %}
             </div>
@@ -188,14 +188,14 @@
                 <p class="text-muted mb-3" style="font-size: 0.82rem;">
                     {{ t('admin.settings.email_help') }}
                 </p>
-                {% for schluessel, label in felder[10:18] %}
+                {% for key, label in fields[10:18] %}
                 <div class="mb-3">
                     <label class="form-label fw-semibold">{{ label }}</label>
-                    <input type="{{ 'password' if ('password' in schluessel or 'api_key' in schluessel) else 'text' }}"
-                           name="{{ schluessel }}" class="form-control"
-                           value="{{ '' if ('password' in schluessel or 'api_key' in schluessel) else (einstellungen.get(schluessel, '') or '') }}"
-                           {% if 'password' in schluessel or 'api_key' in schluessel %}placeholder="{% if einstellungen.get(schluessel) %}{{ t('admin.settings.password_set_placeholder') }}{% else %}{{ t('admin.settings.password_unset_placeholder') }}{% endif %}"
-                           {% elif 'ssl' in schluessel or 'tls' in schluessel %}placeholder="true oder false"
+                    <input type="{{ 'password' if ('password' in key or 'api_key' in key) else 'text' }}"
+                           name="{{ key }}" class="form-control"
+                           value="{{ '' if ('password' in key or 'api_key' in key) else (settings_map.get(key, '') or '') }}"
+                           {% if 'password' in key or 'api_key' in key %}placeholder="{% if settings_map.get(key) %}{{ t('admin.settings.password_set_placeholder') }}{% else %}{{ t('admin.settings.password_unset_placeholder') }}{% endif %}"
+                           {% elif 'ssl' in key or 'tls' in key %}placeholder="true oder false"
                            {% endif %}>
                 </div>
                 {% endfor %}
@@ -208,14 +208,14 @@
                 <p class="text-muted mb-3" style="font-size: 0.82rem;">
                     {{ t('admin.settings.spam_help') }}
                 </p>
-                {% for schluessel, label in felder[18:] %}
+                {% for key, label in fields[18:] %}
                 <div class="mb-3">
                     <label class="form-label fw-semibold">{{ label }}</label>
-                    <input type="{{ 'password' if ('password' in schluessel or 'api_key' in schluessel) else 'text' }}"
-                           name="{{ schluessel }}" class="form-control"
-                           value="{{ '' if ('password' in schluessel or 'api_key' in schluessel) else (einstellungen.get(schluessel, '') or '') }}"
-                           {% if 'password' in schluessel or 'api_key' in schluessel %}placeholder="{% if einstellungen.get(schluessel) %}{{ t('admin.settings.password_set_placeholder') }}{% else %}{{ t('admin.settings.password_unset_placeholder') }}{% endif %}"
-                           {% elif 'schwellenwert' in schluessel %}placeholder="0.5"
+                    <input type="{{ 'password' if ('password' in key or 'api_key' in key) else 'text' }}"
+                           name="{{ key }}" class="form-control"
+                           value="{{ '' if ('password' in key or 'api_key' in key) else (settings_map.get(key, '') or '') }}"
+                           {% if 'password' in key or 'api_key' in key %}placeholder="{% if settings_map.get(key) %}{{ t('admin.settings.password_set_placeholder') }}{% else %}{{ t('admin.settings.password_unset_placeholder') }}{% endif %}"
+                           {% elif 'schwellenwert' in key %}placeholder="0.5"
                            {% endif %}>
                 </div>
                 {% endfor %}

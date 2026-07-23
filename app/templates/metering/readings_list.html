@@ -60,7 +60,7 @@
           class="d-flex gap-2 align-items-center">
         <input type="hidden" name="year" value="{{ year }}">
         <input type="hidden" name="date" value="{{ today }}">
-        <input type="hidden" name="rueck_url" value="{{ url_prefix }}/readings?year={{ year }}">
+        <input type="hidden" name="return_url" value="{{ url_prefix }}/readings?year={{ year }}">
         <input type="text" name="reading" class="form-control"
                placeholder="{% if decimal_places == 0 %}0{% else %}0,0{% endif %}"
                inputmode="{% if decimal_places == 0 %}numeric{% else %}decimal{% endif %}" required>

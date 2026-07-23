@@ -25,9 +25,9 @@
 
 {% block content %}
 
-{% if request.query_params.get('meldung') %}
+{% if request.query_params.get('message') %}
 <div class="alert alert-success d-flex gap-2 align-items-center mb-3">
-    <i class="bi bi-check-circle-fill"></i> {{ request.query_params.get('meldung') }}
+    <i class="bi bi-check-circle-fill"></i> {{ request.query_params.get('message') }}
 </div>
 {% endif %}
 

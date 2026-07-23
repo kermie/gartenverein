@@ -203,7 +203,7 @@ async def test_smoke_metering_pages_render_without_jinja_errors(client, admin_us
 
     r_exchange = await client.post(
         f"/water/metering-points/{point_id}/meter/exchange",
-        data={"neue_nummer": "WSM-2", "removed_at": "2026-10-02", "installed_at": "2026-10-02", "initial_reading": "0"},
+        data={"new_number": "WSM-2", "removed_at": "2026-10-02", "installed_at": "2026-10-02", "initial_reading": "0"},
     )
     assert r_exchange.status_code in (302, 303)
 

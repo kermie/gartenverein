@@ -47,13 +47,13 @@
             <div class="card-header"><i class="bi bi-person me-2"></i>{{ t('purchase_requests.form.requester_header') }}</div>
             <div class="card-body">
                 <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" name="fuer_andere_person" id="fuer-andere"
-                           onchange="document.getElementById('andere-person-felder').style.display = this.checked ? '' : 'none';">
-                    <label class="form-check-label" for="fuer-andere">
+                    <input class="form-check-input" type="checkbox" name="for_other_person" id="for-other-person"
+                           onchange="document.getElementById('other-person-fields').style.display = this.checked ? '' : 'none';">
+                    <label class="form-check-label" for="for-other-person">
                         {{ t('purchase_requests.form.on_behalf_label') }}
                     </label>
                 </div>
-                <div id="andere-person-felder" style="display: none;">
+                <div id="other-person-fields" style="display: none;">
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <label class="form-label fw-semibold">{{ t('purchase_requests.form.label_person_name') }}</label>

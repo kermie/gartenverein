@@ -1,5 +1,5 @@
 """
-Alembic-Umgebung für asynchrone SQLAlchemy-Engine.
+Alembic environment for the async SQLAlchemy engine.
 """
 import asyncio
 from logging.config import fileConfig
@@ -16,11 +16,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.database import Base
 from app.config import settings
-from app import models  # noqa: F401  – stellt sicher, dass alle Modelle geladen sind
+from app import models  # noqa: F401  – ensures all models are loaded
 
 config = context.config
 
-# Datenbank-URL aus den App-Settings übernehmen (nicht aus alembic.ini)
+# Take the database URL from the app settings (not from alembic.ini)
 config.set_main_option("sqlalchemy.url", settings.database_url)
 
 if config.config_file_name is not None:

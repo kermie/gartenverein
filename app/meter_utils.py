@@ -21,23 +21,23 @@ def reading_before_year(meter: Meter, year: int, exclude_id: Optional[str] = Non
     year's consumption: the last reading BEFORE that year, or the
     meter's initial reading if none exists.
     """
-    fruehere = [
+    earlier_readings = [
         z for z in sorted_readings(meter)
         if z.year < year and z.id != exclude_id
     ]
-    if fruehere:
-        return Decimal(str(fruehere[-1].reading))
+    if earlier_readings:
+        return Decimal(str(earlier_readings[-1].reading))
     return Decimal(str(meter.initial_reading))
 
 
 def reading_after_year(meter: Meter, year: int, exclude_id: Optional[str] = None) -> Optional[Decimal]:
     """The next existing reading AFTER a year, if any (for edit-time plausibility checks)."""
-    spaetere = [
+    later_readings = [
         z for z in sorted_readings(meter)
         if z.year > year and z.id != exclude_id
     ]
-    if spaetere:
-        return Decimal(str(spaetere[0].reading))
+    if later_readings:
+        return Decimal(str(later_readings[0].reading))
     return None
 
 
@@ -47,15 +47,15 @@ def calculate_consumption(meter: Meter, year: int) -> Optional[Decimal]:
     the last reading before it (or the initial reading). Returns None
     if no reading exists for that year.
     """
-    aktuelle = next((z for z in meter.readings if z.year == year), None)
-    if not aktuelle:
+    current_reading = next((z for z in meter.readings if z.year == year), None)
+    if not current_reading:
         return None
-    vorwert = reading_before_year(meter, year, exclude_id=aktuelle.id)
-    return Decimal(str(aktuelle.reading)) - vorwert
+    previous_value = reading_before_year(meter, year, exclude_id=current_reading.id)
+    return Decimal(str(current_reading.reading)) - previous_value
 
 
 def check_monotonicity(
-    meter: Meter, year: int, neuer_stand: Decimal, exclude_id: Optional[str] = None
+    meter: Meter, year: int, new_value: Decimal, exclude_id: Optional[str] = None
 ) -> Optional[tuple]:
     """
     Plausibility check: a meter's reading may not decrease over time.
@@ -68,13 +68,13 @@ def check_monotonicity(
     UI can share the same check code -- see app.i18n.translate() for
     the web-UI side.
     """
-    vorwert = reading_before_year(meter, year, exclude_id=exclude_id)
-    if neuer_stand < vorwert:
-        return ("metering.errors.reading_below_previous", {"new_value": neuer_stand, "previous_value": vorwert})
+    previous_value = reading_before_year(meter, year, exclude_id=exclude_id)
+    if new_value < previous_value:
+        return ("metering.errors.reading_below_previous", {"new_value": new_value, "previous_value": previous_value})
 
-    nachwert = reading_after_year(meter, year, exclude_id=exclude_id)
-    if nachwert is not None and neuer_stand > nachwert:
-        return ("metering.errors.reading_above_later", {"new_value": neuer_stand, "later_value": nachwert})
+    later_value = reading_after_year(meter, year, exclude_id=exclude_id)
+    if later_value is not None and new_value > later_value:
+        return ("metering.errors.reading_above_later", {"new_value": new_value, "later_value": later_value})
 
     return None
 
@@ -108,13 +108,13 @@ def total_consumption_for_type(metering_points: List, year: int) -> Decimal:
     reading for that year contribute 0 (instead of skewing the sum or
     raising an error) -- the evaluation page reports gaps separately.
     """
-    gesamt = Decimal("0")
+    total = Decimal("0")
     for metering_point in metering_points:
         for meter in metering_point.meters:
             consumption = calculate_consumption(meter, year)
             if consumption is not None:
-                gesamt += consumption
-    return gesamt
+                total += consumption
+    return total
 
 
 # Rounding: how many decimal places are shown/recorded per medium?
@@ -127,6 +127,6 @@ DECIMAL_PLACES_PER_MEDIUM = {
 
 def round_for_medium(value: Decimal, medium: str) -> Decimal:
     """Rounds a value to the number of decimal places customary for the medium."""
-    stellen = DECIMAL_PLACES_PER_MEDIUM.get(medium, 1)
-    quant = Decimal("1") if stellen == 0 else Decimal("1." + "0" * stellen)
+    places = DECIMAL_PLACES_PER_MEDIUM.get(medium, 1)
+    quant = Decimal("1") if places == 0 else Decimal("1." + "0" * places)
     return value.quantize(quant)

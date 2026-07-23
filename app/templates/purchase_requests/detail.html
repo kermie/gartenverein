@@ -78,13 +78,13 @@
                     {% endfor %}
                 </ul>
 
-                {% if pr.status.value == 'OPEN' and ist_vorstand %}
-                    {% if ist_antragsteller %}
+                {% if pr.status.value == 'OPEN' and is_board_member %}
+                    {% if is_requester %}
                     <div class="alert alert-secondary mb-0" style="font-size: 0.85rem;">
                         <i class="bi bi-info-circle me-1"></i>
                         {{ t('purchase_requests.detail.requester_cannot_approve') }}
                     </div>
-                    {% elif hat_bereits_freigegeben %}
+                    {% elif has_already_approved %}
                     <div class="alert alert-secondary mb-0" style="font-size: 0.85rem;">
                         <i class="bi bi-check-lg me-1"></i>{{ t('purchase_requests.detail.already_approved') }}
                     </div>

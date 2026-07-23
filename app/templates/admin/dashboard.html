@@ -4,14 +4,14 @@
 
 {% block content %}
 
-{% if request.query_params.get('erfolg') %}
+{% if request.query_params.get('success') %}
 <div class="alert alert-success d-flex gap-2 align-items-center mb-3">
-    <i class="bi bi-check-circle-fill"></i> {{ request.query_params.get('erfolg') }}
+    <i class="bi bi-check-circle-fill"></i> {{ request.query_params.get('success') }}
 </div>
 {% endif %}
-{% if request.query_params.get('fehler') %}
+{% if request.query_params.get('error') %}
 <div class="alert alert-danger d-flex gap-2 align-items-center mb-3">
-    <i class="bi bi-exclamation-circle-fill"></i> {{ request.query_params.get('fehler') }}
+    <i class="bi bi-exclamation-circle-fill"></i> {{ request.query_params.get('error') }}
 </div>
 {% endif %}
 {% if request.query_params.get('info') %}

@@ -10,9 +10,9 @@
 
 {% block content %}
 
-{% if request.query_params.get('fehler') %}
+{% if request.query_params.get('error') %}
 <div class="alert alert-danger d-flex gap-2 align-items-center mb-3" style="max-width: 640px;">
-    <i class="bi bi-exclamation-circle-fill"></i> {{ request.query_params.get('fehler') }}
+    <i class="bi bi-exclamation-circle-fill"></i> {{ request.query_params.get('error') }}
 </div>
 {% endif %}
 

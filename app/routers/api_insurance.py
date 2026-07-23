@@ -75,8 +75,8 @@ async def package_update(
     if not package:
         raise HTTPException(status_code=404, detail="Package not found")
 
-    for feld, value in daten.model_dump().items():
-        setattr(package, feld, value)
+    for field, value in daten.model_dump().items():
+        setattr(package, field, value)
 
     await db.commit()
     await db.refresh(package)

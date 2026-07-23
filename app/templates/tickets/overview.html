@@ -19,16 +19,16 @@
 
 {% block content %}
 
-{% if request.query_params.get('meldung') %}
+{% if request.query_params.get('message') %}
 <div class="alert alert-info d-flex gap-2 align-items-center mb-3">
-    <i class="bi bi-info-circle-fill"></i> {{ request.query_params.get('meldung') }}
+    <i class="bi bi-info-circle-fill"></i> {{ request.query_params.get('message') }}
 </div>
 {% endif %}
 
-{% if reaktiviert_count > 0 %}
+{% if reactivated_count > 0 %}
 <div class="alert alert-warning d-flex gap-2 align-items-center mb-3">
     <i class="bi bi-alarm-fill"></i>
-    {{ t('tickets.overview.reactivated_notice', count=reaktiviert_count) }}
+    {{ t('tickets.overview.reactivated_notice', count=reactivated_count) }}
 </div>
 {% endif %}
 
@@ -36,19 +36,19 @@
     <div class="card-body py-2">
         <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
             <div class="btn-group btn-group-sm" role="group">
-                <a href="/tickets/?filter=aktiv" class="btn btn-{{ 'primary' if filter == 'aktiv' else 'outline-secondary' }}">{{ t('tickets.overview.filter_active') }}</a>
-                <a href="/tickets/?filter=mir" class="btn btn-{{ 'primary' if filter == 'mir' else 'outline-secondary' }}">{{ t('tickets.overview.filter_mine') }}</a>
-                <a href="/tickets/?filter=wartend" class="btn btn-{{ 'primary' if filter == 'wartend' else 'outline-secondary' }}">
+                <a href="/tickets/?filter=active" class="btn btn-{{ 'primary' if filter == 'active' else 'outline-secondary' }}">{{ t('tickets.overview.filter_active') }}</a>
+                <a href="/tickets/?filter=mine" class="btn btn-{{ 'primary' if filter == 'mine' else 'outline-secondary' }}">{{ t('tickets.overview.filter_mine') }}</a>
+                <a href="/tickets/?filter=waiting" class="btn btn-{{ 'primary' if filter == 'waiting' else 'outline-secondary' }}">
                     {{ t('tickets.overview.filter_waiting') }} {% if waiting_count > 0 %}<span class="badge bg-secondary ms-1">{{ waiting_count }}</span>{% endif %}
                 </a>
-                <a href="/tickets/?filter=zurueckgestellt" class="btn btn-{{ 'primary' if filter == 'zurueckgestellt' else 'outline-secondary' }}">
+                <a href="/tickets/?filter=postponed" class="btn btn-{{ 'primary' if filter == 'postponed' else 'outline-secondary' }}">
                     {{ t('tickets.overview.filter_postponed') }} {% if postponed_count > 0 %}<span class="badge bg-secondary ms-1">{{ postponed_count }}</span>{% endif %}
                 </a>
                 <a href="/tickets/?filter=spam" class="btn btn-{{ 'primary' if filter == 'spam' else 'outline-secondary' }}">
                     {{ t('tickets.overview.filter_spam') }} {% if spam_count > 0 %}<span class="badge bg-danger ms-1">{{ spam_count }}</span>{% endif %}
                 </a>
-                <a href="/tickets/?filter=geschlossen" class="btn btn-{{ 'primary' if filter == 'geschlossen' else 'outline-secondary' }}">{{ t('tickets.overview.filter_closed') }}</a>
-                <a href="/tickets/?filter=alle" class="btn btn-{{ 'primary' if filter == 'alle' else 'outline-secondary' }}">{{ t('tickets.overview.filter_all') }}</a>
+                <a href="/tickets/?filter=closed" class="btn btn-{{ 'primary' if filter == 'closed' else 'outline-secondary' }}">{{ t('tickets.overview.filter_closed') }}</a>
+                <a href="/tickets/?filter=all" class="btn btn-{{ 'primary' if filter == 'all' else 'outline-secondary' }}">{{ t('tickets.overview.filter_all') }}</a>
             </div>
             <input type="hidden" name="filter" value="{{ filter }}">
             <input type="text" name="search" value="{{ search }}" class="form-control form-control-sm"
@@ -61,7 +61,7 @@
 <form method="post" id="bulk-form">
     <input type="hidden" name="filter" value="{{ filter }}">
 
-    <!-- Massenbearbeitung -->
+    <!-- Bulk editing -->
     {% if has_perm(request, 'tickets', 'write') %}
     <div class="card mb-3">
         <div class="card-body py-2 d-flex flex-wrap gap-2 align-items-center">
@@ -69,7 +69,7 @@
                 {{ t('tickets.overview.bulk_none_selected') }}
             </span>
 
-            <select name="status_neu" id="bulk-status-select" class="form-select form-select-sm" style="max-width: 180px;">
+            <select name="new_status_value" id="bulk-status-select" class="form-select form-select-sm" style="max-width: 180px;">
                 <option value="">{{ t('tickets.overview.bulk_status_placeholder') }}</option>
                 <option value="ACTIVE">{{ t('tickets.overview.status_active') }}</option>
                 <option value="ASSIGNED">{{ t('tickets.overview.status_assigned') }}</option>
@@ -89,7 +89,7 @@
 
             <select name="user_id" id="bulk-assign-select" class="form-select form-select-sm" style="max-width: 200px;">
                 <option value="">{{ t('tickets.overview.bulk_unassign_option') }}</option>
-                {% for u in alle_benutzer %}
+                {% for u in all_active_users %}
                 <option value="{{ u.id }}">{{ u.name }}</option>
                 {% endfor %}
             </select>

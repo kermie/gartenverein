@@ -118,7 +118,7 @@
             <div class="card-body">
                 {% if has_perm(request, 'tickets', 'write') %}
                 <form method="post" action="/tickets/{{ ticket.id }}/status">
-                    <select name="status_neu" class="form-select form-select-sm mb-2"
+                    <select name="new_status_value" class="form-select form-select-sm mb-2"
                             onchange="document.getElementById('zurueckstell-datum').style.display = this.value === 'POSTPONED' ? '' : 'none';">
                         <option value="ACTIVE" {% if ticket.status.value == 'ACTIVE' %}selected{% endif %}>{{ t('tickets.overview.status_active') }}</option>
                         <option value="ASSIGNED" {% if ticket.status.value == 'ASSIGNED' %}selected{% endif %}>{{ t('tickets.overview.status_assigned') }}</option>

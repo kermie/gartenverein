@@ -799,12 +799,12 @@ async def member_club_role_remove(
         select(MemberClubRole).where(MemberClubRole.id == assignment_id)
     )
     assignment = result.scalar_one_or_none()
-    rueck_jahr = assignment.year if assignment else date.today().year
+    return_year = assignment.year if assignment else date.today().year
     if assignment:
         await db.delete(assignment)
         await db.commit()
 
-    return RedirectResponse(f"/work-hours/club-roles?year={rueck_jahr}", status_code=302)
+    return RedirectResponse(f"/work-hours/club-roles?year={return_year}", status_code=302)
 
 
 @router.post("/club-roles/new")
@@ -1230,58 +1230,58 @@ async def evaluation_export_csv(
     ])
 
     if config.mode == WorkHoursMode.PER_PARCEL:
-        parzellen_result = await db.execute(
+        parcels_result = await db.execute(
             select(Parcel)
             .options(selectinload(Parcel.member_assignments).selectinload(MemberParcel.member))
             .where(Parcel.status == ParcelStatus.ACTIVE)
             .order_by(Parcel.plot_number)
         )
-        for parzelle in parzellen_result.scalars().all():
-            paechter = [
-                z.member for z in parzelle.member_assignments
+        for parcel in parcels_result.scalars().all():
+            tenants = [
+                z.member for z in parcel.member_assignments
                 if z.member.deleted_at is None
                 and (z.member.member_until is None or z.member.member_until >= date.today())
             ]
-            if not paechter:
+            if not tenants:
                 continue
-            gesamt = 0.0
-            einsatz_h = 0.0
-            paten_h = 0.0
+            total = 0.0
+            session_hours = 0.0
+            sponsorship_hours = 0.0
             # Same rule as the evaluation page: ONE exempt tenant is enough
             # to exempt the whole parcel (any(), not all() -- see
             # docs/ADR/README.md).
-            ist_befreit = False
-            namen = []
-            for m in paechter:
-                stand = await _calculate_hours_for_member(db, m.id, year)
-                befreit = await _is_exempt(db, m.id, year)
-                gesamt += stand["total"]
-                einsatz_h += stand["session_hours"]
-                paten_h += stand["sponsorship_hours"]
-                if befreit:
-                    ist_befreit = True
-                namen.append(m.full_name)
-            pflicht = float(config.hours_required)
-            offen = max(0.0, pflicht - gesamt) if not ist_befreit else 0.0
-            schuld = offen * float(config.rate_per_hour_eur)
+            is_exempt = False
+            names = []
+            for m in tenants:
+                standing = await _calculate_hours_for_member(db, m.id, year)
+                exempt = await _is_exempt(db, m.id, year)
+                total += standing["total"]
+                session_hours += standing["session_hours"]
+                sponsorship_hours += standing["sponsorship_hours"]
+                if exempt:
+                    is_exempt = True
+                names.append(m.full_name)
+            required = float(config.hours_required)
+            outstanding = max(0.0, required - total) if not is_exempt else 0.0
+            amount_due = outstanding * float(config.rate_per_hour_eur)
             writer.writerow([
-                parzelle.plot_number,
-                "; ".join(namen),
-                f"{pflicht:.1f}",
-                f"{einsatz_h:.1f}",
-                f"{paten_h:.1f}",
-                f"{gesamt:.1f}",
-                f"{offen:.1f}",
-                f"{schuld:.2f}".replace(".", ","),
-                "Ja" if ist_befreit else "Nein",
-                "Ja" if (ist_befreit or gesamt >= pflicht) else "Nein",
+                parcel.plot_number,
+                "; ".join(names),
+                f"{required:.1f}",
+                f"{session_hours:.1f}",
+                f"{sponsorship_hours:.1f}",
+                f"{total:.1f}",
+                f"{outstanding:.1f}",
+                f"{amount_due:.2f}".replace(".", ","),
+                "Ja" if is_exempt else "Nein",
+                "Ja" if (is_exempt or total >= required) else "Nein",
             ])
 
     output.seek(0)
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=pflichtstunden_{year}.csv"},
+        headers={"Content-Disposition": f"attachment; filename=work_hours_{year}.csv"},
     )
 
 

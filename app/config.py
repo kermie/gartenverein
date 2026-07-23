@@ -3,17 +3,17 @@ from typing import Optional
 
 
 class Settings(BaseSettings):
-    # Datenbank
+    # Database
     database_url: str = "postgresql+asyncpg://gartenverein:changeme@localhost:5432/gartenverein"
 
-    # Sicherheit
+    # Security
     secret_key: str = "dev-secret-key-change-in-production"
-    session_max_age: int = 60 * 60 * 8  # 8 Stunden
+    session_max_age: int = 60 * 60 * 8  # 8 hours
 
-    # Umgebung
+    # Environment
     environment: str = "development"
 
-    # E-Mail
+    # Email
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     smtp_from: str = "noreply@gartenverein.local"
     smtp_tls: bool = True
 
-    # App-Metadaten
+    # App metadata
     app_name: str = "Gartenverein Verwaltung"
     app_version: str = "0.1.0"
 

@@ -1,5 +1,5 @@
 """
-Authentifizierungs-Router: Login, Logout, Einladungen.
+Auth router: login, logout, invitations.
 """
 from datetime import datetime, timedelta, timezone
 
@@ -23,7 +23,7 @@ from app.templating import templates
 
 
 @router.get("/login", response_class=HTMLResponse)
-async def login_seite(request: Request, db: AsyncSession = Depends(get_db)):
+async def login_page(request: Request, db: AsyncSession = Depends(get_db)):
     user = await get_current_user(request, db)
     if user:
         return RedirectResponse("/", status_code=302)
@@ -43,18 +43,18 @@ async def login(
     if not user or not user.password_hash or not verify_password(password, user.password_hash):
         return templates.TemplateResponse(
             "auth/login.html",
-            {"request": request, "fehler": t_for(request, "errors.invalid_credentials")},
+            {"request": request, "error": t_for(request, "errors.invalid_credentials")},
             status_code=401,
         )
 
     if not user.is_active:
         return templates.TemplateResponse(
             "auth/login.html",
-            {"request": request, "fehler": t_for(request, "errors.account_deactivated")},
+            {"request": request, "error": t_for(request, "errors.account_deactivated")},
             status_code=403,
         )
 
-    # Letzten Login aktualisieren
+    # Update last login timestamp
     user.last_login = datetime.now(timezone.utc)
     await db.commit()
 
@@ -79,7 +79,7 @@ async def logout():
 
 
 # ---------------------------------------------------------------------------
-# Einladungssystem
+# Invitation system
 # ---------------------------------------------------------------------------
 
 @router.get("/invitation/{token}", response_class=HTMLResponse)
@@ -134,7 +134,7 @@ async def invitation_accept(
                 "request": request,
                 "token": token,
                 "email": invitation.email,
-                "fehler": t_for(request, "errors.passwords_do_not_match"),
+                "error": t_for(request, "errors.passwords_do_not_match"),
             },
         )
 
@@ -145,11 +145,11 @@ async def invitation_accept(
                 "request": request,
                 "token": token,
                 "email": invitation.email,
-                "fehler": t_for(request, "errors.password_too_short"),
+                "error": t_for(request, "errors.password_too_short"),
             },
         )
 
-    # Benutzer anlegen
+    # Create user
     user = User(
         email=invitation.email.lower(),
         name=name,

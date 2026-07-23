@@ -110,7 +110,7 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('metering.point_detail.exchange_new_number_label') }} <span class="text-danger">*</span></label>
-                                    <input type="text" name="neue_nummer" class="form-control form-control-sm" required>
+                                    <input type="text" name="new_number" class="form-control form-control-sm" required>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('metering.point_detail.exchange_calibrated_until_label') }}</label>
@@ -194,7 +194,7 @@
             <div class="card-footer">
                 <form method="post" action="{{ url_prefix }}/metering-points/{{ metering_point.id }}/readings/new"
                       class="d-flex gap-2 flex-wrap align-items-end">
-                    <input type="hidden" name="rueck_url" value="{{ url_prefix }}/metering-points/{{ metering_point.id }}">
+                    <input type="hidden" name="return_url" value="{{ url_prefix }}/metering-points/{{ metering_point.id }}">
                     <div>
                         <label class="form-label small mb-0">{{ t('metering.point_detail.label_year') }}</label>
                         <input type="number" name="year" class="form-control form-control-sm" style="width: 100px;"

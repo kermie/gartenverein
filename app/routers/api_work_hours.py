@@ -542,8 +542,8 @@ async def evaluation_get(
             # docs/ADR/README.md).
             is_exempt = False
             for m in tenants:
-                stand = await _calculate_hours_for_member(db, m.id, year)
-                total += Decimal(str(stand["total"]))
+                standing = await _calculate_hours_for_member(db, m.id, year)
+                total += Decimal(str(standing["total"]))
                 if await _is_exempt(db, m.id, year):
                     is_exempt = True
             outstanding = max(Decimal("0"), required - total) if not is_exempt else Decimal("0")
@@ -561,15 +561,15 @@ async def evaluation_get(
             .order_by(Member.last_name, Member.first_name)
         )
         for m in result.scalars().all():
-            stand = await _calculate_hours_for_member(db, m.id, year)
-            befreit = await _is_exempt(db, m.id, year)
-            total = Decimal(str(stand["total"]))
-            outstanding = max(Decimal("0"), required - total) if not befreit else Decimal("0")
+            standing = await _calculate_hours_for_member(db, m.id, year)
+            exempt = await _is_exempt(db, m.id, year)
+            total = Decimal(str(standing["total"]))
+            outstanding = max(Decimal("0"), required - total) if not exempt else Decimal("0")
             rows.append(EvaluationRowOut(
                 label=m.full_name,
                 hours_required=required, hours_completed=total, hours_open=outstanding,
                 amount_due_eur=outstanding * Decimal(str(config.rate_per_hour_eur)),
-                exempt=befreit, fulfilled=befreit or total >= required,
+                exempt=exempt, fulfilled=exempt or total >= required,
             ))
 
     return rows

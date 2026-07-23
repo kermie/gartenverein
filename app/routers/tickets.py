@@ -63,13 +63,13 @@ async def _reactivate_due_tickets(db: AsyncSession) -> int:
             Ticket.postponed_until <= date.today(),
         )
     )
-    faellige = result.scalars().all()
-    for ticket in faellige:
+    due_tickets = result.scalars().all()
+    for ticket in due_tickets:
         ticket.status = TicketStatus.ASSIGNED if ticket.assigned_to_id else TicketStatus.ACTIVE
         ticket.postponed_until = None
-    if faellige:
+    if due_tickets:
         await db.commit()
-    return len(faellige)
+    return len(due_tickets)
 
 
 # ---------------------------------------------------------------------------
@@ -79,13 +79,13 @@ async def _reactivate_due_tickets(db: AsyncSession) -> int:
 @router.get("/", response_class=HTMLResponse)
 async def tickets_overview(
     request: Request,
-    filter: str = "aktiv",  # aktiv | mir | wartend | zurueckgestellt | geschlossen | spam | alle
+    filter: str = "active",  # active | mine | waiting | postponed | closed | spam | all
     search: str = "",
     db: AsyncSession = Depends(get_db),
 ):
     user = await require_permission(request, db, "tickets", "read")
 
-    reaktiviert_count = await _reactivate_due_tickets(db)
+    reactivated_count = await _reactivate_due_tickets(db)
 
     query = (
         select(Ticket)
@@ -99,23 +99,23 @@ async def tickets_overview(
     # _reactivate_due_tickets above, which makes them reappear
     # here automatically afterward). DELETED never appears in any view
     # (soft-delete, no trash view built).
-    offene_status = [TicketStatus.ACTIVE, TicketStatus.ASSIGNED, TicketStatus.WAITING]
+    open_statuses = [TicketStatus.ACTIVE, TicketStatus.ASSIGNED, TicketStatus.WAITING]
 
-    if filter == "aktiv":
-        query = query.where(Ticket.status.in_(offene_status), Ticket.spam_suspected == False)
-    elif filter == "mir":
+    if filter == "active":
+        query = query.where(Ticket.status.in_(open_statuses), Ticket.spam_suspected == False)
+    elif filter == "mine":
         query = query.where(
-            Ticket.assigned_to_id == user.id, Ticket.status.in_(offene_status)
+            Ticket.assigned_to_id == user.id, Ticket.status.in_(open_statuses)
         )
-    elif filter == "wartend":
+    elif filter == "waiting":
         query = query.where(Ticket.status == TicketStatus.WAITING)
-    elif filter == "zurueckgestellt":
+    elif filter == "postponed":
         query = query.where(Ticket.status == TicketStatus.POSTPONED)
-    elif filter == "geschlossen":
+    elif filter == "closed":
         query = query.where(Ticket.status == TicketStatus.CLOSED)
     elif filter == "spam":
         query = query.where(Ticket.spam_suspected == True, Ticket.status != TicketStatus.DELETED)
-    elif filter == "alle":
+    elif filter == "all":
         query = query.where(Ticket.status != TicketStatus.DELETED)
 
     if search:
@@ -147,14 +147,14 @@ async def tickets_overview(
 
     # For the "assign" selector in bulk editing
     users_result = await db.execute(select(User).where(User.is_active == True).order_by(User.name))
-    alle_benutzer = users_result.scalars().all()
+    all_active_users = users_result.scalars().all()
 
     return templates.TemplateResponse("tickets/overview.html", {
         "request": request, "user": user,
         "tickets": tickets, "filter": filter, "search": search,
-        "reaktiviert_count": reaktiviert_count,
+        "reactivated_count": reactivated_count,
         "postponed_count": postponed_count, "waiting_count": waiting_count,
-        "spam_count": spam_count, "alle_benutzer": alle_benutzer,
+        "spam_count": spam_count, "all_active_users": all_active_users,
         "TicketStatus": TicketStatus,
     })
 
@@ -214,20 +214,20 @@ async def ticket_create(
 async def tickets_bulk_status(
     request: Request,
     ticket_ids: list[str] = Form(...),
-    status_neu: str = Form(...),
+    new_status_value: str = Form(...),
     postponed_until: str = Form(""),
-    filter: str = Form("aktiv"),
+    filter: str = Form("active"),
     db: AsyncSession = Depends(get_db),
 ):
     current_user = await require_permission(request, db, "tickets", "write")
 
-    neuer_status = TicketStatus(status_neu)
+    new_status = TicketStatus(new_status_value)
     result = await db.execute(select(Ticket).where(Ticket.id.in_(ticket_ids)))
     tickets = result.scalars().all()
 
     for ticket in tickets:
         tracker = ChangeTracker(ticket, "Ticket", ["status", "postponed_until", "closed_at"])
-        _apply_status(ticket, neuer_status, postponed_until, request)
+        _apply_status(ticket, new_status, postponed_until, request)
         await tracker.commit(db, current_user.id)
 
     await db.commit()
@@ -239,7 +239,7 @@ async def tickets_bulk_assign(
     request: Request,
     ticket_ids: list[str] = Form(...),
     user_id: str = Form(""),
-    filter: str = Form("aktiv"),
+    filter: str = Form("active"),
     db: AsyncSession = Depends(get_db),
 ):
     current_user = await require_permission(request, db, "tickets", "write")
@@ -269,14 +269,14 @@ async def tickets_bulk_assign(
     if assignee:
         # A single combined email instead of one per ticket, to avoid
         # flooding the assignee's inbox.
-        subject = f"{len(tickets)} Ticket(s) im Gartenmanager zugewiesen"
+        subject = f"{len(tickets)} Ticket(s) im {settings.app_name} zugewiesen"
         items = "".join(f"<li>{t.subject}</li>" for t in tickets)
         html = f"""
         <html><body>
         <p>Hallo {assignee.name},</p>
-        <p>Ihnen wurden {len(tickets)} Ticket(s) im Gartenmanager zugewiesen:</p>
+        <p>Ihnen wurden {len(tickets)} Ticket(s) im {settings.app_name} zugewiesen:</p>
         <ul>{items}</ul>
-        <p>Bitte melden Sie sich im Gartenmanager an, um sie zu bearbeiten.</p>
+        <p>Bitte melden Sie sich im {settings.app_name} an, um sie zu bearbeiten.</p>
         </body></html>
         """
         await send_email(assignee.email, subject, html, db=db)
@@ -311,7 +311,7 @@ async def ticket_detail(
         "request": request, "user": user, "ticket": ticket,
         "candidates": candidates, "all_users": all_users,
         "TicketStatus": TicketStatus, "MessageDirection": MessageDirection,
-        "heute": date.today().isoformat(),
+        "today": date.today().isoformat(),
     })
 
 
@@ -350,9 +350,9 @@ async def ticket_assign(
         html = f"""
         <html><body>
         <p>Hallo {assignee.name},</p>
-        <p>Ihnen wurde ein Ticket im Gartenmanager zugewiesen:</p>
+        <p>Ihnen wurde ein Ticket im {settings.app_name} zugewiesen:</p>
         <p><strong>{ticket.subject}</strong></p>
-        <p>Bitte melden Sie sich im Gartenmanager an, um es zu bearbeiten.</p>
+        <p>Bitte melden Sie sich im {settings.app_name} an, um es zu bearbeiten.</p>
         </body></html>
         """
         await send_email(assignee.email, subject, html, db=db)
@@ -369,28 +369,28 @@ async def ticket_assign(
 # Change status
 # ---------------------------------------------------------------------------
 
-def _apply_status(ticket: Ticket, neuer_status: TicketStatus, postponed_until_str: str, request: Request) -> None:
+def _apply_status(ticket: Ticket, new_status: TicketStatus, postponed_until_str: str, request: Request) -> None:
     """
     Sets the new status on a ticket including side effects
     (postponed_until, closed_at, assigned_to_id) -- shared logic for
     single-ticket and bulk status changes, so both are guaranteed to
     apply the same rules.
     """
-    ticket.status = neuer_status
+    ticket.status = new_status
 
-    if neuer_status == TicketStatus.POSTPONED:
+    if new_status == TicketStatus.POSTPONED:
         if not postponed_until_str.strip():
             raise HTTPException(status_code=400, detail=t_for(request, "errors.deferred_date_required"))
         ticket.postponed_until = date.fromisoformat(postponed_until_str)
     else:
         ticket.postponed_until = None
 
-    if neuer_status == TicketStatus.CLOSED:
+    if new_status == TicketStatus.CLOSED:
         ticket.closed_at = datetime.now(timezone.utc)
     else:
         ticket.closed_at = None
 
-    if neuer_status == TicketStatus.ACTIVE:
+    if new_status == TicketStatus.ACTIVE:
         ticket.assigned_to_id = None
 
 
@@ -398,7 +398,7 @@ def _apply_status(ticket: Ticket, neuer_status: TicketStatus, postponed_until_st
 async def ticket_status_update(
     ticket_id: str,
     request: Request,
-    status_neu: str = Form(...),
+    new_status_value: str = Form(...),
     postponed_until: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
@@ -409,7 +409,7 @@ async def ticket_status_update(
 
     tracker = ChangeTracker(ticket, "Ticket", ["status", "postponed_until", "closed_at"])
 
-    _apply_status(ticket, TicketStatus(status_neu), postponed_until, request)
+    _apply_status(ticket, TicketStatus(new_status_value), postponed_until, request)
 
     await tracker.commit(db, current_user.id)
     await db.commit()
@@ -501,7 +501,7 @@ async def message_add(
 @router.post("/inbox/fetch-now")
 async def inbox_fetch_now(request: Request, db: AsyncSession = Depends(get_db)):
     await require_permission(request, db, "tickets", "write")
-    anzahl = await process_incoming_mails(db)
+    count = await process_incoming_mails(db)
     import urllib.parse
-    meldung = urllib.parse.quote(f"{anzahl} neue E-Mail(s) verarbeitet.")
-    return RedirectResponse(f"/tickets/?meldung={meldung}", status_code=302)
+    message = urllib.parse.quote(f"{count} neue E-Mail(s) verarbeitet.")
+    return RedirectResponse(f"/tickets/?message={message}", status_code=302)

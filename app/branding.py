@@ -10,8 +10,8 @@ Concept:
 - Loaded once per request in a middleware, same pattern as module flags
   (app/module_flags.py) and language (app/i18n.py), and stored under
   request.state.club_name / request.state.logo_url.
-- Falls back to "Gartenverein" and no logo (the default tree icon) if
-  nothing has been configured yet, so existing installs aren't left
+- Falls back to DEFAULT_CLUB_NAME and no logo (the default tree icon)
+  if nothing has been configured yet, so existing installs aren't left
   with a blank name.
 """
 import os

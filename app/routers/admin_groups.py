@@ -102,14 +102,14 @@ async def group_create(
 
     if not name:
         return RedirectResponse(
-            f"/admin/groups/?fehler={urllib.parse.quote(t_for(request, 'errors.group_name_required'))}",
+            f"/admin/groups/?error={urllib.parse.quote(t_for(request, 'errors.group_name_required'))}",
             status_code=302,
         )
 
     existing = await db.execute(select(Group).where(Group.name == name))
     if existing.scalar_one_or_none():
         return RedirectResponse(
-            f"/admin/groups/?fehler={urllib.parse.quote(t_for(request, 'errors.group_name_taken'))}",
+            f"/admin/groups/?error={urllib.parse.quote(t_for(request, 'errors.group_name_taken'))}",
             status_code=302,
         )
 
@@ -124,7 +124,7 @@ async def group_create(
     await db.commit()
 
     return RedirectResponse(
-        f"/admin/groups/?erfolg={urllib.parse.quote(t_for(request, 'errors.group_created'))}",
+        f"/admin/groups/?success={urllib.parse.quote(t_for(request, 'errors.group_created'))}",
         status_code=302,
     )
 
@@ -148,14 +148,14 @@ async def group_update(
     group = result.scalar_one_or_none()
     if not group:
         return RedirectResponse(
-            f"/admin/groups/?fehler={urllib.parse.quote(t_for(request, 'errors.group_not_found'))}",
+            f"/admin/groups/?error={urllib.parse.quote(t_for(request, 'errors.group_not_found'))}",
             status_code=302,
         )
 
     name = name.strip()
     if not name:
         return RedirectResponse(
-            f"/admin/groups/?fehler={urllib.parse.quote(t_for(request, 'errors.group_name_required'))}",
+            f"/admin/groups/?error={urllib.parse.quote(t_for(request, 'errors.group_name_required'))}",
             status_code=302,
         )
     duplicate = await db.execute(
@@ -163,7 +163,7 @@ async def group_update(
     )
     if duplicate.scalar_one_or_none():
         return RedirectResponse(
-            f"/admin/groups/?fehler={urllib.parse.quote(t_for(request, 'errors.group_name_taken'))}",
+            f"/admin/groups/?error={urllib.parse.quote(t_for(request, 'errors.group_name_taken'))}",
             status_code=302,
         )
 
@@ -172,7 +172,7 @@ async def group_update(
         and not await _other_system_admin_exists(db, exclude_group_id=group_id)
     ):
         return RedirectResponse(
-            f"/admin/groups/?fehler={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
+            f"/admin/groups/?error={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
             status_code=302,
         )
 
@@ -194,7 +194,7 @@ async def group_update(
     await db.commit()
 
     return RedirectResponse(
-        f"/admin/groups/?erfolg={urllib.parse.quote(t_for(request, 'errors.group_updated'))}",
+        f"/admin/groups/?success={urllib.parse.quote(t_for(request, 'errors.group_updated'))}",
         status_code=302,
     )
 
@@ -212,14 +212,14 @@ async def group_delete(
     if group:
         if group.grants_system_admin and not await _other_system_admin_exists(db, exclude_group_id=group_id):
             return RedirectResponse(
-                f"/admin/groups/?fehler={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
+                f"/admin/groups/?error={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
                 status_code=302,
             )
         await db.delete(group)
         await db.commit()
 
     return RedirectResponse(
-        f"/admin/groups/?erfolg={urllib.parse.quote(t_for(request, 'errors.group_deleted'))}",
+        f"/admin/groups/?success={urllib.parse.quote(t_for(request, 'errors.group_deleted'))}",
         status_code=302,
     )
 
@@ -236,7 +236,7 @@ async def group_member_add(
     group_result = await db.execute(select(Group).where(Group.id == group_id))
     if not group_result.scalar_one_or_none():
         return RedirectResponse(
-            f"/admin/groups/?fehler={urllib.parse.quote(t_for(request, 'errors.group_not_found'))}",
+            f"/admin/groups/?error={urllib.parse.quote(t_for(request, 'errors.group_not_found'))}",
             status_code=302,
         )
 
@@ -247,7 +247,7 @@ async def group_member_add(
     )
     if existing.scalar_one_or_none():
         return RedirectResponse(
-            f"/admin/groups/?fehler={urllib.parse.quote(t_for(request, 'errors.user_already_in_group'))}",
+            f"/admin/groups/?error={urllib.parse.quote(t_for(request, 'errors.user_already_in_group'))}",
             status_code=302,
         )
 
@@ -255,7 +255,7 @@ async def group_member_add(
     await db.commit()
 
     return RedirectResponse(
-        f"/admin/groups/?erfolg={urllib.parse.quote(t_for(request, 'errors.member_added'))}",
+        f"/admin/groups/?success={urllib.parse.quote(t_for(request, 'errors.member_added'))}",
         status_code=302,
     )
 
@@ -293,13 +293,13 @@ async def group_member_remove(
             )
             if not user_has_other_admin_path and await is_last_admin(db, membership.user_id):
                 return RedirectResponse(
-                    f"/admin/groups/?fehler={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
+                    f"/admin/groups/?error={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
                     status_code=302,
                 )
         await db.delete(membership)
         await db.commit()
 
     return RedirectResponse(
-        f"/admin/groups/?erfolg={urllib.parse.quote(t_for(request, 'errors.member_removed'))}",
+        f"/admin/groups/?success={urllib.parse.quote(t_for(request, 'errors.member_removed'))}",
         status_code=302,
     )
