@@ -127,11 +127,13 @@
         <p class="text-muted">{{ t('admin.groups.no_members') }}</p>
         {% endif %}
 
+        {% set member_ids = group.memberships | map(attribute='user_id') | list %}
+        {% set candidates = assignable_users | rejectattr('id', 'in', member_ids) | list %}
+        {% if candidates %}
         <form method="post" action="/admin/groups/{{ group.id }}/members/add" class="d-flex gap-2">
             <select name="user_id" class="form-select" required>
                 <option value="" disabled selected>{{ t('admin.groups.label_add_member') }}</option>
-                {% set member_ids = group.memberships | map(attribute='user_id') | list %}
-                {% for candidate in assignable_users if candidate.id not in member_ids %}
+                {% for candidate in candidates %}
                 <option value="{{ candidate.id }}">{{ candidate.name }} ({{ candidate.email }})</option>
                 {% endfor %}
             </select>
@@ -139,6 +141,12 @@
                 <i class="bi bi-person-plus me-1"></i>{{ t('admin.groups.button_add') }}
             </button>
         </form>
+        {% else %}
+        <p class="text-muted small mb-0">
+            {{ t('admin.groups.no_assignable_users') }}
+            <a href="/admin/">{{ t('admin.groups.no_assignable_users_link') }}</a>
+        </p>
+        {% endif %}
     </div>
 </div>
 {% else %}
