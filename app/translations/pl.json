@@ -373,6 +373,8 @@
       "no_members": "Brak przypisanych użytkowników.",
       "label_add_member": "Dodaj użytkownika...",
       "button_add": "Dodaj",
+      "no_assignable_users": "Nie ma jeszcze kont Skarbnika ani Tylko do odczytu do przypisania -- konta Administratora i Zarządu nie potrzebują grupy.",
+      "no_assignable_users_link": "Zaproś teraz",
       "no_groups": "Brak grup. Utwórz pierwszą, aby zacząć.",
       "delete_confirm": "Usunąć tę grupę? Przypisani użytkownicy stracą dostęp, który ona przyznawała.",
       "modules": {

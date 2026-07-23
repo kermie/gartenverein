@@ -373,6 +373,8 @@
       "no_members": "Zatiaľ žiadni priradení používatelia.",
       "label_add_member": "Pridať používateľa...",
       "button_add": "Pridať",
+      "no_assignable_users": "Zatiaľ nie sú žiadne účty Pokladníka alebo Iba na čítanie na priradenie -- účty Administrátora a Výboru skupinu nepotrebujú.",
+      "no_assignable_users_link": "Pozvať teraz",
       "no_groups": "Zatiaľ žiadne skupiny. Vytvorte prvú a začnite.",
       "delete_confirm": "Odstrániť túto skupinu? Priradení používatelia stratia prístup, ktorý im poskytovala.",
       "modules": {

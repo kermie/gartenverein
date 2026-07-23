@@ -373,6 +373,8 @@
       "no_members": "Zatím žádní přiřazení uživatelé.",
       "label_add_member": "Přidat uživatele...",
       "button_add": "Přidat",
+      "no_assignable_users": "Zatím nejsou žádné účty Pokladníka nebo Pouze pro čtení k přiřazení -- účty Správce a Výboru skupinu nepotřebují.",
+      "no_assignable_users_link": "Pozvat nyní",
       "no_groups": "Zatím žádné skupiny. Vytvořte první a začněte.",
       "delete_confirm": "Odstranit tuto skupinu? Přiřazení uživatelé ztratí přístup, který jim poskytovala.",
       "modules": {

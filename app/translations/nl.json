@@ -373,6 +373,8 @@
       "no_members": "Nog geen gebruikers toegewezen.",
       "label_add_member": "Gebruiker toevoegen...",
       "button_add": "Toevoegen",
+      "no_assignable_users": "Nog geen Penningmeester- of Alleen-lezen-accounts om toe te wijzen -- Beheerder- en Bestuursaccounts hebben geen groep nodig.",
+      "no_assignable_users_link": "Nu uitnodigen",
       "no_groups": "Nog geen groepen. Maak er een aan om te beginnen.",
       "delete_confirm": "Deze groep verwijderen? Toegewezen gebruikers verliezen de toegang die deze groep verleende.",
       "modules": {

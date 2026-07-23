@@ -373,6 +373,8 @@
       "no_members": "Aucun utilisateur assigné pour le moment.",
       "label_add_member": "Ajouter un utilisateur...",
       "button_add": "Ajouter",
+      "no_assignable_users": "Aucun compte Trésorier ou Lecture seule à assigner pour le moment -- les comptes Administrateur et Conseil d'administration n'ont pas besoin de groupe.",
+      "no_assignable_users_link": "En inviter un",
       "no_groups": "Aucun groupe pour le moment. Créez-en un pour commencer.",
       "delete_confirm": "Supprimer ce groupe ? Les utilisateurs assignés perdront l'accès qu'il leur accordait.",
       "modules": {
