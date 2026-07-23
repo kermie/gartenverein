@@ -41,3 +41,4 @@ in chronological order.
 35. [Invoice-address flag on member-parcel assignments](./0035-invoice-address-flag-on-member-parcel-assignments.md)
 36. [Admin update notice: GitHub releases, not an image registry](./0036-admin-update-notice-github-releases-not-image-registry.md)
 37. [Sample data generator: tracked removal, not guessed](./0037-sample-data-generator-tracked-not-guessed-removal.md)
+38. [Spam filter external API: tied to apilayer.com for now](./0038-spam-filter-external-api-tied-to-apilayer-for-now.md)

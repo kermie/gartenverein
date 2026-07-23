@@ -5,7 +5,7 @@ Two layers, combined:
 1. Built-in heuristics (domain/keyword blocklist, link count) -- work
    immediately, no external service, configurable under
    /admin/settings.
-2. Optional external API (e.g. Akismet, a self-hosted filter) -- only
+2. Optional external API (apilayer.com's Spam Check API) -- only
    active when a URL is configured. If the external call fails, it
    silently falls back to the heuristics; an outage of the external
    service must never block ticket creation.
@@ -13,6 +13,9 @@ Two layers, combined:
 The final score is the maximum of the heuristic and external scores.
 If the score is >= the threshold, the message is flagged as suspected
 spam.
+
+NOTE: the external check is currently tied to one closed, commercial
+vendor -- a pre-open-source loose end. See ADR 0038 before shipping.
 """
 import logging
 import re
@@ -99,27 +102,26 @@ async def _external_check(
     config: dict, sender_email: str, subject: str, content: str
 ) -> Optional[float]:
     """
-    Calls an optional external spam-check service. Expects a JSON
-    response of the form {"spam_score": 0.0-1.0} -- so any service can
-    be hooked up that fulfills this simple contract via a small adapter
-    (e.g. a small cloud function). Returns None if no external API is
-    configured or the call fails.
+    Calls apilayer.com's Spam Check API (https://apilayer.com/marketplace/spamchecker-api).
+    It takes the message as a plain-text body and returns whether it
+    considers it spam, already weighed against the threshold configured
+    in the API URL's query string (e.g. ?threshold=3.5). Returns None if
+    no external API is configured or the call fails.
     """
     if not config["api_url"]:
         return None
 
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            headers = {"Authorization": f"Bearer {config['api_key']}"} if config["api_key"] else {}
+            headers = {"apikey": config["api_key"]} if config["api_key"] else {}
             response = await client.post(
                 config["api_url"],
-                json={"absender_email": sender_email, "betreff": subject, "inhalt": content},
                 headers=headers,
+                content=f"{subject}\n\n{content}".encode("utf-8"),
             )
             response.raise_for_status()
             data = response.json()
-            score = float(data.get("spam_score", 0.0))
-            return max(0.0, min(score, 1.0))
+            return 1.0 if data.get("is_spam") else 0.0
     except Exception as e:
         logger.warning(f"External spam check failed, falling back to heuristics only: {e}")
         return None
@@ -143,7 +145,7 @@ async def check_for_spam(
     external_score = await _external_check(config, sender_email, subject, content)
     if external_score is not None and external_score > heuristic_score:
         final_score = external_score
-        reasons.append(f"External check: score {external_score:.2f}")
+        reasons.append("External check (apilayer.com) flagged this message as spam")
     else:
         final_score = heuristic_score
 
