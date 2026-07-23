@@ -9,16 +9,19 @@ from fastapi import APIRouter, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.models import (
     User, Invitation, InvitationStatus, UserRole, ClubSetting,
+    Group, InvitationGroupTarget,
     GroupMembership, ParcelCloudFolder, WorkSession, WorkTask, ChangeHistory,
     MeterReading, Ticket, TicketMessage, PurchaseRequest, PurchaseRequestApproval,
     CalendarEvent, CouncilPresence, CouncilAbsence, Announcement, InventoryItem,
     ItemLoan, Task,
 )
 from app.auth import require_system_admin, create_invitation_token, hash_password
+from app.permissions import is_last_admin
 from app.email_service import send_email
 from app.crypto_utils import encrypt
 from app.blog_publisher import load_wordpress_configuration, WordPressPublisher, BlogPublishError
@@ -38,25 +41,6 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 from app.templating import templates
 
 INVITATION_DAYS = 7
-
-
-async def _is_last_admin(db: AsyncSession, user_id: str) -> bool:
-    """True if no other active ADMIN user exists besides `user_id`. Only
-    ADMIN reaches require_system_admin (the admin panel) -- BOARD has
-    full module access but not that -- so losing the last ADMIN, not
-    the last ADMIN-or-BOARD, is the actual lockout to prevent: with at
-    least one ADMIN left, they can always promote a new one via the
-    panel BOARD can't reach."""
-    result = await db.execute(
-        select(User.id)
-        .where(
-            User.id != user_id,
-            User.is_active == True,  # noqa: E712
-            User.role == UserRole.ADMIN,
-        )
-        .limit(1)
-    )
-    return result.scalar_one_or_none() is None
 
 
 # Every FK-to-users.id in the schema (see ADR 0040/audit) -- a user can
@@ -108,9 +92,13 @@ async def admin_dashboard(request: Request, db: AsyncSession = Depends(get_db)):
     invitation_result = await db.execute(
         select(Invitation)
         .where(Invitation.status == InvitationStatus.PENDING)
+        .options(selectinload(Invitation.target_groups).selectinload(InvitationGroupTarget.group))
         .order_by(Invitation.created_at.desc())
     )
     open_invitations = invitation_result.scalars().all()
+
+    groups_result = await db.execute(select(Group).order_by(Group.name))
+    all_groups = groups_result.scalars().all()
 
     update_status = await get_update_status(db)
 
@@ -121,6 +109,7 @@ async def admin_dashboard(request: Request, db: AsyncSession = Depends(get_db)):
             "user": user,
             "all_users": all_users,
             "open_invitations": open_invitations,
+            "all_groups": all_groups,
             "UserRole": UserRole,
             "update_status": update_status,
         },
@@ -176,9 +165,13 @@ async def sample_data_remove(request: Request, db: AsyncSession = Depends(get_db
 async def user_invite(
     request: Request,
     email: str = Form(...),
-    role: str = Form("readonly"),
+    group_ids: list[str] = Form([]),
     db: AsyncSession = Depends(get_db),
 ):
+    """ADR 0041: invites assign group(s), not a role -- the new User is
+    always created with role=READONLY (inert, real access comes from
+    whichever groups were selected here, applied on acceptance in
+    routers/auth.py)."""
     admin = await require_system_admin(request, db)
 
     email = email.strip().lower()
@@ -205,8 +198,10 @@ async def user_invite(
     for old_invitation in pending.scalars().all():
         old_invitation.status = InvitationStatus.EXPIRED
 
-    if role not in [r.value for r in UserRole]:
-        role = "readonly"
+    valid_group_ids = set()
+    if group_ids:
+        existing_groups = await db.execute(select(Group.id).where(Group.id.in_(group_ids)))
+        valid_group_ids = {row[0] for row in existing_groups.all()}
 
     token = create_invitation_token(email)
     expires_at = datetime.now(timezone.utc) + timedelta(days=INVITATION_DAYS)
@@ -214,11 +209,14 @@ async def user_invite(
     invitation = Invitation(
         email=email,
         token=token,
-        role=UserRole(role),
+        role=UserRole.READONLY,
         invited_by_id=admin.id,
         expires_at=expires_at,
     )
     db.add(invitation)
+    await db.flush()
+    for group_id in valid_group_ids:
+        db.add(InvitationGroupTarget(invitation_id=invitation.id, group_id=group_id))
     await db.commit()
 
     # Assemble the link
@@ -276,7 +274,7 @@ async def user_deactivate(
         if (
             target.is_active
             and target.role == UserRole.ADMIN
-            and await _is_last_admin(db, target.id)
+            and await is_last_admin(db, target.id)
         ):
             return RedirectResponse(
                 f"/admin/?fehler={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
@@ -306,13 +304,26 @@ async def user_edit_page(
         is_last_admin_lock = (
             target.role == UserRole.ADMIN
             and target.is_active
-            and await _is_last_admin(db, target.id)
+            and await is_last_admin(db, target.id)
         )
         can_delete = not is_last_admin_lock and not await _user_has_history(db, target.id)
 
+    groups_result = await db.execute(select(Group).order_by(Group.name))
+    all_groups = groups_result.scalars().all()
+
+    memberships_result = await db.execute(
+        select(GroupMembership).where(GroupMembership.user_id == target.id)
+    )
+    # group_id -> membership_id, so the template can render a Remove
+    # button (needs the membership id) or an Add button per group.
+    target_memberships = {m.group_id: m.id for m in memberships_result.scalars().all()}
+
     return templates.TemplateResponse(
         "admin/user_edit.html",
-        {"request": request, "user": admin, "target": target, "UserRole": UserRole, "can_delete": can_delete},
+        {
+            "request": request, "user": admin, "target": target, "UserRole": UserRole,
+            "can_delete": can_delete, "all_groups": all_groups, "target_memberships": target_memberships,
+        },
     )
 
 
@@ -322,9 +333,15 @@ async def user_edit(
     request: Request,
     name: str = Form(...),
     email: str = Form(...),
-    role: str = Form(...),
+    role: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db),
 ):
+    """ADR 0041: role is no longer offered as a promotable dropdown --
+    the only way `role` is submitted here is the "remove legacy role"
+    action on an existing ADMIN/BOARD account, always sending READONLY.
+    Every other user's real access comes from group membership, edited
+    via the /admin/groups/{id}/members/add|remove endpoints from this
+    same page."""
     await require_system_admin(request, db)
 
     result = await db.execute(select(User).where(User.id == user_id))
@@ -348,24 +365,22 @@ async def user_edit(
             status_code=302,
         )
 
-    if role not in [r.value for r in UserRole]:
-        role = target.role.value
-    new_role = UserRole(role)
-
-    if (
-        target.role == UserRole.ADMIN
-        and new_role != UserRole.ADMIN
-        and target.is_active
-        and await _is_last_admin(db, target.id)
-    ):
-        return RedirectResponse(
-            f"/admin/users/{user_id}/edit?fehler={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
-            status_code=302,
-        )
+    if role is not None and role in [r.value for r in UserRole]:
+        new_role = UserRole(role)
+        if (
+            target.role == UserRole.ADMIN
+            and new_role != UserRole.ADMIN
+            and target.is_active
+            and await is_last_admin(db, target.id)
+        ):
+            return RedirectResponse(
+                f"/admin/users/{user_id}/edit?fehler={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",
+                status_code=302,
+            )
+        target.role = new_role
 
     target.name = name
     target.email = email
-    target.role = new_role
     await db.commit()
 
     return RedirectResponse(
@@ -396,7 +411,7 @@ async def user_delete(
     if (
         target.role == UserRole.ADMIN
         and target.is_active
-        and await _is_last_admin(db, target.id)
+        and await is_last_admin(db, target.id)
     ):
         return RedirectResponse(
             f"/admin/?fehler={urllib.parse.quote(t_for(request, 'errors.cannot_remove_last_admin'))}",

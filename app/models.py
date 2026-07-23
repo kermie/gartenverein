@@ -104,6 +104,9 @@ class Invitation(Base):
     )
 
     invited_by: Mapped[Optional["User"]] = relationship("User", back_populates="invitations")
+    target_groups: Mapped[List["InvitationGroupTarget"]] = relationship(
+        "InvitationGroupTarget", back_populates="invitation", cascade="all, delete-orphan"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -111,6 +114,13 @@ class Invitation(Base):
 # read/write/delete per module. ADMIN/BOARD always bypass this entirely
 # (unchanged from their existing behavior) -- see app/permissions.py for
 # the module list and permission-check helpers, and ADR 0038 for why.
+#
+# grants_full_access / grants_system_admin (ADR 0041): a group can now
+# ALSO grant the same effective access a role used to be the only way
+# to get -- full module access, and/or the admin panel -- so new users
+# are assigned to groups instead of a role. This is additive: ADMIN and
+# BOARD roles keep working exactly as before for whoever already has
+# them (the seeded bootstrap Administrator account above all).
 # ---------------------------------------------------------------------------
 
 class Group(Base):
@@ -125,6 +135,8 @@ class Group(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
     name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    grants_full_access: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    grants_system_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -160,6 +172,29 @@ class GroupMembership(Base):
 
     __table_args__ = (
         UniqueConstraint("user_id", "group_id", name="uq_group_membership"),
+    )
+
+
+class InvitationGroupTarget(Base):
+    """Which group(s) a pending invitation will place the user into once
+    accepted (see routers/auth.py's accept-invitation route) -- mirrors
+    GroupMembership's shape exactly, just for an Invitation instead of
+    a User. ADR 0041: invites assign groups now, not a role."""
+    __tablename__ = "invitation_group_targets"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    invitation_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("invitations.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    group_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("groups.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+
+    invitation: Mapped["Invitation"] = relationship("Invitation", back_populates="target_groups")
+    group: Mapped["Group"] = relationship("Group")
+
+    __table_args__ = (
+        UniqueConstraint("invitation_id", "group_id", name="uq_invitation_group_target"),
     )
 
 

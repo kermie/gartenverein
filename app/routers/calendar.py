@@ -312,7 +312,7 @@ async def council_absence_delete(entry_id: str, request: Request, db: AsyncSessi
     entry = result.scalar_one_or_none()
     if not entry:
         raise HTTPException(status_code=404, detail=t_for(request, "calendar.errors.entry_not_found"))
-    if entry.user_id != user.id and user.role.value not in ("admin", "board"):
+    if entry.user_id != user.id and not getattr(request.state, "is_full_access", False):
         raise HTTPException(status_code=403, detail=t_for(request, "calendar.errors.not_your_entry"))
     await db.delete(entry)
     await db.commit()

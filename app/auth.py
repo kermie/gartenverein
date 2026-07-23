@@ -84,24 +84,33 @@ async def require_user(request: Request, db: AsyncSession) -> User:
 
 
 async def require_admin(request: Request, db: AsyncSession) -> User:
-    """ADMIN or BOARD: full read/write/delete on every club module (see
+    """ADMIN/BOARD role, or membership in a grants_full_access group
+    (ADR 0041): full read/write/delete on every club module (see
     app/permissions.py), but NOT the administration panel itself -- see
-    require_system_admin for that."""
-    from app.models import UserRole
+    require_system_admin for that. Reads the per-request cache
+    permissions_middleware computed, falling back to a fresh check."""
+    from app.permissions import is_full_access_user
     user = await require_user(request, db)
-    if user.role not in (UserRole.ADMIN, UserRole.BOARD):
+    is_full_access = getattr(request.state, "is_full_access", None)
+    if is_full_access is None:
+        is_full_access = await is_full_access_user(db, user)
+    if not is_full_access:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Keine Berechtigung")
     return user
 
 
 async def require_system_admin(request: Request, db: AsyncSession) -> User:
-    """ADMIN only: the administration panel (users, groups, club
-    settings, integrations, sample data) -- these are the people who
-    administer the installation itself, not necessarily council
-    members. BOARD gets full access to every club module (require_admin
-    above) but not this."""
-    from app.models import UserRole
+    """ADMIN role, or membership in a grants_system_admin group (ADR
+    0041): the administration panel (users, groups, club settings,
+    integrations, sample data) -- these are the people who administer
+    the installation itself, not necessarily council members. BOARD
+    (or an equivalent grants_full_access group) gets full access to
+    every club module (require_admin above) but not this."""
+    from app.permissions import is_system_admin_user
     user = await require_user(request, db)
-    if user.role != UserRole.ADMIN:
+    is_system_admin = getattr(request.state, "is_system_admin", None)
+    if is_system_admin is None:
+        is_system_admin = await is_system_admin_user(db, user)
+    if not is_system_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Keine Berechtigung")
     return user

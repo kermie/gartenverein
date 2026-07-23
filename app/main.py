@@ -25,7 +25,7 @@ from app.i18n import load_translations, load_current_language
 from app.l10n import load_current_region, load_current_currency
 from app.branding import load_branding
 from app.update_check import refresh_update_check_cache
-from app.permissions import get_user_permissions
+from app.permissions import get_user_permissions, is_full_access_user, is_system_admin_user
 
 # Loaded at module import time (not only in the lifespan startup
 # event), since ASGI test clients (e.g. httpx with ASGITransport) don't
@@ -178,14 +178,18 @@ async def l10n_middleware(request: Request, call_next):
 async def permissions_middleware(request: Request, call_next):
     """
     Loads the current user's effective per-module permissions once per
-    request and stores them under request.state.permissions (see
-    app/permissions.py). require_permission() and the `has_perm` Jinja
-    global both read from here instead of re-querying. Anonymous
+    request and stores them under request.state.permissions, plus the
+    two ADR 0041 group-derived flags (is_full_access/is_system_admin)
+    -- see app/permissions.py. require_permission()/require_admin()/
+    require_system_admin() and the has_perm/is_full_access/is_system_admin
+    Jinja globals all read from here instead of re-querying. Anonymous
     requests get all-False permissions, same as get_user_permissions(None).
     """
     async with AsyncSessionLocal() as db:
         user = await get_current_user(request, db)
         request.state.permissions = await get_user_permissions(db, user)
+        request.state.is_full_access = await is_full_access_user(db, user)
+        request.state.is_system_admin = await is_system_admin_user(db, user)
     response = await call_next(request)
     return response
 

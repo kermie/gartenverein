@@ -289,8 +289,9 @@
     </div>
     {% endif %}
 
-    <!-- Cloud storage (Nextcloud) documents -- board/admin only -->
-    {% if cloud_storage_enabled and user.role.value in ['admin', 'board'] %}
+    <!-- Cloud storage (Nextcloud) documents -- board/admin only (cloud_storage_enabled
+         already folds in that check, see app/routers/parcels.py) -->
+    {% if cloud_storage_enabled %}
     <div class="col-12">
         <div class="card">
             <div class="card-header"><i class="bi bi-cloud me-2"></i>{{ t('parcels.detail.cloud_documents_header') }}</div>

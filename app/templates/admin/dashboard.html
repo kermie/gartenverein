@@ -74,13 +74,20 @@ docker compose up -d</pre>
                                placeholder="person@beispiel.de" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">{{ t('admin.dashboard.label_role') }}</label>
-                        <select name="role" class="form-select">
-                            <option value="readonly">{{ t('admin.dashboard.role_readonly') }}</option>
-                            <option value="treasurer">{{ t('admin.dashboard.role_treasurer') }}</option>
-                            <option value="board">{{ t('admin.dashboard.role_board') }}</option>
-                            <option value="admin">{{ t('admin.dashboard.role_admin') }}</option>
-                        </select>
+                        <label class="form-label fw-semibold">{{ t('admin.dashboard.label_groups') }}</label>
+                        {% if all_groups %}
+                        {% for g in all_groups %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="group_ids" value="{{ g.id }}" id="invite-group-{{ g.id }}">
+                            <label class="form-check-label" for="invite-group-{{ g.id }}">{{ g.name }}</label>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <p class="text-muted small mb-0">
+                            {{ t('admin.dashboard.no_groups_yet') }}
+                            <a href="/admin/groups/">{{ t('admin.dashboard.no_groups_yet_link') }}</a>
+                        </p>
+                        {% endif %}
                     </div>
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-send me-1"></i>{{ t('admin.dashboard.button_send_invite') }}
@@ -98,7 +105,14 @@ docker compose up -d</pre>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
                         <div>{{ e.email }}</div>
-                        <small class="text-muted">{{ e.role.value }} · {{ t('admin.dashboard.valid_until', date=e.expires_at.strftime('%d.%m.%Y')) }}</small>
+                        <small class="text-muted">
+                            {% if e.target_groups %}
+                            {{ e.target_groups | map(attribute='group.name') | join(', ') }}
+                            {% else %}
+                            {{ t('admin.dashboard.no_groups_selected') }}
+                            {% endif %}
+                            · {{ t('admin.dashboard.valid_until', date=e.expires_at.strftime('%d.%m.%Y')) }}
+                        </small>
                     </div>
                     <span class="badge" style="background: #fef3c7; color: #92400e;">{{ t('admin.dashboard.status_pending') }}</span>
                 </li>

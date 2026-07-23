@@ -170,7 +170,7 @@ async def parcel_detail(
     aenderungen = aenderungen_result.scalars().all()
 
     module_flags = getattr(request.state, "module_flags", {})
-    cloud_storage_enabled = bool(module_flags.get("cloud_storage")) and user.role.value in ("admin", "board")
+    cloud_storage_enabled = bool(module_flags.get("cloud_storage")) and getattr(request.state, "is_full_access", False)
     cloud_folder = None
     cloud_files = None
     cloud_error = None

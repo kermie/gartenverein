@@ -32,15 +32,17 @@
                         <label class="form-label fw-semibold">{{ t('admin.dashboard.label_email') }} <span class="text-danger">*</span></label>
                         <input type="email" name="email" class="form-control" value="{{ target.email }}" required>
                     </div>
+                    {% if target.role in (UserRole.ADMIN, UserRole.BOARD) %}
                     <div class="col-12">
                         <label class="form-label fw-semibold">{{ t('admin.dashboard.label_role') }}</label>
-                        <select name="role" class="form-select">
-                            <option value="readonly" {% if target.role == UserRole.READONLY %}selected{% endif %}>{{ t('admin.dashboard.role_readonly') }}</option>
-                            <option value="treasurer" {% if target.role == UserRole.TREASURER %}selected{% endif %}>{{ t('admin.dashboard.role_treasurer') }}</option>
-                            <option value="board" {% if target.role == UserRole.BOARD %}selected{% endif %}>{{ t('admin.dashboard.role_board') }}</option>
-                            <option value="admin" {% if target.role == UserRole.ADMIN %}selected{% endif %}>{{ t('admin.dashboard.role_admin') }}</option>
-                        </select>
+                        <div>
+                            <span class="badge" style="background: var(--gv-gruen-blass); color: var(--gv-gruen);">
+                                {{ t('admin.dashboard.role_admin') if target.role == UserRole.ADMIN else t('admin.dashboard.role_board') }}
+                            </span>
+                            <span class="text-muted small">{{ t('admin.users.edit.legacy_role_text') }}</span>
+                        </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -57,6 +59,60 @@
 
 </div>
 </form>
+
+{% if target.role in (UserRole.ADMIN, UserRole.BOARD) %}
+<div class="row g-3 mt-2" style="max-width: 640px;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <p class="text-muted small mb-0">{{ t('admin.users.edit.remove_legacy_role_text') }}</p>
+                <form method="post" action="/admin/users/{{ target.id }}/edit">
+                    <input type="hidden" name="name" value="{{ target.name }}">
+                    <input type="hidden" name="email" value="{{ target.email }}">
+                    <input type="hidden" name="role" value="readonly">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        {{ t('admin.users.edit.button_remove_legacy_role') }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-3 mt-2" style="max-width: 640px;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-people me-2"></i>{{ t('admin.users.edit.groups_header') }}</div>
+            <div class="card-body p-0">
+                {% if all_groups %}
+                <ul class="list-group list-group-flush">
+                    {% for g in all_groups %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ g.name }}</span>
+                        {% if g.id in target_memberships %}
+                        <form method="post" action="/admin/groups/{{ g.id }}/members/{{ target_memberships[g.id] }}/remove">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">{{ t('admin.groups.button_remove_member') }}</button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="/admin/groups/{{ g.id }}/members/add">
+                            <input type="hidden" name="user_id" value="{{ target.id }}">
+                            <button type="submit" class="btn btn-sm btn-outline-primary">{{ t('admin.groups.button_add') }}</button>
+                        </form>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted small p-3 mb-0">
+                    {{ t('admin.users.edit.no_groups_yet') }}
+                    <a href="/admin/groups/">{{ t('admin.users.edit.no_groups_yet_link') }}</a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 
 {% if target.id != user.id %}
 <div class="row g-3 mt-2" style="max-width: 640px;">

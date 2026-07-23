@@ -17,7 +17,7 @@ from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.models import (
-    PurchaseRequest, PurchaseRequestApproval, PurchaseRequestStatus, User, UserRole,
+    PurchaseRequest, PurchaseRequestApproval, PurchaseRequestStatus, User,
 )
 from app.auth import require_admin, serializer
 from app.permissions import require_permission
@@ -173,7 +173,7 @@ async def purchase_request_detail(request_id: str, request: Request, db: AsyncSe
     if not pr:
         raise HTTPException(status_code=404, detail=t_for(request, "errors.purchase_request_not_found"))
 
-    ist_vorstand = user.role in (UserRole.ADMIN, UserRole.BOARD)
+    ist_vorstand = getattr(request.state, "is_full_access", False)
     hat_bereits_freigegeben = any(a.user_id == user.id for a in pr.approvals)
     ist_antragsteller = pr.requested_by_id == user.id or pr.created_by_id == user.id
 

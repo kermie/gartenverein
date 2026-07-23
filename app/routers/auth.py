@@ -7,9 +7,10 @@ from fastapi import APIRouter, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.models import User, Invitation, InvitationStatus, UserRole
+from app.models import User, Invitation, InvitationStatus, UserRole, GroupMembership
 from app.auth import (
     verify_password, hash_password, create_session_token,
     verify_invitation_token, create_invitation_token, get_current_user, require_admin
@@ -112,10 +113,12 @@ async def invitation_accept(
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
-        select(Invitation).where(
+        select(Invitation)
+        .where(
             Invitation.token == token,
             Invitation.status == InvitationStatus.PENDING,
         )
+        .options(selectinload(Invitation.target_groups))
     )
     invitation = result.scalar_one_or_none()
 
@@ -154,6 +157,12 @@ async def invitation_accept(
         role=invitation.role,
     )
     db.add(user)
+    await db.flush()
+
+    # ADR 0041: real access comes from whichever groups the invite targeted,
+    # not from invitation.role (kept only as an inert default, see admin.py).
+    for target in invitation.target_groups:
+        db.add(GroupMembership(user_id=user.id, group_id=target.group_id))
 
     invitation.status = InvitationStatus.ACCEPTED
     await db.commit()
