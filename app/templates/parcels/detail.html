@@ -4,9 +4,11 @@
 
 {% block topbar_actions %}
 <div class="d-flex gap-2">
+    {% if has_perm(request, 'members_parcels', 'write') %}
     <a href="/parcels/{{ parcel.id }}/edit" class="btn btn-sm btn-primary">
         <i class="bi bi-pencil me-1"></i>{{ t('parcels.detail.button_edit') }}
     </a>
+    {% endif %}
     <a href="/parcels/" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i>{{ t('parcels.detail.button_back') }}
     </a>
@@ -102,6 +104,7 @@
                                 </td>
                                 <td class="text-muted">{{ z.assigned_from.strftime('%d.%m.%Y') if z.assigned_from else '–' }}</td>
                                 <td class="text-end">
+                                    {% if has_perm(request, 'members_parcels', 'write') %}
                                     <a href="/parcels/{{ parcel.id }}/member/{{ z.id }}/edit"
                                        class="btn btn-sm btn-outline-secondary border-0">
                                         <i class="bi bi-pencil"></i>
@@ -115,6 +118,7 @@
                                             <i class="bi bi-calendar-x"></i>
                                         </button>
                                     </form>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% else %}
@@ -128,6 +132,7 @@
                     </table>
                 </div>
             </div>
+            {% if has_perm(request, 'members_parcels', 'write') %}
             <div class="card-footer">
                 <form method="post" action="/parcels/{{ parcel.id }}/member/assign"
                       class="d-flex gap-2 flex-wrap align-items-center" id="form-assign-member">
@@ -149,6 +154,7 @@
                     </button>
                 </form>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -255,11 +261,13 @@
                                 <td>{{ z.assigned_from.strftime('%d.%m.%Y') if z.assigned_from else '–' }}</td>
                                 <td>{{ z.assigned_until.strftime('%d.%m.%Y') }}</td>
                                 <td class="text-end">
+                                    {% if has_perm(request, 'members_parcels', 'write') %}
                                     <a href="/parcels/{{ parcel.id }}/member/{{ z.id }}/edit"
                                        class="btn btn-sm btn-outline-secondary border-0" title="{{ t('parcels.detail.edit_period_tooltip') }}">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    {% if user.role.value in ['admin', 'board'] %}
+                                    {% endif %}
+                                    {% if has_perm(request, 'members_parcels', 'delete') %}
                                     <form method="post"
                                           action="/parcels/{{ parcel.id }}/member/{{ z.id }}/delete-history"
                                           class="d-inline">

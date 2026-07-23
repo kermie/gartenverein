@@ -4,18 +4,22 @@
 
 {% block topbar_actions %}
 <div class="d-flex gap-2 flex-wrap">
+    {% if has_perm(request, 'work_hours', 'write') %}
     <a href="/work-hours/sessions/{{ session.id }}/edit" class="btn btn-sm btn-primary">
         <i class="bi bi-pencil me-1"></i>{{ t('work_hours.session_detail.edit_button') }}
     </a>
+    {% endif %}
     <a href="/work-hours/sessions/{{ session.id }}/attendee-sheet" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-file-earmark-pdf me-1"></i>{{ t('work_hours.session_detail.attendee_sheet_link') }}
     </a>
+    {% if has_perm(request, 'work_hours', 'delete') %}
     <form method="post" action="/work-hours/sessions/{{ session.id }}/delete" class="d-inline">
         <button type="submit" class="btn btn-sm btn-outline-danger"
                 onclick="return confirm('{{ t('work_hours.session_detail.delete_confirm', title=session.title) }}')">
             <i class="bi bi-trash me-1"></i>{{ t('work_hours.session_detail.delete_button') }}
         </button>
     </form>
+    {% endif %}
     <a href="/work-hours/" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i>{{ t('common.back') }}
     </a>
@@ -104,6 +108,7 @@
                                        style="color: var(--gv-gruen);">{{ t_p.member.full_name }}</a>
                                 </td>
                                 <td>
+                                    {% if has_perm(request, 'work_hours', 'write') %}
                                     <form method="post"
                                           action="/work-hours/sessions/{{ session.id }}/participants/{{ t_p.id }}/status"
                                           class="d-flex gap-1 align-items-center">
@@ -114,8 +119,12 @@
                                             <option value="NO_SHOW" {% if t_p.status.value == 'NO_SHOW' %}selected{% endif %}>{{ t('work_hours.session_detail.status_no_show') }}</option>
                                         </select>
                                     </form>
+                                    {% else %}
+                                    {{ t('work_hours.session_detail.status_' ~ t_p.status.value.lower()) }}
+                                    {% endif %}
                                 </td>
                                 <td>
+                                    {% if has_perm(request, 'work_hours', 'write') %}
                                     <form method="post"
                                           action="/work-hours/sessions/{{ session.id }}/participants/{{ t_p.id }}/status"
                                           class="d-flex gap-1 align-items-center">
@@ -127,9 +136,13 @@
                                             <button type="submit" class="btn btn-sm btn-outline-secondary px-1">✓</button>
                                         </div>
                                     </form>
+                                    {% else %}
+                                    {{ t_p.hours_completed or session.hours_per_participant or '–' }}
+                                    {% endif %}
                                 </td>
                                 <td class="text-muted" style="font-size: 0.85rem;">{{ t_p.note or '' }}</td>
                                 <td class="text-end">
+                                    {% if has_perm(request, 'work_hours', 'delete') %}
                                     <form method="post"
                                           action="/work-hours/sessions/{{ session.id }}/participants/{{ t_p.id }}/remove">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border-0"
@@ -137,6 +150,7 @@
                                             <i class="bi bi-x-lg"></i>
                                         </button>
                                     </form>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% else %}
@@ -152,6 +166,7 @@
             </div>
 
             <!-- Teilnehmer hinzufügen -->
+            {% if has_perm(request, 'work_hours', 'write') %}
             <div class="card-footer">
                 <form method="post"
                       action="/work-hours/sessions/{{ session.id }}/participants/add"
@@ -179,6 +194,7 @@
                     </button>
                 </form>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -219,6 +235,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
+                                    {% if has_perm(request, 'work_hours', 'write') %}
                                     <form method="post" action="/work-hours/tasks/{{ task.id }}/assign">
                                         <select name="participation_id" class="form-select form-select-sm" onchange="this.form.submit()">
                                             <option value="">{{ t('work_hours.tasks.not_yet_assigned') }}</option>
@@ -229,13 +246,18 @@
                                             {% endfor %}
                                         </select>
                                     </form>
+                                    {% else %}
+                                    {{ task.assigned_participation.member.full_name if task.assigned_participation else t('work_hours.tasks.not_yet_assigned') }}
+                                    {% endif %}
                                 </td>
                                 <td class="text-end">
+                                    {% if has_perm(request, 'work_hours', 'write') %}
                                     <form method="post" action="/work-hours/tasks/{{ task.id }}/toggle-done" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-outline-secondary border-0" title="{{ t('work_hours.tasks.toggle_done_tooltip') }}">
                                             <i class="bi {% if task.is_done %}bi-arrow-counterclockwise{% else %}bi-check-lg{% endif %}"></i>
                                         </button>
                                     </form>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% else %}

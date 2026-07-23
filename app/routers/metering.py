@@ -27,7 +27,7 @@ from app.models import (
     MeteringPoint, MeteringPointType, MeteringMedium, Meter, MeterReading,
     Parcel, ParcelStatus,
 )
-from app.auth import require_user
+from app.permissions import require_permission
 from app.i18n import t_for, translate, DEFAULT_LANGUAGE
 from app.module_flags import require_module
 from app.meter_utils import (
@@ -93,6 +93,7 @@ def create_metering_router(
 
     basis_context_ohne_label = {
         "medium": medium.value,
+        "modul_name": modul_name,
         "unit": unit,
         "icon": icon,
         "url_prefix": url_prefix,
@@ -134,7 +135,7 @@ def create_metering_router(
         year: Optional[int] = None,
         db: AsyncSession = Depends(get_db),
     ):
-        user = await require_user(request, db)
+        user = await require_permission(request, db, modul_name, "read")
         if not year:
             year = date.today().year
 
@@ -186,7 +187,7 @@ def create_metering_router(
 
     @router.get("/metering-points", response_class=HTMLResponse)
     async def metering_points_list(request: Request, db: AsyncSession = Depends(get_db)):
-        user = await require_user(request, db)
+        user = await require_permission(request, db, modul_name, "read")
         alle = await _load_all_metering_points(db)
 
         def sortkey(a):
@@ -207,7 +208,7 @@ def create_metering_router(
 
     @router.get("/metering-points/new", response_class=HTMLResponse)
     async def metering_point_new_page(request: Request, db: AsyncSession = Depends(get_db)):
-        user = await require_user(request, db)
+        user = await require_permission(request, db, modul_name, "write")
         result = await db.execute(
             select(Parcel).where(Parcel.status == ParcelStatus.ACTIVE).order_by(Parcel.plot_number)
         )
@@ -232,7 +233,7 @@ def create_metering_router(
         initial_reading: str = Form("0"),
         db: AsyncSession = Depends(get_db),
     ):
-        await require_user(request, db)
+        await require_permission(request, db, modul_name, "write")
 
         metering_point = MeteringPoint(
             medium=medium,
@@ -265,7 +266,7 @@ def create_metering_router(
         request: Request,
         db: AsyncSession = Depends(get_db),
     ):
-        user = await require_user(request, db)
+        user = await require_permission(request, db, modul_name, "read")
         metering_point = await _load_metering_point_with_details(db, metering_point_id)
         if not metering_point:
             raise HTTPException(status_code=404, detail=t_for(request, "metering.errors.point_not_found", medium=medium_label(request)))
@@ -305,7 +306,7 @@ def create_metering_router(
         notes: str = Form(""),
         db: AsyncSession = Depends(get_db),
     ):
-        await require_user(request, db)
+        await require_permission(request, db, modul_name, "write")
         result = await db.execute(
             select(MeteringPoint).where(MeteringPoint.id == metering_point_id, MeteringPoint.medium == medium)
         )
@@ -324,7 +325,7 @@ def create_metering_router(
         request: Request,
         db: AsyncSession = Depends(get_db),
     ):
-        await require_user(request, db)
+        await require_permission(request, db, modul_name, "delete")
         result = await db.execute(
             select(MeteringPoint).where(MeteringPoint.id == metering_point_id, MeteringPoint.medium == medium)
         )
@@ -349,7 +350,7 @@ def create_metering_router(
         initial_reading: str = Form("0"),
         db: AsyncSession = Depends(get_db),
     ):
-        await require_user(request, db)
+        await require_permission(request, db, modul_name, "write")
         metering_point = await _load_metering_point_with_details(db, metering_point_id)
         if not metering_point:
             raise HTTPException(status_code=404)
@@ -386,7 +387,7 @@ def create_metering_router(
         rueck_url: str = Form(f"{url_prefix}/readings"),
         db: AsyncSession = Depends(get_db),
     ):
-        user = await require_user(request, db)
+        user = await require_permission(request, db, modul_name, "write")
         metering_point = await _load_metering_point_with_details(db, metering_point_id)
         if not metering_point:
             raise HTTPException(status_code=404)
@@ -430,7 +431,7 @@ def create_metering_router(
         request: Request,
         db: AsyncSession = Depends(get_db),
     ):
-        await require_user(request, db)
+        await require_permission(request, db, modul_name, "delete")
         result = await db.execute(select(MeterReading).where(MeterReading.id == reading_id))
         reading_entry = result.scalar_one_or_none()
         metering_point_id = None
@@ -456,7 +457,7 @@ def create_metering_router(
         error: Optional[str] = None,
         db: AsyncSession = Depends(get_db),
     ):
-        user = await require_user(request, db)
+        user = await require_permission(request, db, modul_name, "read")
         if not year:
             year = date.today().year
 
@@ -507,7 +508,7 @@ def create_metering_router(
         year: Optional[int] = None,
         db: AsyncSession = Depends(get_db),
     ):
-        user = await require_user(request, db)
+        user = await require_permission(request, db, modul_name, "read")
         if not year:
             year = date.today().year
 
@@ -565,7 +566,7 @@ def create_metering_router(
         year: Optional[int] = None,
         db: AsyncSession = Depends(get_db),
     ):
-        await require_user(request, db)
+        await require_permission(request, db, modul_name, "read")
         if not year:
             year = date.today().year
 

@@ -7,9 +7,11 @@
     <a href="{{ url_prefix }}/" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i>{{ t('metering.points_list.back') }}
     </a>
+    {% if has_perm(request, modul_name, 'write') %}
     <a href="{{ url_prefix }}/metering-points/new" class="btn btn-sm btn-primary">
         <i class="bi bi-plus-lg me-1"></i>{{ t('metering.points_list.new_point') }}
     </a>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -77,7 +79,9 @@
                         <td colspan="6" class="text-center py-5 text-muted">
                             <i class="bi {{ icon }} d-block mb-2" style="font-size: 1.5rem;"></i>
                             {{ t('metering.points_list.empty', medium=medium_label) }}<br>
+                            {% if has_perm(request, modul_name, 'write') %}
                             <a href="{{ url_prefix }}/metering-points/new" class="btn btn-sm btn-primary mt-2">{{ t('metering.points_list.create_first') }}</a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

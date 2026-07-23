@@ -7,7 +7,7 @@
     <a href="/inventory/loans/active" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-arrow-left-right me-1"></i>{{ t('inventory.list.active_loans_link') }}
     </a>
-    {% if user.role.value in ['admin', 'board'] %}
+    {% if has_perm(request, 'inventory', 'write') %}
     <a href="/inventory/categories/" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-tags me-1"></i>{{ t('inventory.list.manage_categories_link') }}
     </a>

@@ -7,10 +7,11 @@ InventoryItem's docstring in app/models.py), grouped into
 freely-configurable categories, plus a lending system for borrowable
 items. See docs/module-inventory.md for the full design.
 
-Viewing is available to any logged-in member (require_user) --
-transparency about club assets, same permission level as the member
-list. Creating/editing/retiring items, managing categories, and
-checking items in/out requires admin/board (require_admin).
+Gated by the "inventory" module permission (see app/permissions.py):
+ADMIN/BOARD always have full access; other roles need a group grant.
+Viewing requires "read"; creating/editing/retiring items, managing
+categories, and checking items in/out require "write"; hard-deleting
+an item or a category requires "delete".
 
 Route registration order matters here: /categories/, /new, and
 /loans/... are all registered before the single-segment /{item_id}
@@ -31,7 +32,7 @@ from app.database import get_db, active_member_filter
 from app.models import (
     InventoryCategory, InventoryItem, InventoryOwnerType, ItemLoan, Member,
 )
-from app.auth import require_user, require_admin
+from app.permissions import require_permission
 from app.module_flags import require_module
 from app.templating import templates
 
@@ -77,7 +78,7 @@ async def inventory_list(
     request: Request, category_id: str = "", include_retired: bool = False,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "inventory", "read")
 
     query = (
         select(InventoryItem)
@@ -112,7 +113,7 @@ async def inventory_list(
 
 @router.get("/categories/", response_class=HTMLResponse)
 async def categories_list(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_admin(request, db)
+    user = await require_permission(request, db, "inventory", "write")
     result = await db.execute(select(InventoryCategory).order_by(InventoryCategory.name))
     categories = result.scalars().all()
     return templates.TemplateResponse("inventory/categories.html", {
@@ -122,7 +123,7 @@ async def categories_list(request: Request, db: AsyncSession = Depends(get_db)):
 
 @router.post("/categories/new")
 async def category_create(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_admin(request, db)
+    user = await require_permission(request, db, "inventory", "write")
     form = await request.form()
     name = (form.get("name") or "").strip()
     description = (form.get("description") or "").strip() or None
@@ -151,7 +152,7 @@ async def category_create(request: Request, db: AsyncSession = Depends(get_db)):
 async def category_delete(category_id: str, request: Request, db: AsyncSession = Depends(get_db)):
     """Items in this category are not deleted -- see the API's
     delete_category for the same note; category_id is just cleared."""
-    await require_admin(request, db)
+    await require_permission(request, db, "inventory", "delete")
     result = await db.execute(select(InventoryCategory).where(InventoryCategory.id == category_id))
     category = result.scalar_one_or_none()
     if category is None:
@@ -171,7 +172,7 @@ async def active_loans_overview(request: Request, db: AsyncSession = Depends(get
     """Board-wide view of everything currently checked out, across
     every item -- "who has what out right now," not scoped to one
     item's detail page."""
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "inventory", "read")
     result = await db.execute(
         select(ItemLoan)
         .options(selectinload(ItemLoan.item), selectinload(ItemLoan.member))
@@ -186,7 +187,7 @@ async def active_loans_overview(request: Request, db: AsyncSession = Depends(get
 
 @router.post("/loans/{loan_id}/return")
 async def loan_return(loan_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    await require_admin(request, db)
+    await require_permission(request, db, "inventory", "write")
     result = await db.execute(select(ItemLoan).where(ItemLoan.id == loan_id))
     loan = result.scalar_one_or_none()
     if loan is None:
@@ -216,13 +217,13 @@ async def _item_form_context(request, db, user, item=None, error=None):
 
 @router.get("/new", response_class=HTMLResponse)
 async def item_new_form(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_admin(request, db)
+    user = await require_permission(request, db, "inventory", "write")
     return templates.TemplateResponse("inventory/form.html", await _item_form_context(request, db, user))
 
 
 @router.post("/new")
 async def item_create(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_admin(request, db)
+    user = await require_permission(request, db, "inventory", "write")
     form = await request.form()
 
     name = (form.get("name") or "").strip()
@@ -267,14 +268,14 @@ async def item_create(request: Request, db: AsyncSession = Depends(get_db)):
 
 @router.get("/{item_id}/edit", response_class=HTMLResponse)
 async def item_edit_form(item_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_admin(request, db)
+    user = await require_permission(request, db, "inventory", "write")
     item = await _get_item_or_404(db, item_id)
     return templates.TemplateResponse("inventory/form.html", await _item_form_context(request, db, user, item=item))
 
 
 @router.post("/{item_id}/edit")
 async def item_update(item_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_admin(request, db)
+    user = await require_permission(request, db, "inventory", "write")
     item = await _get_item_or_404(db, item_id)
     form = await request.form()
 
@@ -317,7 +318,7 @@ async def item_update(item_id: str, request: Request, db: AsyncSession = Depends
 
 @router.post("/{item_id}/retire")
 async def item_retire(item_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    await require_admin(request, db)
+    await require_permission(request, db, "inventory", "write")
     item = await _get_item_or_404(db, item_id)
     item.retired_at = datetime.now(timezone.utc)
     await db.commit()
@@ -326,7 +327,7 @@ async def item_retire(item_id: str, request: Request, db: AsyncSession = Depends
 
 @router.post("/{item_id}/delete")
 async def item_delete(item_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    await require_admin(request, db)
+    await require_permission(request, db, "inventory", "delete")
     item = await _get_item_or_404(db, item_id)
     await db.delete(item)
     await db.commit()
@@ -335,7 +336,7 @@ async def item_delete(item_id: str, request: Request, db: AsyncSession = Depends
 
 @router.post("/{item_id}/loans/checkout")
 async def loan_checkout(item_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_admin(request, db)
+    user = await require_permission(request, db, "inventory", "write")
     item = await _get_item_or_404(db, item_id)
     form = await request.form()
 
@@ -372,7 +373,7 @@ async def loan_checkout(item_id: str, request: Request, db: AsyncSession = Depen
 
 @router.get("/{item_id}", response_class=HTMLResponse)
 async def item_detail(item_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "inventory", "read")
     item = await _get_item_or_404(db, item_id)
 
     members_result = await db.execute(

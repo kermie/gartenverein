@@ -16,7 +16,7 @@ from sqlalchemy.orm import selectinload
 
 from app.database import get_db, active_member_filter
 from app.models import Member, MemberPhone, MemberEmail, MemberParcel, Parcel
-from app.auth import get_current_user, require_user, require_admin
+from app.permissions import require_permission
 from app.i18n import t_for
 from app.branding import load_branding
 from app.meeting_signin_sheet import render_meeting_signin_sheet_pdf
@@ -45,7 +45,7 @@ async def members_list(
     include_inactive: bool = False,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "read")
 
     query = (
         select(Member)
@@ -106,14 +106,14 @@ async def members_list(
 # ---------------------------------------------------------------------------
 # General-meeting sign-in sheet (PDF): current members, grouped by
 # parcel, one signature line each. Not gated by a module flag -- same
-# permission level as the member list itself (require_user), since
-# it's just another view onto the same data, not a separate feature
-# area with its own security surface.
+# permission level as the member list itself (members_parcels read),
+# since it's just another view onto the same data, not a separate
+# feature area with its own security surface.
 # ---------------------------------------------------------------------------
 
 @router.get("/signin-sheet", response_class=HTMLResponse)
 async def signin_sheet_form(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "read")
     default_headline = f"General meeting on {date.today().isoformat()}"
     return templates.TemplateResponse("members/signin_sheet.html", {
         "request": request, "user": user, "default_headline": default_headline,
@@ -122,7 +122,7 @@ async def signin_sheet_form(request: Request, db: AsyncSession = Depends(get_db)
 
 @router.post("/signin-sheet")
 async def signin_sheet_generate(request: Request, db: AsyncSession = Depends(get_db)):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "read")
     form = await request.form()
     headline = (form.get("headline") or "").strip()
     if not headline:
@@ -161,7 +161,7 @@ async def signin_sheet_generate(request: Request, db: AsyncSession = Depends(get
 
 @router.get("/new", response_class=HTMLResponse)
 async def member_new_page(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "write")
     return templates.TemplateResponse(
         "members/form.html",
         {"request": request, "user": user, "member": None},
@@ -184,7 +184,7 @@ async def member_create(
     notes: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "write")
 
     def parse_datum(s: str) -> Optional[date]:
         if s:
@@ -219,7 +219,7 @@ async def member_detail(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "read")
     member = await _get_member_with_details(db, member_id)
 
     if not member:
@@ -248,7 +248,7 @@ async def member_edit_page(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "write")
     member = await _get_member_with_details(db, member_id)
 
     if not member:
@@ -277,7 +277,7 @@ async def member_update(
     notes: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "write")
     member = await _get_member_with_details(db, member_id)
 
     if not member:
@@ -316,9 +316,9 @@ async def member_delete(
     """Soft-delete: sets deleted_at, removes the member from lists/search.
     Already-recorded parcel assignments, tickets, work sessions etc.
     remain unchanged -- no FK cascade, since there's no real DELETE.
-    Admin/board only (same permission level as require_admin elsewhere
-    in the project, see app/auth.py)."""
-    await require_admin(request, db)
+    Requires "delete" on members_parcels (ADMIN/BOARD always qualify,
+    see app/permissions.py)."""
+    await require_permission(request, db, "members_parcels", "delete")
     member = await _get_member_with_details(db, member_id)
 
     if not member:
@@ -347,7 +347,7 @@ async def phone_add(
     is_primary: bool = Form(False),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "write")
     telefon = MemberPhone(
         member_id=member_id,
         number=number.strip(),
@@ -366,7 +366,7 @@ async def phone_delete(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "delete")
     result = await db.execute(
         select(MemberPhone).where(
             MemberPhone.id == phone_id,
@@ -389,7 +389,7 @@ async def email_add(
     is_primary: bool = Form(False),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "write")
     email_obj = MemberEmail(
         member_id=member_id,
         address=address.strip().lower(),
@@ -408,7 +408,7 @@ async def email_delete(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "delete")
     result = await db.execute(
         select(MemberEmail).where(
             MemberEmail.id == email_id,
@@ -428,7 +428,7 @@ async def email_delete(
 
 @router.get("/export/csv")
 async def members_export_csv(request: Request, db: AsyncSession = Depends(get_db)):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "read")
 
     result = await db.execute(
         select(Member)
@@ -484,7 +484,7 @@ async def members_import_csv(
     datei: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "write")
 
     inhalt = await datei.read()
     try:

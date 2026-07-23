@@ -62,9 +62,9 @@
     "group_updated": "Groupe mis à jour",
     "group_deleted": "Groupe supprimé",
     "group_not_found": "Groupe introuvable",
-    "user_already_in_group": "Cet utilisateur est déjà membre de ce groupe",
-    "member_added": "Membre ajouté",
-    "member_removed": "Membre retiré"
+    "user_already_in_group": "Cet utilisateur est déjà assigné à ce groupe",
+    "member_added": "Utilisateur ajouté",
+    "member_removed": "Utilisateur retiré"
   },
   "tickets": {
     "overview": {
@@ -369,12 +369,12 @@
       "col_write": "Écriture",
       "col_delete": "Suppression",
       "button_save": "Enregistrer",
-      "members_header": "Membres",
-      "no_members": "Aucun membre pour le moment.",
-      "label_add_member": "Ajouter un membre...",
+      "members_header": "Utilisateurs assignés",
+      "no_members": "Aucun utilisateur assigné pour le moment.",
+      "label_add_member": "Ajouter un utilisateur...",
       "button_add": "Ajouter",
       "no_groups": "Aucun groupe pour le moment. Créez-en un pour commencer.",
-      "delete_confirm": "Supprimer ce groupe ? Les membres perdront l'accès qu'il leur accordait.",
+      "delete_confirm": "Supprimer ce groupe ? Les utilisateurs assignés perdront l'accès qu'il leur accordait.",
       "modules": {
         "members_parcels": "Membres et parcelles",
         "work_hours": "Sessions de travail",
@@ -912,7 +912,8 @@
       "no_parcel_points": "Aucun point de mesure pour les parcelles.",
       "club_header": "Raccordements du club",
       "previous_year_label": "Année précédente",
-      "recorded_label": "enregistré"
+      "recorded_label": "enregistré",
+      "no_entry_yet": "Pas encore renseigné"
     },
     "evaluation": {
       "title_suffix": " rapport",

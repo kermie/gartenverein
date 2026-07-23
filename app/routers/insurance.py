@@ -20,7 +20,7 @@ from app.models import (
     PropertyInsurancePackage, InsuranceConfiguration, ParcelInsurance,
     AccidentInsuranceAdditionalPerson, Parcel, ParcelStatus, MemberParcel, Member,
 )
-from app.auth import require_user
+from app.permissions import require_permission
 from app.module_flags import require_module
 from app.insurance_utils import household_grouping, calculate_insurance_cost
 
@@ -99,7 +99,7 @@ async def insurance_overview(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "insurance", "read")
     if not year:
         year = date.today().year
 
@@ -150,7 +150,7 @@ async def configuration_page(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "insurance", "read")
     if not year:
         year = date.today().year
 
@@ -180,7 +180,7 @@ async def configuration_save(
     accident_additional_amount_eur: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "insurance", "write")
 
     configuration = await _get_configuration(db, year)
     base = _parse_decimal(accident_base_amount_eur) or Decimal("0")
@@ -207,7 +207,7 @@ async def package_create(
     sort_order: int = Form(0),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "insurance", "write")
 
     amount = _parse_decimal(amount_eur) or Decimal("0")
     db.add(PropertyInsurancePackage(
@@ -226,7 +226,7 @@ async def package_update(
     sort_order: int = Form(0),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "insurance", "write")
 
     result = await db.execute(select(PropertyInsurancePackage).where(PropertyInsurancePackage.id == package_id))
     package = result.scalar_one_or_none()
@@ -247,7 +247,7 @@ async def package_delete(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "insurance", "delete")
 
     result = await db.execute(select(PropertyInsurancePackage).where(PropertyInsurancePackage.id == package_id))
     package = result.scalar_one_or_none()
@@ -269,7 +269,7 @@ async def insurance_parcels_list(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "insurance", "read")
     if not year:
         year = date.today().year
 
@@ -310,7 +310,7 @@ async def insurance_detail(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "insurance", "read")
     if not year:
         year = date.today().year
 
@@ -350,7 +350,7 @@ async def insurance_save(
     additional_persons: list[str] = Form([]),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "insurance", "write")
 
     pi = await _get_or_create_pi(db, parcel_id, year)
 
@@ -384,7 +384,7 @@ async def insurance_evaluation(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "insurance", "read")
     if not year:
         year = date.today().year
 
@@ -433,7 +433,7 @@ async def insurance_evaluation_csv(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "insurance", "read")
     if not year:
         year = date.today().year
 

@@ -21,6 +21,7 @@
 <div class="row g-3">
 
     <!-- Neue ClubRole anlegen -->
+    {% if has_perm(request, 'work_hours', 'write') %}
     <div class="col-lg-4">
         <div class="card">
             <div class="card-header"><i class="bi bi-plus-lg me-2"></i>{{ t('work_hours.club_roles.new_role_card_title') }}</div>
@@ -64,6 +65,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Bestehende Rollen -->
     <div class="col-lg-8">
@@ -100,10 +102,13 @@
                                     {{ r.exemption_reason.value if r.exemption_reason else '–' }}
                                 </td>
                                 <td class="text-end">
+                                    {% if has_perm(request, 'work_hours', 'write') %}
                                     <a href="/work-hours/club-roles/{{ r.id }}/edit"
                                        class="btn btn-sm btn-outline-secondary border-0">
                                         <i class="bi bi-pencil"></i>
                                     </a>
+                                    {% endif %}
+                                    {% if has_perm(request, 'work_hours', 'delete') %}
                                     <form method="post"
                                           action="/work-hours/club-roles/{{ r.id }}/delete"
                                           class="d-inline">
@@ -112,6 +117,7 @@
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% else %}
@@ -136,6 +142,7 @@
             </div>
 
             <!-- Neue Zuordnung -->
+            {% if has_perm(request, 'work_hours', 'write') %}
             <div class="card-body border-bottom">
                 <form method="post" action="/work-hours/club-roles/assign-member"
                       class="row g-2 align-items-end">
@@ -174,6 +181,7 @@
                     </div>
                 </form>
             </div>
+            {% endif %}
 
             <!-- Bestehende Zuordnungen -->
             <div class="card-body p-0">
@@ -213,10 +221,13 @@
                                 <td class="text-muted">{{ z.valid_until.strftime('%d.%m.%Y') if z.valid_until else t('work_hours.club_roles.ongoing') }}</td>
                                 <td class="text-muted" style="font-size: 0.85rem;">{{ z.note or '' }}</td>
                                 <td class="text-end">
+                                    {% if has_perm(request, 'work_hours', 'write') %}
                                     <a href="/work-hours/club-roles/assignment/{{ z.id }}/edit"
                                        class="btn btn-sm btn-outline-secondary border-0">
                                         <i class="bi bi-pencil"></i>
                                     </a>
+                                    {% endif %}
+                                    {% if has_perm(request, 'work_hours', 'delete') %}
                                     <form method="post"
                                           action="/work-hours/club-roles/assignment/{{ z.id }}/remove"
                                           class="d-inline">
@@ -226,6 +237,7 @@
                                             <i class="bi bi-x-lg"></i>
                                         </button>
                                     </form>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% else %}

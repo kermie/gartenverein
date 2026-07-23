@@ -62,9 +62,9 @@
     "group_updated": "Gruppe aktualisiert",
     "group_deleted": "Gruppe gelöscht",
     "group_not_found": "Gruppe nicht gefunden",
-    "user_already_in_group": "Dieser Benutzer ist bereits Mitglied dieser Gruppe",
-    "member_added": "Mitglied hinzugefügt",
-    "member_removed": "Mitglied entfernt"
+    "user_already_in_group": "Dieser Benutzer ist dieser Gruppe bereits zugewiesen",
+    "member_added": "Benutzer hinzugefügt",
+    "member_removed": "Benutzer entfernt"
   },
   "tickets": {
     "overview": {
@@ -369,12 +369,12 @@
       "col_write": "Schreiben",
       "col_delete": "Löschen",
       "button_save": "Speichern",
-      "members_header": "Mitglieder",
-      "no_members": "Noch keine Mitglieder.",
-      "label_add_member": "Mitglied hinzufügen...",
+      "members_header": "Zugewiesene Benutzer",
+      "no_members": "Noch keine Benutzer zugewiesen.",
+      "label_add_member": "Benutzer hinzufügen...",
       "button_add": "Hinzufügen",
       "no_groups": "Noch keine Gruppen vorhanden. Legen Sie eine an, um zu beginnen.",
-      "delete_confirm": "Diese Gruppe löschen? Mitglieder verlieren den dadurch gewährten Zugriff.",
+      "delete_confirm": "Diese Gruppe löschen? Zugewiesene Benutzer verlieren den dadurch gewährten Zugriff.",
       "modules": {
         "members_parcels": "Mitglieder & Parzellen",
         "work_hours": "Arbeitseinsätze",
@@ -912,7 +912,8 @@
       "no_parcel_points": "Keine Parzellen-Zählpunkte vorhanden.",
       "club_header": "Vereinsanschlüsse",
       "previous_year_label": "Vorjahr",
-      "recorded_label": "erfasst"
+      "recorded_label": "erfasst",
+      "no_entry_yet": "Noch nicht erfasst"
     },
     "evaluation": {
       "title_suffix": "-Auswertung",

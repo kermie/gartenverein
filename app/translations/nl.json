@@ -62,9 +62,9 @@
     "group_updated": "Groep bijgewerkt",
     "group_deleted": "Groep verwijderd",
     "group_not_found": "Groep niet gevonden",
-    "user_already_in_group": "Deze gebruiker is al lid van deze groep",
-    "member_added": "Lid toegevoegd",
-    "member_removed": "Lid verwijderd"
+    "user_already_in_group": "Deze gebruiker is al toegewezen aan deze groep",
+    "member_added": "Gebruiker toegevoegd",
+    "member_removed": "Gebruiker verwijderd"
   },
   "tickets": {
     "overview": {
@@ -369,12 +369,12 @@
       "col_write": "Schrijven",
       "col_delete": "Verwijderen",
       "button_save": "Opslaan",
-      "members_header": "Leden",
-      "no_members": "Nog geen leden.",
-      "label_add_member": "Lid toevoegen...",
+      "members_header": "Toegewezen gebruikers",
+      "no_members": "Nog geen gebruikers toegewezen.",
+      "label_add_member": "Gebruiker toevoegen...",
       "button_add": "Toevoegen",
       "no_groups": "Nog geen groepen. Maak er een aan om te beginnen.",
-      "delete_confirm": "Deze groep verwijderen? Leden verliezen de toegang die deze groep verleende.",
+      "delete_confirm": "Deze groep verwijderen? Toegewezen gebruikers verliezen de toegang die deze groep verleende.",
       "modules": {
         "members_parcels": "Leden en percelen",
         "work_hours": "Werksessies",
@@ -912,7 +912,8 @@
       "no_parcel_points": "Geen perceel-meetpunten.",
       "club_header": "Verenigingsaansluitingen",
       "previous_year_label": "Vorig jaar",
-      "recorded_label": "geregistreerd"
+      "recorded_label": "geregistreerd",
+      "no_entry_yet": "Nog niet ingevoerd"
     },
     "evaluation": {
       "title_suffix": " rapport",

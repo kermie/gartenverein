@@ -320,14 +320,27 @@ async def test_readonly_role_can_view_but_not_create_items(client, admin_user):
     headers = auth_header(token)
 
     from app.database import AsyncSessionLocal
-    from app.models import User, UserRole
+    from app.models import User, UserRole, Group, GroupMembership, GroupModulePermission
     from app.auth import hash_password
 
+    # Since the group-permission system defaults to no access at all
+    # (see app/permissions.py), a READONLY user must be placed in a
+    # group with "inventory: read" to see anything -- this is the
+    # narrowly-scoped access the system is meant to provide, replacing
+    # the old blanket "any logged-in user can view" behavior.
     async with AsyncSessionLocal() as session:
-        session.add(User(
+        user = User(
             email="readonly@example.com", name="Test-Readonly",
             password_hash=hash_password("testpasswort123"), role=UserRole.READONLY,
-        ))
+        )
+        session.add(user)
+        await session.flush()
+
+        group = Group(name="Inventory Viewers")
+        session.add(group)
+        await session.flush()
+        session.add(GroupModulePermission(group_id=group.id, module="inventory", can_read=True))
+        session.add(GroupMembership(user_id=user.id, group_id=group.id))
         await session.commit()
 
     await web_login(client, "readonly@example.com")

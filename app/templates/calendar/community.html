@@ -18,7 +18,7 @@
 {% block content %}
 <div class="row g-3">
 
-    {% if user.role.value in ['admin', 'board'] %}
+    {% if has_perm(request, 'calendar', 'write') %}
     <div class="col-lg-4">
         <div class="card">
             <div class="card-header"><i class="bi bi-plus-lg me-2"></i>{{ t('calendar.community.new_card_title') }}</div>
@@ -75,7 +75,7 @@
     </div>
     {% endif %}
 
-    <div class="{% if user.role.value in ['admin', 'board'] %}col-lg-8{% else %}col-12{% endif %}">
+    <div class="{% if has_perm(request, 'calendar', 'write') %}col-lg-8{% else %}col-12{% endif %}">
         <div class="card">
             <div class="card-header"><i class="bi bi-calendar-event me-2"></i>{{ t('calendar.community.upcoming_card_title') }}</div>
             <div class="card-body p-0">
@@ -120,7 +120,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-end">
-                                    {% if kind == 'event' and user.role.value in ['admin', 'board'] %}
+                                    {% if kind == 'event' and has_perm(request, 'calendar', 'delete') %}
                                     <form method="post" action="/calendar/community/{{ item.id }}/delete" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border-0"
                                                 onclick="return confirm('{{ t('calendar.community.delete_confirm') }}')">

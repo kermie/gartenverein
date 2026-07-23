@@ -11,9 +11,11 @@
             {% endfor %}
         </select>
     </form>
+    {% if has_perm(request, 'work_hours', 'write') %}
     <a href="/work-hours/sessions/new" class="btn btn-sm btn-primary">
         <i class="bi bi-plus-lg me-1"></i>{{ t('work_hours.overview.new_session_button') }}
     </a>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -117,9 +119,11 @@
                         <td colspan="6" class="text-center py-4 text-muted">
                             <i class="bi bi-calendar-x d-block mb-2" style="font-size: 1.5rem;"></i>
                             {{ t('work_hours.overview.no_sessions', year=year) }}
+                            {% if has_perm(request, 'work_hours', 'write') %}
                             <br><a href="/work-hours/sessions/new" class="btn btn-sm btn-primary mt-2">
                                 {{ t('work_hours.overview.first_session_button') }}
                             </a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

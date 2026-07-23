@@ -19,7 +19,8 @@ from app.database import get_db
 from app.models import (
     PurchaseRequest, PurchaseRequestApproval, PurchaseRequestStatus, User, UserRole,
 )
-from app.auth import require_user, require_admin, serializer
+from app.auth import require_admin, serializer
+from app.permissions import require_permission
 from app.i18n import t_for
 from app.module_flags import require_module
 from app.email_service import send_email
@@ -59,7 +60,7 @@ async def purchase_requests_overview(
     filter: str = "offen",
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "purchase_requests", "read")
 
     query = (
         select(PurchaseRequest)
@@ -94,7 +95,7 @@ async def purchase_requests_overview(
 
 @router.get("/new", response_class=HTMLResponse)
 async def purchase_request_new_page(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "purchase_requests", "write")
     return templates.TemplateResponse("purchase_requests/form.html", {
         "request": request, "user": user,
     })
@@ -112,7 +113,7 @@ async def purchase_request_create(
     requester_email: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "purchase_requests", "write")
 
     kosten = None
     if estimated_cost_eur.strip():
@@ -167,7 +168,7 @@ async def purchase_request_create(
 
 @router.get("/{request_id}", response_class=HTMLResponse)
 async def purchase_request_detail(request_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "purchase_requests", "read")
     pr = await _load_with_details(db, request_id)
     if not pr:
         raise HTTPException(status_code=404, detail=t_for(request, "errors.purchase_request_not_found"))

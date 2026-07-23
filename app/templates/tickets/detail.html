@@ -61,7 +61,7 @@
             </div>
         </div>
 
-        {% if ticket.status.value != 'CLOSED' %}
+        {% if ticket.status.value != 'CLOSED' and has_perm(request, 'tickets', 'write') %}
         <div class="card">
             <div class="card-header"><i class="bi bi-reply me-2"></i>{{ t('tickets.detail.reply_header') }}</div>
             <div class="card-body">
@@ -102,11 +102,13 @@
                 {% if ticket.spam_reasoning %}
                 <p class="text-muted mb-2" style="font-size: 0.82rem;">{{ ticket.spam_reasoning }}</p>
                 {% endif %}
+                {% if has_perm(request, 'tickets', 'write') %}
                 <form method="post" action="/tickets/{{ ticket.id }}/not-spam">
                     <button type="submit" class="btn btn-sm btn-outline-danger w-100">
                         <i class="bi bi-check-lg me-1"></i>{{ t('tickets.detail.spam_not_spam_button') }}
                     </button>
                 </form>
+                {% endif %}
             </div>
         </div>
         {% endif %}
@@ -114,6 +116,7 @@
         <div class="card mb-3">
             <div class="card-header"><i class="bi bi-flag me-2"></i>{{ t('tickets.detail.status_header') }}</div>
             <div class="card-body">
+                {% if has_perm(request, 'tickets', 'write') %}
                 <form method="post" action="/tickets/{{ ticket.id }}/status">
                     <select name="status_neu" class="form-select form-select-sm mb-2"
                             onchange="document.getElementById('zurueckstell-datum').style.display = this.value === 'POSTPONED' ? '' : 'none';">
@@ -134,12 +137,18 @@
                         <i class="bi bi-check-lg me-1"></i>{{ t('tickets.detail.status_save_button') }}
                     </button>
                 </form>
+                {% else %}
+                <span class="badge" style="background: var(--gv-gruen-blass); color: var(--gv-gruen);">
+                    {{ t('tickets.overview.status_' ~ ticket.status.value.lower()) }}
+                </span>
+                {% endif %}
             </div>
         </div>
 
         <div class="card mb-3">
             <div class="card-header"><i class="bi bi-person-check me-2"></i>{{ t('tickets.detail.assignment_header') }}</div>
             <div class="card-body">
+                {% if has_perm(request, 'tickets', 'write') %}
                 <form method="post" action="/tickets/{{ ticket.id }}/assign">
                     <select name="user_id" class="form-select form-select-sm mb-2">
                         <option value="">{{ t('tickets.detail.assignment_unassigned_option') }}</option>
@@ -156,6 +165,9 @@
                 <div class="form-text mt-2">
                     {{ t('tickets.detail.assignment_help_text') }}
                 </div>
+                {% else %}
+                <p class="mb-0">{{ ticket.assigned_to.name if ticket.assigned_to else t('tickets.detail.assignment_unassigned_option') }}</p>
+                {% endif %}
             </div>
         </div>
 
@@ -171,7 +183,7 @@
                 <p class="text-muted mb-2" style="font-size: 0.85rem;">{{ t('tickets.detail.member_none_assigned') }}</p>
                 {% endif %}
 
-                {% if candidates %}
+                {% if candidates and has_perm(request, 'tickets', 'write') %}
                 <form method="post" action="/tickets/{{ ticket.id }}/member">
                     <select name="member_id" class="form-select form-select-sm mb-2">
                         <option value="">{{ t('tickets.detail.member_no_assignment_option') }}</option>

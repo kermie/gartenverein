@@ -62,9 +62,9 @@
     "group_updated": "Skupina aktualizována",
     "group_deleted": "Skupina odstraněna",
     "group_not_found": "Skupina nenalezena",
-    "user_already_in_group": "Tento uživatel je již členem této skupiny",
-    "member_added": "Člen přidán",
-    "member_removed": "Člen odebrán"
+    "user_already_in_group": "Tento uživatel je již přiřazen k této skupině",
+    "member_added": "Uživatel přidán",
+    "member_removed": "Uživatel odebrán"
   },
   "tickets": {
     "overview": {
@@ -369,12 +369,12 @@
       "col_write": "Zápis",
       "col_delete": "Mazání",
       "button_save": "Uložit",
-      "members_header": "Členové",
-      "no_members": "Zatím žádní členové.",
-      "label_add_member": "Přidat člena...",
+      "members_header": "Přiřazení uživatelé",
+      "no_members": "Zatím žádní přiřazení uživatelé.",
+      "label_add_member": "Přidat uživatele...",
       "button_add": "Přidat",
       "no_groups": "Zatím žádné skupiny. Vytvořte první a začněte.",
-      "delete_confirm": "Odstranit tuto skupinu? Členové ztratí přístup, který jim poskytovala.",
+      "delete_confirm": "Odstranit tuto skupinu? Přiřazení uživatelé ztratí přístup, který jim poskytovala.",
       "modules": {
         "members_parcels": "Členové a parcely",
         "work_hours": "Pracovní sezení",
@@ -912,7 +912,8 @@
       "no_parcel_points": "Žádná měrná místa pro parcely.",
       "club_header": "Přípojky spolku",
       "previous_year_label": "Předchozí rok",
-      "recorded_label": "zaznamenáno"
+      "recorded_label": "zaznamenáno",
+      "no_entry_yet": "Zatím nezadáno"
     },
     "evaluation": {
       "title_suffix": " zpráva",

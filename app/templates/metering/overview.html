@@ -97,9 +97,11 @@
                 <a href="{{ url_prefix }}/metering-points" class="btn btn-outline-primary text-start">
                     <i class="bi {{ icon }} me-2"></i>{{ t('metering.overview.nav_all_points') }}
                 </a>
+                {% if has_perm(request, modul_name, 'write') %}
                 <a href="{{ url_prefix }}/metering-points/new" class="btn btn-outline-primary text-start">
                     <i class="bi bi-plus-square me-2"></i>{{ t('metering.overview.nav_new_point') }}
                 </a>
+                {% endif %}
                 <a href="{{ url_prefix }}/evaluation?year={{ year }}" class="btn btn-outline-secondary text-start">
                     <i class="bi bi-bar-chart me-2"></i>{{ t('metering.overview.nav_evaluation') }}
                 </a>

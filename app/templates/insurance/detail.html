@@ -31,12 +31,14 @@
                     <input class="form-check-input" type="checkbox" role="switch"
                            name="has_property_insurance" id="has-property"
                            {% if pi.has_property_insurance %}checked{% endif %}
+                           {% if not has_perm(request, 'insurance', 'write') %}disabled{% endif %}
                            onchange="document.getElementById('property-package-field').style.display = this.checked ? '' : 'none';">
                     <label class="form-check-label fw-semibold" for="has-property">{{ t('insurance.detail.label_has_property') }}</label>
                 </div>
                 <div id="property-package-field" style="{% if not pi.has_property_insurance %}display: none;{% endif %}">
                     <label class="form-label fw-semibold">{{ t('insurance.detail.label_package') }}</label>
-                    <select name="property_package_id" class="form-select">
+                    <select name="property_package_id" class="form-select"
+                            {% if not has_perm(request, 'insurance', 'write') %}disabled{% endif %}>
                         <option value="">{{ t('insurance.detail.select_package_placeholder') }}</option>
                         {% for package in packages %}
                         <option value="{{ package.id }}" {% if pi.property_package_id == package.id %}selected{% endif %}>
@@ -64,6 +66,7 @@
                     <input class="form-check-input" type="checkbox" role="switch"
                            name="has_accident_insurance" id="has-accident"
                            {% if pi.has_accident_insurance %}checked{% endif %}
+                           {% if not has_perm(request, 'insurance', 'write') %}disabled{% endif %}
                            onchange="document.getElementById('accident-details').style.display = this.checked ? '' : 'none';">
                     <label class="form-check-label fw-semibold" for="has-accident">{{ t('insurance.detail.label_has_accident') }}</label>
                 </div>
@@ -89,7 +92,8 @@
                         <li class="list-group-item py-1 px-2 d-flex align-items-center gap-2" style="font-size: 0.88rem;">
                             <input class="form-check-input mt-0" type="checkbox" name="additional_persons"
                                    value="{{ m.id }}" id="ap-{{ m.id }}"
-                                   {% if m.id in additional_ids %}checked{% endif %}>
+                                   {% if m.id in additional_ids %}checked{% endif %}
+                                   {% if not has_perm(request, 'insurance', 'write') %}disabled{% endif %}>
                             <label class="form-check-label" for="ap-{{ m.id }}">{{ m.full_name }}</label>
                         </li>
                         {% endfor %}
@@ -123,11 +127,13 @@
         </div>
     </div>
 
+    {% if has_perm(request, 'insurance', 'write') %}
     <div class="col-12 d-flex justify-content-end">
         <button type="submit" class="btn btn-primary">
             <i class="bi bi-check-lg me-1"></i>{{ t('insurance.detail.save_button') }}
         </button>
     </div>
+    {% endif %}
 
 </div>
 </form>

@@ -42,6 +42,7 @@
                     {% endif %}
                 </dl>
 
+                {% if has_perm(request, modul_name, 'write') %}
                 <hr>
                 <form method="post" action="{{ url_prefix }}/metering-points/{{ metering_point.id }}/edit">
                     <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('metering.point_detail.label_label') }}</label>
@@ -54,6 +55,7 @@
                         <i class="bi bi-check-lg me-1"></i>{{ t('metering.point_detail.save_button') }}
                     </button>
                 </form>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -85,6 +87,7 @@
                     <dd class="col-sm-8">{{ current_meter.initial_reading | fmt(decimal_places) }} {{ unit }}</dd>
                 </dl>
 
+                {% if has_perm(request, modul_name, 'write') %}
                 <hr>
                 <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="collapse"
                         data-bs-target="#tausch-formular">
@@ -129,6 +132,7 @@
                         </form>
                     </div>
                 </div>
+                {% endif %}
                 {% else %}
                 <p class="text-muted mb-0">{{ t('metering.point_detail.no_active_meter') }}</p>
                 {% endif %}
@@ -167,12 +171,14 @@
                                 </td>
                                 <td class="text-muted" style="font-size: 0.85rem;">{{ eintrag.reading.note or '' }}</td>
                                 <td class="text-end">
+                                    {% if has_perm(request, modul_name, 'delete') %}
                                     <form method="post" action="{{ url_prefix }}/readings/{{ eintrag.reading.id }}/delete">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border-0"
                                                 onclick="return confirm('{{ t('metering.point_detail.delete_confirm') }}')">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% else %}
@@ -184,6 +190,7 @@
                     </table>
                 </div>
             </div>
+            {% if has_perm(request, modul_name, 'write') %}
             <div class="card-footer">
                 <form method="post" action="{{ url_prefix }}/metering-points/{{ metering_point.id }}/readings/new"
                       class="d-flex gap-2 flex-wrap align-items-end">
@@ -211,6 +218,7 @@
                     </button>
                 </form>
             </div>
+            {% endif %}
         </div>
     </div>
     {% endif %}

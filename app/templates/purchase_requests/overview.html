@@ -3,9 +3,11 @@
 {% block page_title %}{{ t('purchase_requests.overview.title') }}{% endblock %}
 
 {% block topbar_actions %}
+{% if has_perm(request, 'purchase_requests', 'write') %}
 <a href="/purchase-requests/new" class="btn btn-sm btn-primary">
     <i class="bi bi-plus-lg me-1"></i>{{ t('purchase_requests.overview.new_request') }}
 </a>
+{% endif %}
 {% endblock %}
 
 {% block content %}

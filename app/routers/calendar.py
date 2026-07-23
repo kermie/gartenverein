@@ -33,7 +33,8 @@ from app.models import (
     CalendarEvent, CalendarEventType, WorkSession, SessionType,
     CouncilPresence, CouncilAbsence, User,
 )
-from app.auth import require_user, require_admin
+from app.auth import require_user
+from app.permissions import require_permission
 from app.module_flags import require_module
 from app.i18n import t_for
 from app.birthdays import upcoming_birthdays, all_birthdays_for_calendar, ROUND_BIRTHDAY_INTERVAL
@@ -68,7 +69,7 @@ def _ics_response(ical_bytes: bytes, filename: str) -> Response:
 
 @router.get("/", response_class=HTMLResponse)
 async def calendar_hub(request: Request, db: AsyncSession = Depends(get_db)):
-    await require_user(request, db)
+    await require_permission(request, db, "calendar", "read")
     return RedirectResponse("/calendar/community", status_code=302)
 
 
@@ -78,7 +79,7 @@ async def calendar_hub(request: Request, db: AsyncSession = Depends(get_db)):
 
 @router.get("/community", response_class=HTMLResponse)
 async def community_overview(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "calendar", "read")
 
     events_result = await db.execute(
         select(CalendarEvent).where(CalendarEvent.start_date >= date.today()).order_by(CalendarEvent.start_date)
@@ -120,7 +121,7 @@ async def community_event_create(
     end_time: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_admin(request, db)
+    user = await require_permission(request, db, "calendar", "write")
 
     event = CalendarEvent(
         title=title.strip(),
@@ -140,7 +141,7 @@ async def community_event_create(
 
 @router.post("/community/{event_id}/delete")
 async def community_event_delete(event_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    await require_admin(request, db)
+    await require_permission(request, db, "calendar", "delete")
     result = await db.execute(select(CalendarEvent).where(CalendarEvent.id == event_id))
     event = result.scalar_one_or_none()
     if not event:
@@ -165,7 +166,7 @@ async def community_ics(request: Request, db: AsyncSession = Depends(get_db)):
 
 @router.get("/birthdays", response_class=HTMLResponse)
 async def birthdays_overview(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "calendar", "read")
     upcoming = await upcoming_birthdays(db, within_days=90)
     ics_token = await get_or_create_ics_token(db)
     return templates.TemplateResponse("calendar/birthdays.html", {
@@ -192,7 +193,7 @@ async def birthdays_ics(request: Request, token: Optional[str] = Query(None), db
 
 @router.get("/council-presence", response_class=HTMLResponse)
 async def council_presence_overview(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "calendar", "read")
 
     result = await db.execute(
         select(CouncilPresence)
@@ -222,7 +223,7 @@ async def council_presence_create(
     note: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_admin(request, db)
+    await require_permission(request, db, "calendar", "write")
     entry = CouncilPresence(
         user_id=user_id,
         date=date.fromisoformat(presence_date),
@@ -237,7 +238,7 @@ async def council_presence_create(
 
 @router.post("/council-presence/{entry_id}/delete")
 async def council_presence_delete(entry_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    await require_admin(request, db)
+    await require_permission(request, db, "calendar", "delete")
     result = await db.execute(select(CouncilPresence).where(CouncilPresence.id == entry_id))
     entry = result.scalar_one_or_none()
     if not entry:
@@ -262,7 +263,7 @@ async def council_presence_ics(request: Request, token: Optional[str] = Query(No
 
 @router.get("/council-absence", response_class=HTMLResponse)
 async def council_absence_overview(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "calendar", "read")
 
     result = await db.execute(
         select(CouncilAbsence)

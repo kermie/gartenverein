@@ -55,7 +55,7 @@
         </span>
         <span class="text-muted" style="font-size: 0.8rem;">{{ t('metering.readings_list.recorded_label') }}</span>
     </div>
-    {% else %}
+    {% elif has_perm(request, modul_name, 'write') %}
     <form method="post" action="{{ url_prefix }}/metering-points/{{ z.metering_point.id }}/readings/new"
           class="d-flex gap-2 align-items-center">
         <input type="hidden" name="year" value="{{ year }}">
@@ -68,6 +68,8 @@
             <i class="bi bi-check-lg"></i>
         </button>
     </form>
+    {% else %}
+    <span class="text-muted" style="font-size: 0.85rem;">{{ t('metering.readings_list.no_entry_yet') }}</span>
     {% endif %}
 </div>
 {% endmacro %}

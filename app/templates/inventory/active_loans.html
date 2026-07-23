@@ -31,7 +31,7 @@
                     <td>{{ loan.borrowed_date.isoformat() }}</td>
                     <td>{{ loan.fee_charged|float|money if loan.fee_charged is not none else '-' }}</td>
                     <td class="text-end">
-                        {% if user.role.value in ['admin', 'board'] %}
+                        {% if has_perm(request, 'inventory', 'write') %}
                         <form method="post" action="/inventory/loans/{{ loan.id }}/return" class="d-inline">
                             <button type="submit" class="btn btn-sm btn-outline-secondary">{{ t('inventory.detail.mark_returned_button') }}</button>
                         </form>

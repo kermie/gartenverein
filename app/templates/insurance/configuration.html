@@ -25,6 +25,7 @@
         <div class="card">
             <div class="card-header"><i class="bi bi-heart-pulse me-2"></i>{{ t('insurance.configuration.accident_header', year=year) }}</div>
             <div class="card-body">
+                {% if has_perm(request, 'insurance', 'write') %}
                 <form method="post" action="/insurance/configuration/save">
                     <input type="hidden" name="year" value="{{ year }}">
                     <div class="mb-3">
@@ -55,12 +56,21 @@
                         <i class="bi bi-check-lg me-1"></i>{{ t('insurance.configuration.save_button') }}
                     </button>
                 </form>
+                {% else %}
+                <dl class="row mb-0">
+                    <dt class="col-sm-7 text-muted">{{ t('insurance.configuration.label_base_amount') }}</dt>
+                    <dd class="col-sm-5">{{ ('%.2f'|format(configuration.accident_base_amount_eur|float) if configuration else '3,00') }} {{ currency_symbol() }}</dd>
+                    <dt class="col-sm-7 text-muted">{{ t('insurance.configuration.label_additional_amount') }}</dt>
+                    <dd class="col-sm-5">{{ ('%.2f'|format(configuration.accident_additional_amount_eur|float) if configuration else '3,00') }} {{ currency_symbol() }}</dd>
+                </dl>
+                {% endif %}
             </div>
         </div>
     </div>
 
     <!-- Sachversicherungs-Pakete -->
     <div class="col-lg-7">
+        {% if has_perm(request, 'insurance', 'write') %}
         <div class="card mb-3">
             <div class="card-header"><i class="bi bi-plus-lg me-2"></i>{{ t('insurance.configuration.new_package_header') }}</div>
             <div class="card-body">
@@ -91,6 +101,7 @@
                 </form>
             </div>
         </div>
+        {% endif %}
 
         <div class="card">
             <div class="card-header"><i class="bi bi-box-seam me-2"></i>{{ t('insurance.configuration.packages_header', year=year) }}</div>
@@ -107,6 +118,7 @@
                         <tbody>
                             {% for p in packages %}
                             <tr>
+                                {% if has_perm(request, 'insurance', 'write') %}
                                 <td>
                                     <form method="post" action="/insurance/configuration/packages/{{ p.id }}/edit"
                                           class="d-flex gap-2 align-items-center">
@@ -126,13 +138,29 @@
                                             <i class="bi bi-check-lg"></i>
                                         </button>
                                     </form>
+                                    {% if has_perm(request, 'insurance', 'delete') %}
                                     <form method="post" action="/insurance/configuration/packages/{{ p.id }}/delete" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border-0"
                                                 onclick="return confirm('{{ t('insurance.configuration.delete_confirm') }}')">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
+                                    {% endif %}
                                 </td>
+                                {% else %}
+                                <td>{{ p.name }}</td>
+                                <td>{{ '%.2f'|format(p.amount_eur|float) }} {{ currency_symbol() }}</td>
+                                <td class="text-end">
+                                    {% if has_perm(request, 'insurance', 'delete') %}
+                                    <form method="post" action="/insurance/configuration/packages/{{ p.id }}/delete" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                                onclick="return confirm('{{ t('insurance.configuration.delete_confirm') }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
                             </tr>
                             {% else %}
                             <tr>

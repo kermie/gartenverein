@@ -4,15 +4,19 @@
 
 {% block topbar_actions %}
 <div class="d-flex gap-2 flex-wrap">
+    {% if has_perm(request, 'members_parcels', 'write') %}
     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#csvImportModal">
         <i class="bi bi-upload me-1"></i>{{ t('parcels.list.csv_import') }}
     </button>
+    {% endif %}
     <a href="/parcels/export/csv" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-download me-1"></i>{{ t('parcels.list.csv_export') }}
     </a>
+    {% if has_perm(request, 'members_parcels', 'write') %}
     <a href="/parcels/new" class="btn btn-sm btn-primary">
         <i class="bi bi-plus-lg me-1"></i>{{ t('parcels.list.new_parcel') }}
     </a>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -101,7 +105,9 @@
                         <td colspan="5" class="text-center py-5 text-muted">
                             <i class="bi bi-grid-3x3 d-block mb-2" style="font-size: 1.5rem;"></i>
                             {{ t('parcels.list.empty') }}<br>
+                            {% if has_perm(request, 'members_parcels', 'write') %}
                             <a href="/parcels/new" class="btn btn-sm btn-primary mt-2">{{ t('parcels.list.create_first') }}</a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

@@ -19,7 +19,7 @@ from app.database import get_db, active_member_filter
 from app.models import (
     Ticket, TicketMessage, TicketStatus, MessageDirection, User, Member,
 )
-from app.auth import require_user
+from app.permissions import require_permission
 from app.module_flags import require_module
 from app.change_tracker import ChangeTracker
 from app.ticket_utils import find_members_by_email
@@ -83,7 +83,7 @@ async def tickets_overview(
     search: str = "",
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "tickets", "read")
 
     reaktiviert_count = await _reactivate_due_tickets(db)
 
@@ -166,7 +166,7 @@ async def tickets_overview(
 
 @router.get("/new", response_class=HTMLResponse)
 async def ticket_new_page(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "tickets", "read")
     return templates.TemplateResponse("tickets/form.html", {"request": request, "user": user})
 
 
@@ -179,7 +179,7 @@ async def ticket_create(
     message: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "tickets", "write")
 
     sender_email = sender_email.strip().lower()
     matches = await find_members_by_email(db, sender_email)
@@ -219,7 +219,7 @@ async def tickets_bulk_status(
     filter: str = Form("aktiv"),
     db: AsyncSession = Depends(get_db),
 ):
-    current_user = await require_user(request, db)
+    current_user = await require_permission(request, db, "tickets", "write")
 
     neuer_status = TicketStatus(status_neu)
     result = await db.execute(select(Ticket).where(Ticket.id.in_(ticket_ids)))
@@ -242,7 +242,7 @@ async def tickets_bulk_assign(
     filter: str = Form("aktiv"),
     db: AsyncSession = Depends(get_db),
 ):
-    current_user = await require_user(request, db)
+    current_user = await require_permission(request, db, "tickets", "write")
 
     assignee = None
     if user_id.strip():
@@ -294,7 +294,7 @@ async def ticket_detail(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "tickets", "read")
     await _reactivate_due_tickets(db)
     ticket = await _load_ticket_with_details(db, ticket_id)
     if not ticket:
@@ -326,7 +326,7 @@ async def ticket_assign(
     user_id: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    current_user = await require_user(request, db)
+    current_user = await require_permission(request, db, "tickets", "write")
     ticket = await _load_ticket_with_details(db, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404)
@@ -402,7 +402,7 @@ async def ticket_status_update(
     postponed_until: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    current_user = await require_user(request, db)
+    current_user = await require_permission(request, db, "tickets", "write")
     ticket = await _load_ticket_with_details(db, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404)
@@ -427,7 +427,7 @@ async def ticket_member_assign(
     member_id: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "tickets", "write")
     result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
     ticket = result.scalar_one_or_none()
     if not ticket:
@@ -448,7 +448,7 @@ async def ticket_mark_not_spam(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "tickets", "write")
     result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
     ticket = result.scalar_one_or_none()
     if not ticket:
@@ -471,7 +471,7 @@ async def message_add(
     direction: str = Form("OUTGOING"),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "tickets", "write")
     ticket = await _load_ticket_with_details(db, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404)
@@ -500,7 +500,7 @@ async def message_add(
 
 @router.post("/inbox/fetch-now")
 async def inbox_fetch_now(request: Request, db: AsyncSession = Depends(get_db)):
-    await require_user(request, db)
+    await require_permission(request, db, "tickets", "write")
     anzahl = await process_incoming_mails(db)
     import urllib.parse
     meldung = urllib.parse.quote(f"{anzahl} neue E-Mail(s) verarbeitet.")

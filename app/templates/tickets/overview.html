@@ -4,6 +4,7 @@
 
 {% block topbar_actions %}
 <div class="d-flex gap-2">
+    {% if has_perm(request, 'tickets', 'write') %}
     <form method="post" action="/tickets/inbox/fetch-now" class="d-inline">
         <button type="submit" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-arrow-clockwise me-1"></i>{{ t('tickets.overview.fetch_inbox_now') }}
@@ -12,6 +13,7 @@
     <a href="/tickets/new" class="btn btn-sm btn-primary">
         <i class="bi bi-plus-lg me-1"></i>{{ t('tickets.overview.new_ticket') }}
     </a>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -60,6 +62,7 @@
     <input type="hidden" name="filter" value="{{ filter }}">
 
     <!-- Massenbearbeitung -->
+    {% if has_perm(request, 'tickets', 'write') %}
     <div class="card mb-3">
         <div class="card-body py-2 d-flex flex-wrap gap-2 align-items-center">
             <span class="text-muted" style="font-size: 0.85rem; min-width: 130px;" id="bulk-selected-count">
@@ -96,6 +99,7 @@
             </button>
         </div>
     </div>
+    {% endif %}
 
     <div class="card">
         <div class="card-body p-0">
@@ -103,7 +107,9 @@
 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
+                            {% if has_perm(request, 'tickets', 'write') %}
                             <th style="width: 2.5rem;"><input type="checkbox" id="select-all" aria-label="{{ t('tickets.overview.bulk_none_selected') }}"></th>
+                            {% endif %}
                             <th>{{ t('tickets.overview.col_subject') }}</th>
                             <th>{{ t('tickets.overview.col_sender') }}</th>
                             <th>{{ t('tickets.overview.col_status') }}</th>
@@ -115,9 +121,11 @@
                     <tbody>
                         {% for t_row in tickets %}
                         <tr class="{% if t_row.spam_suspected %}table-danger{% endif %}">
+                            {% if has_perm(request, 'tickets', 'write') %}
                             <td>
                                 <input type="checkbox" name="ticket_ids" value="{{ t_row.id }}" class="ticket-checkbox">
                             </td>
+                            {% endif %}
                             <td>
                                 <a href="/tickets/{{ t_row.id }}" class="text-decoration-none fw-semibold"
                                    style="color: var(--gv-gruen);">{{ t_row.subject }}</a>
@@ -179,13 +187,14 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var selectAll = document.getElementById('select-all');
+    var form = document.getElementById('bulk-form');
+    if (!selectAll || !form) return;  // bulk editing UI isn't rendered without tickets:write
     var checkboxes = document.querySelectorAll('.ticket-checkbox');
     var selectedCountEl = document.getElementById('bulk-selected-count');
     var statusSelect = document.getElementById('bulk-status-select');
     var postponedDate = document.getElementById('bulk-postponed-date');
     var statusApplyBtn = document.getElementById('bulk-status-apply');
     var assignApplyBtn = document.getElementById('bulk-assign-apply');
-    var form = document.getElementById('bulk-form');
 
     function checkedCount() {
         return Array.prototype.filter.call(checkboxes, function (cb) { return cb.checked; }).length;

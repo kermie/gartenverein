@@ -62,9 +62,9 @@
     "group_updated": "Grupa zaktualizowana",
     "group_deleted": "Grupa usunięta",
     "group_not_found": "Nie znaleziono grupy",
-    "user_already_in_group": "Ten użytkownik jest już członkiem tej grupy",
-    "member_added": "Członek dodany",
-    "member_removed": "Członek usunięty"
+    "user_already_in_group": "Ten użytkownik jest już przypisany do tej grupy",
+    "member_added": "Użytkownik dodany",
+    "member_removed": "Użytkownik usunięty"
   },
   "tickets": {
     "overview": {
@@ -369,12 +369,12 @@
       "col_write": "Zapis",
       "col_delete": "Usuwanie",
       "button_save": "Zapisz",
-      "members_header": "Członkowie",
-      "no_members": "Brak członków.",
-      "label_add_member": "Dodaj członka...",
+      "members_header": "Przypisani użytkownicy",
+      "no_members": "Brak przypisanych użytkowników.",
+      "label_add_member": "Dodaj użytkownika...",
       "button_add": "Dodaj",
       "no_groups": "Brak grup. Utwórz pierwszą, aby zacząć.",
-      "delete_confirm": "Usunąć tę grupę? Członkowie stracą dostęp, który ona przyznawała.",
+      "delete_confirm": "Usunąć tę grupę? Przypisani użytkownicy stracą dostęp, który ona przyznawała.",
       "modules": {
         "members_parcels": "Członkowie i działki",
         "work_hours": "Prace społeczne",
@@ -912,7 +912,8 @@
       "no_parcel_points": "Brak punktów pomiarowych na działkach.",
       "club_header": "Przyłącza stowarzyszenia",
       "previous_year_label": "Rok poprzedni",
-      "recorded_label": "zarejestrowano"
+      "recorded_label": "zarejestrowano",
+      "no_entry_yet": "Jeszcze nie wprowadzono"
     },
     "evaluation": {
       "title_suffix": " – rozliczenie",

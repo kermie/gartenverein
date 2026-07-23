@@ -17,7 +17,8 @@ from app.database import get_db, active_member_filter
 from app.models import (
     Parcel, ParcelStatus, MemberParcel, Member, ChangeHistory
 )
-from app.auth import require_user, require_admin
+from app.auth import require_admin
+from app.permissions import require_permission
 from app.i18n import t_for
 from app.change_tracker import ChangeTracker
 from app.module_flags import require_module
@@ -48,7 +49,7 @@ async def parcels_list(
     status_filter: str = "",
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "read")
 
     query = (
         select(Parcel)
@@ -82,7 +83,7 @@ async def parcels_list(
 
 @router.get("/new", response_class=HTMLResponse)
 async def parcel_new_page(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "write")
     return templates.TemplateResponse(
         "parcels/form.html",
         {"request": request, "user": user, "parcel": None},
@@ -97,14 +98,13 @@ async def parcel_create(
     notes: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    user_result = await require_permission(request, db, "members_parcels", "write")
 
     # Check for a duplicate plot number
     existing = await db.execute(
         select(Parcel).where(Parcel.plot_number == plot_number.strip().upper())
     )
     if existing.scalar_one_or_none():
-        user_result = await require_user(request, db)
         return templates.TemplateResponse(
             "parcels/form.html",
             {
@@ -140,7 +140,7 @@ async def parcel_detail(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "read")
     parcel = await _get_parcel_with_details(db, parcel_id)
 
     if not parcel:
@@ -212,7 +212,7 @@ async def parcel_edit_page(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "write")
     parcel = await _get_parcel_with_details(db, parcel_id)
 
     if not parcel:
@@ -235,7 +235,7 @@ async def parcel_update(
     notes: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "write")
     parcel = await _get_parcel_with_details(db, parcel_id)
 
     if not parcel:
@@ -277,8 +277,9 @@ async def parcel_permanently_delete(
     Irrevocably deletes a parcel from the database -- unlike the
     "Deleted" status (soft-delete), which preserves history. Intended
     for accidentally created test/demo records, not for normal operation.
+    Requires "delete" on members_parcels.
     """
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "delete")
 
     parcel = await _get_parcel_with_details(db, parcel_id)
     if not parcel:
@@ -306,7 +307,7 @@ async def member_assign(
     assigned_from: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "write")
 
     # Bereits (auch historisch) zugeordnet?
     existing = await db.execute(
@@ -345,7 +346,7 @@ async def member_assignment_edit_page(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "members_parcels", "write")
 
     result = await db.execute(
         select(MemberParcel)
@@ -379,7 +380,7 @@ async def member_assignment_update(
     assigned_until: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "write")
 
     result = await db.execute(
         select(MemberParcel).where(
@@ -412,7 +413,7 @@ async def member_remove(
     it from the database -- so the history stays intact (who was a
     tenant of this parcel, from when to when).
     """
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "write")
     result = await db.execute(
         select(MemberParcel).where(
             MemberParcel.id == assignment_id,
@@ -440,12 +441,13 @@ async def former_assignment_delete(
     database -- unlike /remove above, which only sets assigned_until
     and deliberately preserves history. For genuine data cleanup (a
     typo in the assignment, an accidental duplicate assignment, etc.),
-    not for a normal "tenant change." Admin/board only. Only for
+    not for a normal "tenant change." Only for
     already-ended assignments (assigned_until set) -- an active
     assignment must first be ended via /remove, so this endpoint can't
-    be used as a bypass for that.
+    be used as a bypass for that. Requires "delete" on members_parcels
+    (ADMIN/BOARD always qualify, see app/permissions.py).
     """
-    await require_admin(request, db)
+    await require_permission(request, db, "members_parcels", "delete")
     result = await db.execute(
         select(MemberParcel).where(
             MemberParcel.id == assignment_id,
@@ -554,7 +556,7 @@ async def parcel_cloud_file_download(
 
 @router.get("/export/csv")
 async def parcels_export_csv(request: Request, db: AsyncSession = Depends(get_db)):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "read")
 
     result = await db.execute(
         select(Parcel)
@@ -605,7 +607,7 @@ async def parcels_import_csv(
     datei: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "members_parcels", "write")
 
     inhalt = await datei.read()
     try:

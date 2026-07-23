@@ -4,18 +4,22 @@
 
 {% block topbar_actions %}
 <div class="d-flex gap-2 flex-wrap">
+    {% if has_perm(request, 'members_parcels', 'write') %}
     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#csvImportModal">
         <i class="bi bi-upload me-1"></i>{{ t('members.list.csv_import') }}
     </button>
+    {% endif %}
     <a href="/members/export/csv" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-download me-1"></i>{{ t('members.list.csv_export') }}
     </a>
     <a href="/members/signin-sheet" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-file-earmark-pdf me-1"></i>{{ t('members.list.signin_sheet_link') }}
     </a>
+    {% if has_perm(request, 'members_parcels', 'write') %}
     <a href="/members/new" class="btn btn-sm btn-primary">
         <i class="bi bi-plus-lg me-1"></i>{{ t('members.list.new_member') }}
     </a>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -120,7 +124,9 @@
                             {% else %}
                             <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
                             {{ t('members.list.empty_none') }}<br>
+                            {% if has_perm(request, 'members_parcels', 'write') %}
                             <a href="/members/new" class="btn btn-sm btn-primary mt-2">{{ t('members.list.create_first') }}</a>
+                            {% endif %}
                             {% endif %}
                         </td>
                     </tr>

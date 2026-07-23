@@ -21,7 +21,7 @@ from app.models import (
     Member, MemberParcel, Parcel, ParcelStatus,
     WorkTask, TaskWorkload,
 )
-from app.auth import require_user
+from app.permissions import require_permission
 from app.i18n import t_for
 from app.branding import load_branding
 from app.l10n import load_current_region, format_number
@@ -105,7 +105,7 @@ async def work_hours_overview(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "read")
 
     if not year:
         year = date.today().year
@@ -148,7 +148,7 @@ async def work_hours_overview(
 
 @router.get("/configuration", response_class=HTMLResponse)
 async def configuration_page(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "read")
 
     result = await db.execute(
         select(WorkHoursConfiguration).order_by(WorkHoursConfiguration.year.desc())
@@ -173,7 +173,7 @@ async def configuration_edit_page(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(
         select(WorkHoursConfiguration).where(WorkHoursConfiguration.id == configuration_id)
@@ -204,7 +204,7 @@ async def configuration_update(
     note: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(
         select(WorkHoursConfiguration).where(WorkHoursConfiguration.id == configuration_id)
@@ -238,7 +238,7 @@ async def configuration_delete(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "delete")
 
     result = await db.execute(
         select(WorkHoursConfiguration).where(WorkHoursConfiguration.id == configuration_id)
@@ -261,7 +261,7 @@ async def configuration_create(
     note: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     existing = await _get_config_for_year(db, year)
     if existing:
@@ -289,7 +289,7 @@ async def configuration_create(
 
 @router.get("/sessions/new", response_class=HTMLResponse)
 async def session_new_page(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "write")
     return templates.TemplateResponse(
         "work_hours/session_form.html",
         {
@@ -314,7 +314,7 @@ async def session_create(
     hours_per_participant: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "write")
 
     session = WorkSession(
         title=title.strip(),
@@ -338,7 +338,7 @@ async def session_edit_page(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(select(WorkSession).where(WorkSession.id == session_id))
     session = result.scalar_one_or_none()
@@ -370,7 +370,7 @@ async def session_update(
     hours_per_participant: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(select(WorkSession).where(WorkSession.id == session_id))
     session = result.scalar_one_or_none()
@@ -398,7 +398,7 @@ async def session_delete(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "delete")
 
     result = await db.execute(select(WorkSession).where(WorkSession.id == session_id))
     session = result.scalar_one_or_none()
@@ -417,7 +417,7 @@ async def session_detail(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "read")
 
     result = await db.execute(
         select(WorkSession)
@@ -474,7 +474,7 @@ async def session_attendee_sheet_pdf(
     confirm attendance/hours on paper. Multi-page, like the general-
     meeting sign-in sheet (app/meeting_signin_sheet.py) -- a big
     session can have more attendees than fit on one page."""
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "read")
 
     result = await db.execute(
         select(WorkSession)
@@ -556,7 +556,7 @@ async def participant_add(
     note: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     # Already registered?
     existing = await db.execute(
@@ -589,7 +589,7 @@ async def participation_status_change(
     hours_completed: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(
         select(SessionParticipation).where(SessionParticipation.id == participation_id)
@@ -611,7 +611,7 @@ async def participation_remove(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "delete")
 
     result = await db.execute(
         select(SessionParticipation).where(SessionParticipation.id == participation_id)
@@ -634,7 +634,7 @@ async def club_roles_page(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "read")
 
     if not year:
         year = date.today().year
@@ -688,7 +688,7 @@ async def member_club_role_assign(
     note: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     existing = await db.execute(
         select(MemberClubRole).where(
@@ -718,7 +718,7 @@ async def member_club_role_edit_page(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(
         select(MemberClubRole)
@@ -766,7 +766,7 @@ async def member_club_role_update(
     note: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(
         select(MemberClubRole).where(MemberClubRole.id == assignment_id)
@@ -793,7 +793,7 @@ async def member_club_role_remove(
     year: int = Form(0),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "delete")
 
     result = await db.execute(
         select(MemberClubRole).where(MemberClubRole.id == assignment_id)
@@ -816,7 +816,7 @@ async def club_role_create(
     exemption_reason: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     role = ClubRole(
         name=name.strip(),
@@ -835,7 +835,7 @@ async def club_role_edit_page(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(select(ClubRole).where(ClubRole.id == role_id))
     role = result.scalar_one_or_none()
@@ -862,7 +862,7 @@ async def club_role_update(
     exemption_reason: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(select(ClubRole).where(ClubRole.id == role_id))
     role = result.scalar_one_or_none()
@@ -882,7 +882,7 @@ async def club_role_delete(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "delete")
     result = await db.execute(select(ClubRole).where(ClubRole.id == role_id))
     role = result.scalar_one_or_none()
     if role:
@@ -901,7 +901,7 @@ async def sponsorships_page(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "read")
 
     if not year:
         year = date.today().year
@@ -966,7 +966,7 @@ async def sponsorship_create(
     valid_until: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     sponsorship = Sponsorship(
         member_id=member_id.strip() or None,
@@ -987,7 +987,7 @@ async def sponsorship_edit_page(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(
         select(Sponsorship)
@@ -1034,7 +1034,7 @@ async def sponsorship_update(
     valid_until: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
 
     result = await db.execute(select(Sponsorship).where(Sponsorship.id == sponsorship_id))
     sponsorship = result.scalar_one_or_none()
@@ -1060,7 +1060,7 @@ async def sponsorship_delete(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "delete")
     result = await db.execute(select(Sponsorship).where(Sponsorship.id == sponsorship_id))
     sponsorship = result.scalar_one_or_none()
     if sponsorship:
@@ -1079,7 +1079,7 @@ async def evaluation(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "read")
 
     if not year:
         year = date.today().year
@@ -1212,7 +1212,7 @@ async def evaluation_export_csv(
     year: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "read")
 
     if not year:
         year = date.today().year
@@ -1308,7 +1308,7 @@ async def _load_task(db: AsyncSession, task_id: str) -> Optional[WorkTask]:
 
 @router.get("/tasks", response_class=HTMLResponse)
 async def tasks_overview(request: Request, db: AsyncSession = Depends(get_db)):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "read")
 
     backlog_result = await db.execute(
         select(WorkTask)
@@ -1357,7 +1357,7 @@ async def task_create(
     session_id: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await require_user(request, db)
+    user = await require_permission(request, db, "work_hours", "write")
 
     task = WorkTask(
         title=title.strip(),
@@ -1382,7 +1382,7 @@ async def task_assign_to_session(
     session_id is empty. Clears any participant assignment when the
     session changes (an assignment to a specific person only makes sense
     for the session they actually signed up for)."""
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
     task = await _load_task(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail=t_for(request, "work_hours.errors.task_not_found"))
@@ -1405,7 +1405,7 @@ async def task_participant_assign(
 ):
     """Assigns a task to one specific signed-up participant of its
     session, or clears the assignment if participation_id is empty."""
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
     task = await _load_task(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail=t_for(request, "work_hours.errors.task_not_found"))
@@ -1437,7 +1437,7 @@ async def task_toggle_done(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "write")
     task = await _load_task(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail=t_for(request, "work_hours.errors.task_not_found"))
@@ -1454,7 +1454,7 @@ async def task_delete(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    await require_user(request, db)
+    await require_permission(request, db, "work_hours", "delete")
     task = await _load_task(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail=t_for(request, "work_hours.errors.task_not_found"))
