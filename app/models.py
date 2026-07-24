@@ -1784,8 +1784,42 @@ class Task(Base):
 
 
 # ---------------------------------------------------------------------------
-# Finances: annual invoices (issues #55/#56/#57/#58)
+# Finances: annual invoices (issues #55/#56/#57/#58), bookkeeping
+# categories (issue #67)
 # ---------------------------------------------------------------------------
+
+class FinanceCategoryGroup(str, enum.Enum):
+    INCOME = "INCOME"
+    EXPENSE = "EXPENSE"
+    FIXED_ASSETS = "FIXED_ASSETS"
+    EQUITY_LIABILITIES = "EQUITY_LIABILITIES"
+    OTHER = "OTHER"
+
+
+class FinanceCategory(Base):
+    """
+    A bookkeeping category (issue #67): a short code (e.g. "40000") and
+    title (e.g. "Membership fees"), grouped into a small set of
+    accounting-style buckets. Loosely inspired by German chart-of-
+    accounts conventions (the issue references SKR42) without claiming
+    to reproduce one -- SKR42 itself is DATEV's copyrighted structure,
+    so this app doesn't ship any of its actual codes; a club imports
+    its own real chart via CSV instead (see the import route in
+    app/routers/finances.py) or types categories in by hand.
+    """
+    __tablename__ = "finance_categories"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    code: Mapped[str] = mapped_column(String(5), nullable=False, unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    group: Mapped[FinanceCategoryGroup] = mapped_column(SAEnum(FinanceCategoryGroup), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    def __repr__(self) -> str:
+        return f"<FinanceCategory {self.code} {self.title!r}>"
+
 
 class InvoiceRunStatus(str, enum.Enum):
     DRAFT = "draft"
@@ -1877,10 +1911,19 @@ class InvoiceItemDefinition(Base):
     # explicitly listed in `parcel_scopes`.
     applies_to_all_parcels: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
+    # Optional bookkeeping category (issue #67) -- purely for the
+    # club's own accounting/reporting, doesn't affect invoice
+    # generation. SET NULL rather than blocking deletion, so removing
+    # a category never blocks removing/editing an item that used it.
+    category_id: Mapped[Optional[str]] = mapped_column(
+        String(36), ForeignKey("finance_categories.id", ondelete="SET NULL"), nullable=True
+    )
+
     invoice_run: Mapped["InvoiceRun"] = relationship("InvoiceRun", back_populates="item_definitions")
     parcel_scopes: Mapped[List["InvoiceItemDefinitionParcel"]] = relationship(
         "InvoiceItemDefinitionParcel", back_populates="item_definition", cascade="all, delete-orphan",
     )
+    category: Mapped[Optional["FinanceCategory"]] = relationship("FinanceCategory")
 
     def __repr__(self) -> str:
         return f"<InvoiceItemDefinition {self.name!r} ({self.pricing_mode.value})>"

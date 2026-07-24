@@ -408,7 +408,9 @@
       "blocked_real_data": "Ten klub ma już prawdziwe dane członków/działek -- dane przykładowe można dodać tylko do nowej instalacji. Najpierw usuń istniejące dane, jeśli naprawdę chcesz zacząć od nowa.",
       "fresh_install_hint": "Ta instalacja wygląda na nową -- nie ma jeszcze danych o członkach ani działkach.",
       "add_confirm": "Dodać teraz dane przykładowe we wszystkich modułach?",
-      "add_button": "Dodaj dane przykładowe"
+      "add_button": "Dodaj dane przykładowe",
+      "what_finances": "Finanse: kilka przykładowych kategorii księgowych (nie prawdziwe dane SKR42)",
+      "module_finances": "Kategorie finansowe"
     },
     "groups": {
       "page_title": "Grupy",
@@ -1733,7 +1735,9 @@
       "icon_uploaded": "Przesłano do chmury",
       "copy_items_header": "Ponowne użycie pozycji z innej serii",
       "copy_items_label": "Skopiuj definicje pozycji z",
-      "copy_items_button": "Skopiuj pozycje"
+      "copy_items_button": "Skopiuj pozycje",
+      "col_category": "Kategoria",
+      "label_category": "Kategoria"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Kwota stała za działkę",
@@ -1748,7 +1752,9 @@
       "run_not_draft": "Ta seria faktur jest już zakończona; jej definicji pozycji nie można już zmienić.",
       "no_item_definitions": "Ta seria faktur nie ma jeszcze żadnych definicji pozycji — dodaj co najmniej jedną przed zakończeniem.",
       "no_print_invoices": "Wszystkie faktury z tej serii zostały już wysłane e-mailem -- nie ma nic do wydrukowania.",
-      "no_email_recipient": "Nie znaleziono dostępnego członka z adresem do faktur dla tej faktury (powiadomienia e-mail + zapisany adres e-mail)."
+      "no_email_recipient": "Nie znaleziono dostępnego członka z adresem do faktur dla tej faktury (powiadomienia e-mail + zapisany adres e-mail).",
+      "invalid_category": "Nieprawidłowa kategoria -- numer musi mieć dokładnie 5 cyfr, wymagane są nazwa i grupa.",
+      "duplicate_category_code": "Kategoria z tym numerem już istnieje."
     },
     "run_preview": {
       "title": "Podgląd faktur",
@@ -1817,7 +1823,8 @@
       "outgoing_hint": "{n} seria(e) faktur",
       "coming_soon_hint": "Wkrótce dostępne",
       "accounts_header": "Konta",
-      "accounts_hint": "Wkrótce dostępne -- tutaj pojawią się konta Twojego stowarzyszenia."
+      "accounts_hint": "Wkrótce dostępne -- tutaj pojawią się konta Twojego stowarzyszenia.",
+      "categories_hint": "zdefiniowano {n} kategorii"
     },
     "coming_soon": {
       "message": "Ta funkcja będzie wkrótce dostępna.",
@@ -1828,6 +1835,33 @@
     },
     "incoming_invoices": {
       "title": "Faktury przychodzące"
+    },
+    "category_groups": {
+      "income": "Przychody",
+      "expense": "Wydatki",
+      "fixed_assets": "Środki trwałe",
+      "equity_liabilities": "Kapitał własny i zobowiązania",
+      "other": "Inne"
+    },
+    "category_list": {
+      "title": "Kategorie",
+      "heading": "Kategorie księgowe",
+      "new_header": "Nowa kategoria",
+      "label_code": "Numer",
+      "label_title": "Nazwa",
+      "label_group": "Grupa",
+      "button_create": "Dodaj kategorię",
+      "import_header": "Import z CSV",
+      "import_help": "Plik z wierszem nagłówka \"code,title,group\" -- group to jedno z income/expense/fixed_assets/equity_liabilities/other. Wiersze z nieprawidłowym numerem, nieznaną grupą lub już istniejącym numerem są pomijane.",
+      "label_file": "Plik CSV",
+      "button_import": "Importuj",
+      "import_result": "Zaimportowano {imported}, pominięto {skipped}.",
+      "list_header": "Kategorie",
+      "col_code": "Numer",
+      "col_title": "Nazwa",
+      "col_group": "Grupa",
+      "no_categories": "Brak jeszcze kategorii -- dodaj powyżej lub zaimportuj plik CSV.",
+      "delete_confirm": "Usunąć tę kategorię? Pozycje, które jej używają, nadal będą działać, tylko bez kategorii."
     }
   }
 }

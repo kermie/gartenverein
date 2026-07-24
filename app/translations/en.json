@@ -408,7 +408,9 @@
       "blocked_real_data": "This club already has real member/parcel data -- sample data can only be added to a fresh installation. Remove the existing data first if you really want to start over.",
       "fresh_install_hint": "This installation looks fresh -- no member or parcel data yet.",
       "add_confirm": "Add sample data across every module now?",
-      "add_button": "Add sample data"
+      "add_button": "Add sample data",
+      "what_finances": "Finances: a few example bookkeeping categories (not real SKR42 data)",
+      "module_finances": "Finance categories"
     },
     "groups": {
       "page_title": "Groups",
@@ -1733,7 +1735,9 @@
       "icon_uploaded": "Uploaded to cloud storage",
       "copy_items_header": "Re-use items from another run",
       "copy_items_label": "Copy item definitions from",
-      "copy_items_button": "Copy items"
+      "copy_items_button": "Copy items",
+      "col_category": "Category",
+      "label_category": "Category"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Fixed amount per parcel",
@@ -1748,7 +1752,9 @@
       "run_not_draft": "This invoice run is already finalized; its item definitions can no longer be changed.",
       "no_item_definitions": "This invoice run has no item definitions yet — add at least one before finalizing.",
       "no_print_invoices": "Every invoice in this run has already been emailed -- nothing left to print.",
-      "no_email_recipient": "No reachable invoice-address member (email notifications + a stored email address) was found for this invoice."
+      "no_email_recipient": "No reachable invoice-address member (email notifications + a stored email address) was found for this invoice.",
+      "invalid_category": "Invalid category -- the code must be exactly 5 digits, and a title and group are required.",
+      "duplicate_category_code": "A category with this code already exists."
     },
     "run_preview": {
       "title": "Preview invoices",
@@ -1817,7 +1823,8 @@
       "outgoing_hint": "{n} invoice run(s)",
       "coming_soon_hint": "Coming soon",
       "accounts_header": "Accounts",
-      "accounts_hint": "Coming soon -- your club's accounts will appear here."
+      "accounts_hint": "Coming soon -- your club's accounts will appear here.",
+      "categories_hint": "{n} categor(y/ies) defined"
     },
     "coming_soon": {
       "message": "This feature is coming soon.",
@@ -1828,6 +1835,33 @@
     },
     "incoming_invoices": {
       "title": "Incoming Invoices"
+    },
+    "category_groups": {
+      "income": "Income",
+      "expense": "Expense",
+      "fixed_assets": "Fixed assets",
+      "equity_liabilities": "Equity & liabilities",
+      "other": "Other"
+    },
+    "category_list": {
+      "title": "Categories",
+      "heading": "Bookkeeping categories",
+      "new_header": "New category",
+      "label_code": "Code",
+      "label_title": "Title",
+      "label_group": "Group",
+      "button_create": "Add category",
+      "import_header": "Import from CSV",
+      "import_help": "A file with a header row \"code,title,group\" -- group is one of income/expense/fixed_assets/equity_liabilities/other. Rows with an invalid code, unknown group, or a code that already exists are skipped.",
+      "label_file": "CSV file",
+      "button_import": "Import",
+      "import_result": "Imported {imported}, skipped {skipped}.",
+      "list_header": "Categories",
+      "col_code": "Code",
+      "col_title": "Title",
+      "col_group": "Group",
+      "no_categories": "No categories yet -- add one above, or import a CSV.",
+      "delete_confirm": "Delete this category? Items using it keep working, just without a category."
     }
   }
 }

@@ -408,7 +408,9 @@
       "blocked_real_data": "Deze vereniging heeft al echte leden-/perceelgegevens -- voorbeeldgegevens kunnen alleen aan een verse installatie worden toegevoegd. Verwijder eerst de bestaande gegevens als u echt opnieuw wilt beginnen.",
       "fresh_install_hint": "Deze installatie lijkt vers -- nog geen leden- of perceelgegevens aanwezig.",
       "add_confirm": "Nu voorbeeldgegevens toevoegen in alle modules?",
-      "add_button": "Voorbeeldgegevens toevoegen"
+      "add_button": "Voorbeeldgegevens toevoegen",
+      "what_finances": "Financiën: enkele voorbeeldboekhoudcategorieën (geen echte SKR42-gegevens)",
+      "module_finances": "Financiële categorieën"
     },
     "groups": {
       "page_title": "Groepen",
@@ -1733,7 +1735,9 @@
       "icon_uploaded": "Geüpload naar cloudopslag",
       "copy_items_header": "Regels van een andere ronde hergebruiken",
       "copy_items_label": "Regeldefinities kopiëren van",
-      "copy_items_button": "Regels kopiëren"
+      "copy_items_button": "Regels kopiëren",
+      "col_category": "Categorie",
+      "label_category": "Categorie"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Vast bedrag per perceel",
@@ -1748,7 +1752,9 @@
       "run_not_draft": "Deze factuurronde is al afgerond; de regeldefinities kunnen niet meer worden gewijzigd.",
       "no_item_definitions": "Deze factuurronde heeft nog geen regeldefinities — voeg er minstens één toe voordat u afrondt.",
       "no_print_invoices": "Alle facturen in deze ronde zijn al per e-mail verstuurd -- niets meer om af te drukken.",
-      "no_email_recipient": "Er is geen bereikbaar lid met factuuradres gevonden voor deze factuur (e-mailmeldingen + opgeslagen e-mailadres)."
+      "no_email_recipient": "Er is geen bereikbaar lid met factuuradres gevonden voor deze factuur (e-mailmeldingen + opgeslagen e-mailadres).",
+      "invalid_category": "Ongeldige categorie -- de code moet precies 5 cijfers bevatten, titel en groep zijn verplicht.",
+      "duplicate_category_code": "Er bestaat al een categorie met deze code."
     },
     "run_preview": {
       "title": "Facturen voorbeeld",
@@ -1817,7 +1823,8 @@
       "outgoing_hint": "{n} factuurronde(s)",
       "coming_soon_hint": "Binnenkort beschikbaar",
       "accounts_header": "Rekeningen",
-      "accounts_hint": "Binnenkort beschikbaar -- de rekeningen van uw vereniging verschijnen hier."
+      "accounts_hint": "Binnenkort beschikbaar -- de rekeningen van uw vereniging verschijnen hier.",
+      "categories_hint": "{n} categorie(ën) gedefinieerd"
     },
     "coming_soon": {
       "message": "Deze functie is binnenkort beschikbaar.",
@@ -1828,6 +1835,33 @@
     },
     "incoming_invoices": {
       "title": "Inkomende facturen"
+    },
+    "category_groups": {
+      "income": "Inkomsten",
+      "expense": "Uitgaven",
+      "fixed_assets": "Vaste activa",
+      "equity_liabilities": "Eigen vermogen & schulden",
+      "other": "Overig"
+    },
+    "category_list": {
+      "title": "Categorieën",
+      "heading": "Boekhoudcategorieën",
+      "new_header": "Nieuwe categorie",
+      "label_code": "Code",
+      "label_title": "Titel",
+      "label_group": "Groep",
+      "button_create": "Categorie toevoegen",
+      "import_header": "Importeren uit CSV",
+      "import_help": "Een bestand met een kopregel \"code,title,group\" -- group is een van income/expense/fixed_assets/equity_liabilities/other. Regels met een ongeldige code, onbekende groep of een reeds bestaande code worden overgeslagen.",
+      "label_file": "CSV-bestand",
+      "button_import": "Importeren",
+      "import_result": "{imported} geïmporteerd, {skipped} overgeslagen.",
+      "list_header": "Categorieën",
+      "col_code": "Code",
+      "col_title": "Titel",
+      "col_group": "Groep",
+      "no_categories": "Nog geen categorieën -- voeg er hierboven een toe of importeer een CSV.",
+      "delete_confirm": "Deze categorie verwijderen? Regels die deze gebruiken blijven werken, alleen zonder categorie."
     }
   }
 }

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}{{ t('finances.category_list.title') }}{% endblock %}
+{% block page_title %}{{ t('finances.category_list.heading') }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="/finances/" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>{{ t('finances.coming_soon.back') }}
+</a>
+{% endblock %}
+
+{% block content %}
+{% if request.query_params.get('success') and request.query_params.get('imported') is not none %}
+<div class="alert alert-success d-flex gap-2 align-items-center mb-3">
+    <i class="bi bi-check-circle-fill"></i>
+    {{ t('finances.category_list.import_result', imported=request.query_params.get('imported'), skipped=request.query_params.get('skipped')) }}
+</div>
+{% elif request.query_params.get('error') %}
+<div class="alert alert-danger d-flex gap-2 align-items-center mb-3">
+    <i class="bi bi-exclamation-triangle-fill"></i> {{ request.query_params.get('error') }}
+</div>
+{% endif %}
+
+<div class="row g-3">
+
+    {% if has_perm(request, 'finances', 'write') %}
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-plus-lg me-2"></i>{{ t('finances.category_list.new_header') }}</div>
+            <div class="card-body">
+                <form method="post" action="/finances/categories" class="row g-2 align-items-end">
+                    <div class="col-sm-3">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('finances.category_list.label_code') }}</label>
+                        <input type="text" name="code" class="form-control form-control-sm" maxlength="5" pattern="\d{5}" placeholder="40000" required>
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('finances.category_list.label_title') }}</label>
+                        <input type="text" name="title" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('finances.category_list.label_group') }}</label>
+                        <select name="group" class="form-select form-select-sm">
+                            {% for group in groups %}
+                            <option value="{{ group.value }}">{{ t('finances.category_groups.' ~ group.value) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-lg me-1"></i>{{ t('finances.category_list.button_create') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-upload me-2"></i>{{ t('finances.category_list.import_header') }}</div>
+            <div class="card-body">
+                <p class="text-muted mb-3" style="font-size: 0.82rem;">
+                    {{ t('finances.category_list.import_help') }}
+                </p>
+                <form method="post" action="/finances/categories/import" enctype="multipart/form-data" class="d-flex gap-2 align-items-end">
+                    <div class="flex-grow-1">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('finances.category_list.label_file') }}</label>
+                        <input type="file" name="file" accept=".csv,text/csv" class="form-control form-control-sm" required>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-upload me-1"></i>{{ t('finances.category_list.button_import') }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-tags me-2"></i>{{ t('finances.category_list.list_header') }}</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>{{ t('finances.category_list.col_code') }}</th>
+                                <th>{{ t('finances.category_list.col_title') }}</th>
+                                <th>{{ t('finances.category_list.col_group') }}</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if has_perm(request, 'finances', 'write') %}
+                            {% for category in categories %}
+                            <form method="post" action="/finances/categories/{{ category.id }}/edit" id="edit-category-{{ category.id }}"></form>
+                            {% endfor %}
+                            {% endif %}
+                            {% for category in categories %}
+                            <tr>
+                                {% if has_perm(request, 'finances', 'write') %}
+                                <td>
+                                    <input type="text" name="code" form="edit-category-{{ category.id }}" class="form-control form-control-sm"
+                                           style="width: 90px;" maxlength="5" pattern="\d{5}" value="{{ category.code }}" required>
+                                </td>
+                                <td>
+                                    <input type="text" name="title" form="edit-category-{{ category.id }}" class="form-control form-control-sm"
+                                           value="{{ category.title }}" required>
+                                </td>
+                                <td>
+                                    <select name="group" form="edit-category-{{ category.id }}" class="form-select form-select-sm">
+                                        {% for group in groups %}
+                                        <option value="{{ group.value }}" {% if category.group == group %}selected{% endif %}>
+                                            {{ t('finances.category_groups.' ~ group.value) }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="text-end text-nowrap">
+                                    <button type="submit" form="edit-category-{{ category.id }}" class="btn btn-sm btn-outline-primary border-0">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    {% if has_perm(request, 'finances', 'delete') %}
+                                    <form method="post" action="/finances/categories/{{ category.id }}/delete" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                                onclick="return confirm('{{ t('finances.category_list.delete_confirm') }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                                {% else %}
+                                <td>{{ category.code }}</td>
+                                <td>{{ category.title }}</td>
+                                <td>{{ t('finances.category_groups.' ~ category.group.value) }}</td>
+                                <td></td>
+                                {% endif %}
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">{{ t('finances.category_list.no_categories') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

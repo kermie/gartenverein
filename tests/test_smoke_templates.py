@@ -251,6 +251,41 @@ async def test_smoke_finances_pages_render_without_jinja_errors(client, admin_us
     assert "UndefinedError" not in r_second_detail.text
     assert "Item fixed_per_parcel" in r_second_detail.text
 
+    # Bookkeeping categories (issue #67): CRUD, CSV import, and the
+    # item-form picker.
+    r_categories = await client.get("/finances/categories")
+    assert r_categories.status_code == 200
+    assert "UndefinedError" not in r_categories.text
+
+    r_cat_create = await client.post("/finances/categories", data={
+        "code": "40000", "title": "Membership fees", "group": "INCOME",
+    })
+    assert r_cat_create.status_code in (302, 303)
+    assert "error" not in r_cat_create.headers["location"]
+
+    r_cat_invalid = await client.post("/finances/categories", data={
+        "code": "not5digits", "title": "Bad", "group": "INCOME",
+    })
+    assert "invoice_number_format_error" not in r_cat_invalid.headers["location"]
+    assert "error=" in r_cat_invalid.headers["location"]
+
+    csv_content = "code,title,group\n60020,Ehrenamtspauschale,EXPENSE\n40000,Duplicate skip,income\n"
+    r_import = await client.post(
+        "/finances/categories/import",
+        files={"file": ("categories.csv", csv_content, "text/csv")},
+    )
+    assert r_import.status_code in (302, 303)
+    assert "imported=1" in r_import.headers["location"]
+    assert "skipped=1" in r_import.headers["location"]
+
+    r_categories2 = await client.get("/finances/categories")
+    assert "UndefinedError" not in r_categories2.text
+    assert "40000" in r_categories2.text
+    assert "60020" in r_categories2.text
+
+    r_third_run = await client.get(f"/finances/runs/{second_run_id}")
+    assert "40000" in r_third_run.text and "Membership fees" in r_third_run.text
+
     # Delivery + payments (phase 3, issue #58). The SMOKE-01 member has
     # no stored email, so deliver() should email nobody and the print
     # bundle should include this invoice instead.

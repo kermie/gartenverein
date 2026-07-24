@@ -31,6 +31,8 @@ from app.models import (
     AccidentInsuranceAdditionalPerson,
     CalendarEvent,
     CalendarEventType,
+    FinanceCategory,
+    FinanceCategoryGroup,
     InsuranceConfiguration,
     InventoryCategory,
     InventoryItem,
@@ -90,6 +92,7 @@ def _track(db: AsyncSession, module: str, obj) -> None:
 # ---------------------------------------------------------------------------
 
 _MODEL_BY_ENTITY_TYPE = {
+    "FinanceCategory": FinanceCategory,
     "TicketMessage": TicketMessage,
     "Ticket": Ticket,
     "PurchaseRequestApproval": PurchaseRequestApproval,
@@ -122,7 +125,7 @@ _DELETION_ORDER = list(_MODEL_BY_ENTITY_TYPE.keys())
 # else references members/parcels).
 MODULES = [
     "core", "work_hours", "metering", "insurance",
-    "tickets", "purchase_requests", "calendar", "inventory", "tasks",
+    "tickets", "purchase_requests", "calendar", "inventory", "tasks", "finances",
 ]
 
 
@@ -198,7 +201,11 @@ async def remove_sample_data(db: AsyncSession) -> int:
 
 async def add_sample_data(db: AsyncSession) -> dict:
     """
-    Creates sample data across core + all default-on modules. Refuses
+    Creates sample data across core, every default-on module, and
+    Finances (off by default, but seeded here anyway -- issue #67's
+    "optional to import SKR42, go with a couple of example data when
+    set in /admin/sample-data" -- module flags only govern nav/route
+    visibility, not whether sample rows exist). Refuses
     (SampleDataBlockedError) if real member/parcel data already exists,
     so this stays a fresh-install tool.
     """
@@ -216,6 +223,7 @@ async def add_sample_data(db: AsyncSession) -> dict:
     await _seed_calendar(db)
     await _seed_inventory(db, members)
     await _seed_tasks(db)
+    await _seed_finances(db)
 
     await db.commit()
     return await sample_data_counts(db)
@@ -584,3 +592,21 @@ async def _seed_tasks(db: AsyncSession) -> None:
         task = Task(id=new_uuid(), title=title, status=status, position=position)
         db.add(task)
         _track(db, "tasks", task)
+
+
+async def _seed_finances(db: AsyncSession) -> None:
+    """A handful of clearly-illustrative bookkeeping categories (issue
+    #67) -- NOT a transcription of DATEV's copyrighted SKR42 chart
+    (see FinanceCategory's docstring in app/models.py), just enough of
+    a starting point across the three groups the issue itself named
+    (income/expenses/fixed assets) that the feature isn't empty on
+    first use. A club replaces or extends these with its own real
+    chart via CSV import."""
+    categories = [
+        FinanceCategory(id=new_uuid(), code="40000", title="Membership fees", group=FinanceCategoryGroup.INCOME),
+        FinanceCategory(id=new_uuid(), code="60020", title="Ehrenamtspauschale", group=FinanceCategoryGroup.EXPENSE),
+        FinanceCategory(id=new_uuid(), code="00100", title="Garden equipment", group=FinanceCategoryGroup.FIXED_ASSETS),
+    ]
+    for c in categories:
+        db.add(c)
+        _track(db, "finances", c)

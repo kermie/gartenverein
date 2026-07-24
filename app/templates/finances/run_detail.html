@@ -109,6 +109,7 @@
                                 <th>{{ t('finances.run_detail.col_pricing_mode') }}</th>
                                 <th>{{ t('finances.run_detail.col_unit_price') }}</th>
                                 <th>{{ t('finances.run_detail.col_scope') }}</th>
+                                <th>{{ t('finances.run_detail.col_category') }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -150,6 +151,16 @@
                                         </label>
                                     </div>
                                 </td>
+                                <td>
+                                    <select name="category_id" form="edit-item-{{ item.id }}" class="form-select form-select-sm">
+                                        <option value="">—</option>
+                                        {% for category in categories %}
+                                        <option value="{{ category.id }}" {% if item.category_id == category.id %}selected{% endif %}>
+                                            {{ category.code }} · {{ category.title }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
                                 <td class="text-end text-nowrap">
                                     <button type="submit" form="edit-item-{{ item.id }}" class="btn btn-sm btn-outline-primary border-0">
                                         <i class="bi bi-check-lg"></i>
@@ -172,12 +183,13 @@
                                     {% if item.applies_to_all_parcels %}{{ t('finances.run_detail.scope_all') }}
                                     {% else %}{{ t('finances.run_detail.scope_n_parcels', n=item.parcel_scopes|length) }}{% endif %}
                                 </td>
+                                <td>{% if item.category %}{{ item.category.code }} · {{ item.category.title }}{% else %}—{% endif %}</td>
                                 <td></td>
                                 {% endif %}
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-3">{{ t('finances.run_detail.no_items') }}</td>
+                                <td colspan="7" class="text-center text-muted py-3">{{ t('finances.run_detail.no_items') }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -244,6 +256,15 @@
                         <div class="col-sm-2">
                             <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('finances.run_detail.label_unit_price') }}</label>
                             <input type="text" name="unit_price" class="form-control form-control-sm" placeholder="0,00">
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('finances.run_detail.label_category') }}</label>
+                            <select name="category_id" class="form-select form-select-sm">
+                                <option value="">—</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.code }} · {{ category.title }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 

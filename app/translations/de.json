@@ -408,7 +408,9 @@
       "blocked_real_data": "Dieser Verein hat bereits echte Mitglieder-/Parzellendaten -- Beispieldaten können nur auf einer frischen Installation hinzugefügt werden. Entfernen Sie zuerst die vorhandenen Daten, falls Sie wirklich neu beginnen möchten.",
       "fresh_install_hint": "Diese Installation wirkt frisch -- noch keine Mitglieder- oder Parzellendaten vorhanden.",
       "add_confirm": "Jetzt Beispieldaten in allen Modulen hinzufügen?",
-      "add_button": "Beispieldaten hinzufügen"
+      "add_button": "Beispieldaten hinzufügen",
+      "what_finances": "Finanzen: ein paar Beispiel-Buchhaltungskategorien (keine echten SKR42-Daten)",
+      "module_finances": "Finanzkategorien"
     },
     "groups": {
       "page_title": "Gruppen",
@@ -1733,7 +1735,9 @@
       "icon_uploaded": "In Cloud-Speicher hochgeladen",
       "copy_items_header": "Positionen aus einem anderen Lauf übernehmen",
       "copy_items_label": "Positionsdefinitionen übernehmen von",
-      "copy_items_button": "Positionen übernehmen"
+      "copy_items_button": "Positionen übernehmen",
+      "col_category": "Kategorie",
+      "label_category": "Kategorie"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Festbetrag je Parzelle",
@@ -1748,7 +1752,9 @@
       "run_not_draft": "Dieser Rechnungslauf ist bereits abgeschlossen; seine Positionsdefinitionen können nicht mehr geändert werden.",
       "no_item_definitions": "Dieser Rechnungslauf hat noch keine Positionsdefinitionen — vor dem Abschluss mindestens eine hinzufügen.",
       "no_print_invoices": "Alle Rechnungen dieses Laufs wurden bereits per E-Mail versendet -- nichts mehr zu drucken.",
-      "no_email_recipient": "Für diese Rechnung wurde kein erreichbares Rechnungsadress-Mitglied gefunden (E-Mail-Benachrichtigung + hinterlegte E-Mail-Adresse)."
+      "no_email_recipient": "Für diese Rechnung wurde kein erreichbares Rechnungsadress-Mitglied gefunden (E-Mail-Benachrichtigung + hinterlegte E-Mail-Adresse).",
+      "invalid_category": "Ungültige Kategorie -- die Nummer muss genau 5 Ziffern haben, Bezeichnung und Gruppe sind erforderlich.",
+      "duplicate_category_code": "Eine Kategorie mit dieser Nummer existiert bereits."
     },
     "run_preview": {
       "title": "Rechnungsvorschau",
@@ -1817,7 +1823,8 @@
       "outgoing_hint": "{n} Rechnungslauf(e/äufe)",
       "coming_soon_hint": "Demnächst verfügbar",
       "accounts_header": "Konten",
-      "accounts_hint": "Demnächst verfügbar -- hier erscheinen die Konten Ihres Vereins."
+      "accounts_hint": "Demnächst verfügbar -- hier erscheinen die Konten Ihres Vereins.",
+      "categories_hint": "{n} Kategorie(n) angelegt"
     },
     "coming_soon": {
       "message": "Diese Funktion ist demnächst verfügbar.",
@@ -1828,6 +1835,33 @@
     },
     "incoming_invoices": {
       "title": "Eingangsrechnungen"
+    },
+    "category_groups": {
+      "income": "Einnahmen",
+      "expense": "Ausgaben",
+      "fixed_assets": "Anlagevermögen",
+      "equity_liabilities": "Eigenkapital & Verbindlichkeiten",
+      "other": "Sonstiges"
+    },
+    "category_list": {
+      "title": "Kategorien",
+      "heading": "Buchhaltungskategorien",
+      "new_header": "Neue Kategorie",
+      "label_code": "Nummer",
+      "label_title": "Bezeichnung",
+      "label_group": "Gruppe",
+      "button_create": "Kategorie hinzufügen",
+      "import_header": "Aus CSV importieren",
+      "import_help": "Eine Datei mit Kopfzeile \"code,title,group\" -- group ist eines von income/expense/fixed_assets/equity_liabilities/other. Zeilen mit ungültiger Nummer, unbekannter Gruppe oder bereits vorhandener Nummer werden übersprungen.",
+      "label_file": "CSV-Datei",
+      "button_import": "Importieren",
+      "import_result": "{imported} importiert, {skipped} übersprungen.",
+      "list_header": "Kategorien",
+      "col_code": "Nummer",
+      "col_title": "Bezeichnung",
+      "col_group": "Gruppe",
+      "no_categories": "Noch keine Kategorien -- oben hinzufügen oder eine CSV importieren.",
+      "delete_confirm": "Diese Kategorie löschen? Positionen, die sie verwenden, bleiben erhalten, nur ohne Kategorie."
     }
   }
 }

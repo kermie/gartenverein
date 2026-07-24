@@ -1,23 +1,30 @@
 """
-Finances module router: annual invoices (issues #55/#56/#57/#58).
+Finances module router: annual invoices (issues #55/#56/#57/#58),
+bookkeeping categories (issue #67).
 
 Phase 1 (#56): creating an InvoiceRun and configuring its
 InvoiceItemDefinitions. Phase 2 (#57): preview (renders a PDF from
 app.invoice_generation's in-memory computation, no DB writes) and
 finalize (persists real Invoice/InvoiceLineItem rows with permanent
 numbers -- see app/invoice_generation.py's module docstring for why
-this is a one-way action). Phase 3 (#58, this addition): delivery
-(email with the PDF attached, upload to the parcel's cloud folder, a
-merged print bundle for anyone not reachable by email -- see
-app/invoice_delivery.py) and payment tracking across every finalized
-run.
+this is a one-way action). Phase 3 (#58): delivery (email with the PDF
+attached, upload to the parcel's cloud folder, a merged print bundle
+for anyone not reachable by email -- see app/invoice_delivery.py) and
+payment tracking across every finalized run. Categories (#67, this
+addition): optional bookkeeping codes an item definition can be
+tagged with, manageable by hand or via CSV import -- see
+FinanceCategory's docstring in app/models.py for why this app doesn't
+ship real SKR42 codes itself.
 """
+import csv
+import io
+import re
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Request, Form, Depends, HTTPException
+from fastapi import APIRouter, Request, Form, Depends, HTTPException, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -28,6 +35,7 @@ from app.i18n import t_for
 from app.models import (
     InvoiceRun, InvoiceRunStatus, InvoiceItemDefinition, InvoiceItemDefinitionParcel,
     InvoicePricingMode, Invoice, InvoicePayment, ClubSetting, Parcel, ParcelStatus,
+    FinanceCategory, FinanceCategoryGroup,
 )
 from app.permissions import require_permission
 from app.module_flags import require_module
@@ -61,7 +69,10 @@ def _parse_decimal(value: str) -> Optional[Decimal]:
 async def _get_run_or_404(db: AsyncSession, run_id: str) -> InvoiceRun:
     result = await db.execute(
         select(InvoiceRun)
-        .options(selectinload(InvoiceRun.item_definitions).selectinload(InvoiceItemDefinition.parcel_scopes))
+        .options(
+            selectinload(InvoiceRun.item_definitions).selectinload(InvoiceItemDefinition.parcel_scopes),
+            selectinload(InvoiceRun.item_definitions).selectinload(InvoiceItemDefinition.category),
+        )
         .where(InvoiceRun.id == run_id)
     )
     run = result.scalar_one_or_none()
@@ -154,10 +165,14 @@ async def finances_dashboard(request: Request, db: AsyncSession = Depends(get_db
     run_count_result = await db.execute(select(InvoiceRun))
     run_count = len(run_count_result.scalars().all())
 
+    category_count_result = await db.execute(select(FinanceCategory))
+    category_count = len(category_count_result.scalars().all())
+
     return templates.TemplateResponse("finances/dashboard.html", {
         "request": request, "user": user,
         "run_count": run_count, "open_invoice_count": open_count,
         "overdue_count": overdue_count, "outstanding_total": outstanding_total,
+        "category_count": category_count,
     })
 
 
@@ -275,12 +290,16 @@ async def run_detail(run_id: str, request: Request, db: AsyncSession = Depends(g
     if run.status == InvoiceRunStatus.DRAFT:
         copyable_runs = await _runs_with_items(db, exclude_run_id=run.id)
 
+    categories_result = await db.execute(select(FinanceCategory).order_by(FinanceCategory.code))
+    categories = list(categories_result.scalars().all())
+
     return templates.TemplateResponse("finances/run_detail.html", {
         "request": request, "user": user, "run": run, "parcels": parcels,
         "pricing_modes": list(InvoicePricingMode),
         "next_order": next_order,
         "invoices": invoices,
         "copyable_runs": copyable_runs,
+        "categories": categories,
     })
 
 
@@ -295,6 +314,7 @@ async def item_create(
     unit_price: str = Form(""),
     applies_to_all_parcels: str = Form(""),
     parcel_ids: list[str] = Form([]),
+    category_id: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
     await require_permission(request, db, "finances", "write")
@@ -317,6 +337,7 @@ async def item_create(
         pricing_mode=mode,
         unit_price=_parse_decimal(unit_price) if mode != InvoicePricingMode.INSURANCE_COST else None,
         applies_to_all_parcels=applies_all,
+        category_id=category_id.strip() or None,
     )
     db.add(item)
     await db.flush()
@@ -358,6 +379,7 @@ async def items_copy_from(
             pricing_mode=source_item.pricing_mode,
             unit_price=source_item.unit_price,
             applies_to_all_parcels=source_item.applies_to_all_parcels,
+            category_id=source_item.category_id,
         )
         db.add(new_item)
         await db.flush()
@@ -383,6 +405,7 @@ async def item_update(
     pricing_mode: str = Form(...),
     unit_price: str = Form(""),
     applies_to_all_parcels: str = Form(""),
+    category_id: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -417,6 +440,7 @@ async def item_update(
     item.pricing_mode = mode
     item.unit_price = _parse_decimal(unit_price) if mode != InvoicePricingMode.INSURANCE_COST else None
     item.applies_to_all_parcels = applies_to_all_parcels == "on"
+    item.category_id = category_id.strip() or None
 
     await db.commit()
     return RedirectResponse(f"/finances/runs/{run_id}", status_code=302)
@@ -713,3 +737,144 @@ async def payment_delete(invoice_id: str, payment_id: str, request: Request, db:
         await db.delete(payment)
         await db.commit()
     return RedirectResponse(f"/finances/invoices/{invoice_id}", status_code=302)
+
+
+# ---------------------------------------------------------------------------
+# Bookkeeping categories (issue #67)
+# ---------------------------------------------------------------------------
+
+_CATEGORY_CODE_RE = re.compile(r"^\d{5}$")
+
+
+def _valid_category_group(value: str) -> Optional[FinanceCategoryGroup]:
+    try:
+        return FinanceCategoryGroup(value.strip().upper())
+    except ValueError:
+        return None
+
+
+@router.get("/categories", response_class=HTMLResponse)
+async def category_list(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await require_permission(request, db, "finances", "read")
+
+    result = await db.execute(select(FinanceCategory).order_by(FinanceCategory.code))
+    categories = list(result.scalars().all())
+
+    return templates.TemplateResponse("finances/category_list.html", {
+        "request": request, "user": user, "categories": categories,
+        "groups": list(FinanceCategoryGroup),
+    })
+
+
+@router.post("/categories")
+async def category_create(
+    request: Request,
+    code: str = Form(...),
+    title: str = Form(...),
+    group: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+):
+    await require_permission(request, db, "finances", "write")
+
+    code = code.strip()
+    parsed_group = _valid_category_group(group)
+    if not _CATEGORY_CODE_RE.match(code) or not parsed_group or not title.strip():
+        return RedirectResponse(
+            f"/finances/categories?error={t_for(request, 'finances.errors.invalid_category')}", status_code=302,
+        )
+
+    existing = await db.execute(select(FinanceCategory).where(FinanceCategory.code == code))
+    if existing.scalar_one_or_none():
+        return RedirectResponse(
+            f"/finances/categories?error={t_for(request, 'finances.errors.duplicate_category_code')}", status_code=302,
+        )
+
+    db.add(FinanceCategory(code=code, title=title.strip(), group=parsed_group))
+    await db.commit()
+    return RedirectResponse("/finances/categories?success=1", status_code=302)
+
+
+@router.post("/categories/{category_id}/edit")
+async def category_update(
+    category_id: str,
+    request: Request,
+    code: str = Form(...),
+    title: str = Form(...),
+    group: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+):
+    await require_permission(request, db, "finances", "write")
+
+    result = await db.execute(select(FinanceCategory).where(FinanceCategory.id == category_id))
+    category = result.scalar_one_or_none()
+    if not category:
+        raise HTTPException(status_code=404)
+
+    code = code.strip()
+    parsed_group = _valid_category_group(group)
+    if not _CATEGORY_CODE_RE.match(code) or not parsed_group or not title.strip():
+        return RedirectResponse(
+            f"/finances/categories?error={t_for(request, 'finances.errors.invalid_category')}", status_code=302,
+        )
+
+    duplicate = await db.execute(
+        select(FinanceCategory).where(FinanceCategory.code == code, FinanceCategory.id != category_id)
+    )
+    if duplicate.scalar_one_or_none():
+        return RedirectResponse(
+            f"/finances/categories?error={t_for(request, 'finances.errors.duplicate_category_code')}", status_code=302,
+        )
+
+    category.code = code
+    category.title = title.strip()
+    category.group = parsed_group
+    await db.commit()
+    return RedirectResponse("/finances/categories?success=1", status_code=302)
+
+
+@router.post("/categories/{category_id}/delete")
+async def category_delete(category_id: str, request: Request, db: AsyncSession = Depends(get_db)):
+    await require_permission(request, db, "finances", "delete")
+
+    result = await db.execute(select(FinanceCategory).where(FinanceCategory.id == category_id))
+    category = result.scalar_one_or_none()
+    if category:
+        await db.delete(category)
+        await db.commit()
+    return RedirectResponse("/finances/categories?success=1", status_code=302)
+
+
+@router.post("/categories/import")
+async def category_import(request: Request, file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
+    """Bulk-imports categories from a CSV file with a header row
+    "code,title,group" -- e.g. a club's own real SKR42-derived chart
+    exported from their accounting software. This app never ships
+    SKR42 codes itself, see FinanceCategory's docstring."""
+    await require_permission(request, db, "finances", "write")
+
+    raw = (await file.read()).decode("utf-8-sig", errors="replace")
+    reader = csv.DictReader(io.StringIO(raw))
+
+    existing_result = await db.execute(select(FinanceCategory.code))
+    existing_codes = {row[0] for row in existing_result.all()}
+
+    imported = 0
+    skipped = 0
+    for row in reader:
+        code = (row.get("code") or "").strip()
+        title = (row.get("title") or "").strip()
+        group_value = row.get("group") or ""
+        parsed_group = _valid_category_group(group_value)
+
+        if not _CATEGORY_CODE_RE.match(code) or not parsed_group or not title or code in existing_codes:
+            skipped += 1
+            continue
+
+        db.add(FinanceCategory(code=code, title=title, group=parsed_group))
+        existing_codes.add(code)
+        imported += 1
+
+    await db.commit()
+    return RedirectResponse(
+        f"/finances/categories?success=1&imported={imported}&skipped={skipped}", status_code=302,
+    )

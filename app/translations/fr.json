@@ -408,7 +408,9 @@
       "blocked_real_data": "Cette association a déjà de vraies données de membres/parcelles -- les données d'exemple ne peuvent être ajoutées qu'à une installation vierge. Supprimez d'abord les données existantes si vous souhaitez vraiment repartir de zéro.",
       "fresh_install_hint": "Cette installation semble vierge -- aucune donnée de membre ou de parcelle pour l'instant.",
       "add_confirm": "Ajouter des données d'exemple dans tous les modules maintenant ?",
-      "add_button": "Ajouter des données d'exemple"
+      "add_button": "Ajouter des données d'exemple",
+      "what_finances": "Finances : quelques exemples de catégories comptables (pas de vraies données SKR42)",
+      "module_finances": "Catégories financières"
     },
     "groups": {
       "page_title": "Groupes",
@@ -1733,7 +1735,9 @@
       "icon_uploaded": "Téléversé vers le stockage cloud",
       "copy_items_header": "Réutiliser les lignes d'une autre série",
       "copy_items_label": "Copier les lignes types depuis",
-      "copy_items_button": "Copier les lignes"
+      "copy_items_button": "Copier les lignes",
+      "col_category": "Catégorie",
+      "label_category": "Catégorie"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Montant fixe par parcelle",
@@ -1748,7 +1752,9 @@
       "run_not_draft": "Cette série de factures est déjà finalisée ; ses lignes types ne peuvent plus être modifiées.",
       "no_item_definitions": "Cette série de factures n'a pas encore de lignes types — ajoutez-en au moins une avant de finaliser.",
       "no_print_invoices": "Toutes les factures de cette série ont déjà été envoyées par e-mail -- rien à imprimer.",
-      "no_email_recipient": "Aucun membre à l'adresse de facturation joignable n'a été trouvé pour cette facture (notifications par e-mail + adresse e-mail enregistrée)."
+      "no_email_recipient": "Aucun membre à l'adresse de facturation joignable n'a été trouvé pour cette facture (notifications par e-mail + adresse e-mail enregistrée).",
+      "invalid_category": "Catégorie invalide -- le code doit comporter exactement 5 chiffres, un intitulé et un groupe sont requis.",
+      "duplicate_category_code": "Une catégorie avec ce code existe déjà."
     },
     "run_preview": {
       "title": "Aperçu des factures",
@@ -1817,7 +1823,8 @@
       "outgoing_hint": "{n} série(s) de factures",
       "coming_soon_hint": "Bientôt disponible",
       "accounts_header": "Comptes",
-      "accounts_hint": "Bientôt disponible -- les comptes de votre association apparaîtront ici."
+      "accounts_hint": "Bientôt disponible -- les comptes de votre association apparaîtront ici.",
+      "categories_hint": "{n} catégorie(s) définie(s)"
     },
     "coming_soon": {
       "message": "Cette fonctionnalité sera bientôt disponible.",
@@ -1828,6 +1835,33 @@
     },
     "incoming_invoices": {
       "title": "Factures reçues"
+    },
+    "category_groups": {
+      "income": "Recettes",
+      "expense": "Dépenses",
+      "fixed_assets": "Immobilisations",
+      "equity_liabilities": "Capitaux propres et dettes",
+      "other": "Autre"
+    },
+    "category_list": {
+      "title": "Catégories",
+      "heading": "Catégories comptables",
+      "new_header": "Nouvelle catégorie",
+      "label_code": "Code",
+      "label_title": "Intitulé",
+      "label_group": "Groupe",
+      "button_create": "Ajouter la catégorie",
+      "import_header": "Importer depuis un CSV",
+      "import_help": "Un fichier avec une ligne d'en-tête \"code,title,group\" -- group est l'un de income/expense/fixed_assets/equity_liabilities/other. Les lignes avec un code invalide, un groupe inconnu ou un code déjà existant sont ignorées.",
+      "label_file": "Fichier CSV",
+      "button_import": "Importer",
+      "import_result": "{imported} importée(s), {skipped} ignorée(s).",
+      "list_header": "Catégories",
+      "col_code": "Code",
+      "col_title": "Intitulé",
+      "col_group": "Groupe",
+      "no_categories": "Aucune catégorie pour le moment -- ajoutez-en une ci-dessus ou importez un CSV.",
+      "delete_confirm": "Supprimer cette catégorie ? Les lignes qui l'utilisent continuent de fonctionner, simplement sans catégorie."
     }
   }
 }

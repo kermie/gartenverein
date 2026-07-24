@@ -408,7 +408,9 @@
       "blocked_real_data": "Tento klub už má skutočné dáta o členoch/parcelách -- ukážkové dáta možno pridať iba do novej inštalácie. Ak naozaj chcete začať odznova, najprv odstráňte existujúce dáta.",
       "fresh_install_hint": "Táto inštalácia vyzerá ako nová -- zatiaľ žiadne dáta o členoch ani parcelách.",
       "add_confirm": "Pridať teraz ukážkové dáta vo všetkých moduloch?",
-      "add_button": "Pridať ukážkové dáta"
+      "add_button": "Pridať ukážkové dáta",
+      "what_finances": "Financie: niekoľko ukážkových účtovných kategórií (nejde o skutočné dáta SKR42)",
+      "module_finances": "Finančné kategórie"
     },
     "groups": {
       "page_title": "Skupiny",
@@ -1733,7 +1735,9 @@
       "icon_uploaded": "Nahrané do cloudového úložiska",
       "copy_items_header": "Znova použiť položky z iného vyúčtovania",
       "copy_items_label": "Skopírovať definície položiek z",
-      "copy_items_button": "Skopírovať položky"
+      "copy_items_button": "Skopírovať položky",
+      "col_category": "Kategória",
+      "label_category": "Kategória"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Pevná suma za parcelu",
@@ -1748,7 +1752,9 @@
       "run_not_draft": "Toto vyúčtovanie je už dokončené; jeho definície položiek už nemožno meniť.",
       "no_item_definitions": "Toto vyúčtovanie zatiaľ nemá žiadne definície položiek — pred dokončením pridajte aspoň jednu.",
       "no_print_invoices": "Všetky faktúry v tomto vyúčtovaní už boli odoslané e-mailom -- nie je čo tlačiť.",
-      "no_email_recipient": "Pre túto faktúru nebol nájdený žiadny dostupný člen s fakturačnou adresou (e-mailové upozornenia + uložená e-mailová adresa)."
+      "no_email_recipient": "Pre túto faktúru nebol nájdený žiadny dostupný člen s fakturačnou adresou (e-mailové upozornenia + uložená e-mailová adresa).",
+      "invalid_category": "Neplatná kategória -- číslo musí mať presne 5 číslic, názov a skupina sú povinné.",
+      "duplicate_category_code": "Kategória s týmto číslom už existuje."
     },
     "run_preview": {
       "title": "Náhľad faktúr",
@@ -1817,7 +1823,8 @@
       "outgoing_hint": "{n} vyúčtovaní",
       "coming_soon_hint": "Už čoskoro",
       "accounts_header": "Účty",
-      "accounts_hint": "Už čoskoro -- tu sa zobrazia účty vašej organizácie."
+      "accounts_hint": "Už čoskoro -- tu sa zobrazia účty vašej organizácie.",
+      "categories_hint": "definovaných {n} kategórií"
     },
     "coming_soon": {
       "message": "Táto funkcia bude čoskoro k dispozícii.",
@@ -1828,6 +1835,33 @@
     },
     "incoming_invoices": {
       "title": "Prijaté faktúry"
+    },
+    "category_groups": {
+      "income": "Príjmy",
+      "expense": "Výdavky",
+      "fixed_assets": "Dlhodobý majetok",
+      "equity_liabilities": "Vlastné imanie a záväzky",
+      "other": "Ostatné"
+    },
+    "category_list": {
+      "title": "Kategórie",
+      "heading": "Účtovné kategórie",
+      "new_header": "Nová kategória",
+      "label_code": "Číslo",
+      "label_title": "Názov",
+      "label_group": "Skupina",
+      "button_create": "Pridať kategóriu",
+      "import_header": "Import z CSV",
+      "import_help": "Súbor s hlavičkovým riadkom \"code,title,group\" -- group je jedna z income/expense/fixed_assets/equity_liabilities/other. Riadky s neplatným číslom, neznámou skupinou alebo už existujúcim číslom sa preskočia.",
+      "label_file": "Súbor CSV",
+      "button_import": "Importovať",
+      "import_result": "Importovaných {imported}, preskočených {skipped}.",
+      "list_header": "Kategórie",
+      "col_code": "Číslo",
+      "col_title": "Názov",
+      "col_group": "Skupina",
+      "no_categories": "Zatiaľ žiadne kategórie -- pridajte vyššie alebo importujte CSV.",
+      "delete_confirm": "Zmazať túto kategóriu? Položky, ktoré ju používajú, zostanú zachované, len bez kategórie."
     }
   }
 }
