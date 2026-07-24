@@ -187,6 +187,33 @@
         </div>
     </div>
 
+    {% if has_perm(request, 'finances', 'write') and copyable_runs %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-clipboard-check me-2"></i>{{ t('finances.run_detail.copy_items_header') }}</div>
+            <div class="card-body">
+                <form method="post" action="/finances/runs/{{ run.id }}/items/copy-from" class="row g-2 align-items-end">
+                    <div class="col-sm-9">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">{{ t('finances.run_detail.copy_items_label') }}</label>
+                        <select name="source_run_id" class="form-select form-select-sm">
+                            {% for source_run in copyable_runs %}
+                            <option value="{{ source_run.id }}">
+                                {{ source_run.year }} — {{ source_run.subject }} ({{ source_run.item_definitions|length }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-sm-3">
+                        <button type="submit" class="btn btn-sm btn-outline-primary w-100">
+                            <i class="bi bi-clipboard-check me-1"></i>{{ t('finances.run_detail.copy_items_button') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% if has_perm(request, 'finances', 'write') %}
     <div class="col-12">
         <div class="card">

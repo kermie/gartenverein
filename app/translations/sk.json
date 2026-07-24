@@ -1730,7 +1730,10 @@
       "col_delivery": "Doručenie",
       "icon_emailed": "Odoslané e-mailom",
       "icon_printed": "Zahrnuté v tlačovom balíku",
-      "icon_uploaded": "Nahrané do cloudového úložiska"
+      "icon_uploaded": "Nahrané do cloudového úložiska",
+      "copy_items_header": "Znova použiť položky z iného vyúčtovania",
+      "copy_items_label": "Skopírovať definície položiek z",
+      "copy_items_button": "Skopírovať položky"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Pevná suma za parcelu",

@@ -1730,7 +1730,10 @@
       "col_delivery": "Envoi",
       "icon_emailed": "Envoyé par e-mail",
       "icon_printed": "Inclus dans un lot d'impression",
-      "icon_uploaded": "Téléversé vers le stockage cloud"
+      "icon_uploaded": "Téléversé vers le stockage cloud",
+      "copy_items_header": "Réutiliser les lignes d'une autre série",
+      "copy_items_label": "Copier les lignes types depuis",
+      "copy_items_button": "Copier les lignes"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Montant fixe par parcelle",

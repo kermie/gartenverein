@@ -1730,7 +1730,10 @@
       "col_delivery": "Delivery",
       "icon_emailed": "Emailed",
       "icon_printed": "Included in a print bundle",
-      "icon_uploaded": "Uploaded to cloud storage"
+      "icon_uploaded": "Uploaded to cloud storage",
+      "copy_items_header": "Re-use items from another run",
+      "copy_items_label": "Copy item definitions from",
+      "copy_items_button": "Copy items"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Fixed amount per parcel",

@@ -1730,7 +1730,10 @@
       "col_delivery": "Doręczenie",
       "icon_emailed": "Wysłano e-mailem",
       "icon_printed": "Uwzględniono w pakiecie do druku",
-      "icon_uploaded": "Przesłano do chmury"
+      "icon_uploaded": "Przesłano do chmury",
+      "copy_items_header": "Ponowne użycie pozycji z innej serii",
+      "copy_items_label": "Skopiuj definicje pozycji z",
+      "copy_items_button": "Skopiuj pozycje"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Kwota stała za działkę",

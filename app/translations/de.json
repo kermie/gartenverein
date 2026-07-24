@@ -1730,7 +1730,10 @@
       "col_delivery": "Versand",
       "icon_emailed": "Per E-Mail versendet",
       "icon_printed": "In Sammel-PDF enthalten",
-      "icon_uploaded": "In Cloud-Speicher hochgeladen"
+      "icon_uploaded": "In Cloud-Speicher hochgeladen",
+      "copy_items_header": "Positionen aus einem anderen Lauf übernehmen",
+      "copy_items_label": "Positionsdefinitionen übernehmen von",
+      "copy_items_button": "Positionen übernehmen"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Festbetrag je Parzelle",

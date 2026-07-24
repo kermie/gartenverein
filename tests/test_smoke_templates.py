@@ -234,6 +234,23 @@ async def test_smoke_finances_pages_render_without_jinja_errors(client, admin_us
     })
     assert r_blocked.status_code == 400
 
+    # Re-using items in another year (issue #66): a finalized run's
+    # item definitions stay attached to it, so a new draft run can
+    # copy them instead of retyping everything.
+    r_second_run = await client.post("/finances/runs", data={
+        "year": "2027", "subject": "Second run", "issued_date": "2027-08-01",
+        "due_date": "2027-09-01", "footer_text": "",
+    })
+    second_run_id = r_second_run.headers["location"].rstrip("/").split("/")[-1]
+
+    r_copy = await client.post(f"/finances/runs/{second_run_id}/items/copy-from", data={"source_run_id": run_id})
+    assert r_copy.status_code in (302, 303)
+
+    r_second_detail = await client.get(f"/finances/runs/{second_run_id}")
+    assert r_second_detail.status_code == 200
+    assert "UndefinedError" not in r_second_detail.text
+    assert "Item fixed_per_parcel" in r_second_detail.text
+
     # Delivery + payments (phase 3, issue #58). The SMOKE-01 member has
     # no stored email, so deliver() should email nobody and the print
     # bundle should include this invoice instead.

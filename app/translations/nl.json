@@ -1730,7 +1730,10 @@
       "col_delivery": "Verzending",
       "icon_emailed": "Verstuurd per e-mail",
       "icon_printed": "Opgenomen in een afdrukbundel",
-      "icon_uploaded": "Geüpload naar cloudopslag"
+      "icon_uploaded": "Geüpload naar cloudopslag",
+      "copy_items_header": "Regels van een andere ronde hergebruiken",
+      "copy_items_label": "Regeldefinities kopiëren van",
+      "copy_items_button": "Regels kopiëren"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Vast bedrag per perceel",

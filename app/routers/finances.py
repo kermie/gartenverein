@@ -70,6 +70,21 @@ async def _get_run_or_404(db: AsyncSession, run_id: str) -> InvoiceRun:
     return run
 
 
+async def _runs_with_items(db: AsyncSession, exclude_run_id: str) -> list:
+    """Other runs that have at least one item definition -- offered as
+    a copy source (issue #66's "re-use them in another year"), newest
+    first. A run's item definitions stay attached to it permanently
+    (never cleared on finalize), so last year's real configuration is
+    always available to copy from, not just still-open drafts."""
+    result = await db.execute(
+        select(InvoiceRun)
+        .options(selectinload(InvoiceRun.item_definitions))
+        .where(InvoiceRun.id != exclude_run_id)
+        .order_by(InvoiceRun.year.desc())
+    )
+    return [r for r in result.scalars().all() if r.item_definitions]
+
+
 async def _active_parcels(db: AsyncSession) -> list:
     result = await db.execute(
         select(Parcel).where(Parcel.status == ParcelStatus.ACTIVE).order_by(Parcel.plot_number)
@@ -256,11 +271,16 @@ async def run_detail(run_id: str, request: Request, db: AsyncSession = Depends(g
         )
         invoices = list(result.scalars().all())
 
+    copyable_runs = []
+    if run.status == InvoiceRunStatus.DRAFT:
+        copyable_runs = await _runs_with_items(db, exclude_run_id=run.id)
+
     return templates.TemplateResponse("finances/run_detail.html", {
         "request": request, "user": user, "run": run, "parcels": parcels,
         "pricing_modes": list(InvoicePricingMode),
         "next_order": next_order,
         "invoices": invoices,
+        "copyable_runs": copyable_runs,
     })
 
 
@@ -304,6 +324,49 @@ async def item_create(
     if not applies_all:
         for parcel_id in parcel_ids:
             db.add(InvoiceItemDefinitionParcel(invoice_item_definition_id=item.id, parcel_id=parcel_id))
+
+    await db.commit()
+    return RedirectResponse(f"/finances/runs/{run_id}", status_code=302)
+
+
+@router.post("/runs/{run_id}/items/copy-from")
+async def items_copy_from(
+    run_id: str,
+    request: Request,
+    source_run_id: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """Duplicates every item definition (including parcel scoping)
+    from `source_run_id` into `run_id` -- issue #66, so the board
+    doesn't have to retype the same membership fee/water/insurance
+    items every year. Adds to whatever's already on the target run
+    rather than replacing it, so it can be combined with items typed
+    by hand."""
+    await require_permission(request, db, "finances", "write")
+
+    run = await _get_run_or_404(db, run_id)
+    if run.status != InvoiceRunStatus.DRAFT:
+        raise HTTPException(status_code=400, detail=t_for(request, "finances.errors.run_not_draft"))
+
+    source = await _get_run_or_404(db, source_run_id)
+    for source_item in source.item_definitions:
+        new_item = InvoiceItemDefinition(
+            invoice_run_id=run.id,
+            order_number=source_item.order_number,
+            name=source_item.name,
+            description=source_item.description,
+            pricing_mode=source_item.pricing_mode,
+            unit_price=source_item.unit_price,
+            applies_to_all_parcels=source_item.applies_to_all_parcels,
+        )
+        db.add(new_item)
+        await db.flush()
+
+        if not source_item.applies_to_all_parcels:
+            for scope in source_item.parcel_scopes:
+                db.add(InvoiceItemDefinitionParcel(
+                    invoice_item_definition_id=new_item.id, parcel_id=scope.parcel_id,
+                ))
 
     await db.commit()
     return RedirectResponse(f"/finances/runs/{run_id}", status_code=302)
