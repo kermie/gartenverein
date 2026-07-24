@@ -338,7 +338,9 @@
       "invoice_number_format_error": "Neplatný formát čísla faktúry -- musí obsahovať práve raz {number} (voliteľne aj {year}), žiadne iné zástupné symboly.",
       "invoice_number_format_help": "Zástupné symboly: {year} a {number} (povinný). Ostatný text sa použije bez zmeny, napr. \"R-{year}-{number}\".",
       "invoice_number_format_currently_used": "Aktuálne používaný: {example}",
-      "invoice_number_format_is_default": "(predvolený, nič vlastné nie je uložené)"
+      "invoice_number_format_is_default": "(predvolený, nič vlastné nie je uložené)",
+      "search_placeholder": "Hľadať v nastaveniach...",
+      "search_no_results": "Žiadne nastavenia nezodpovedajú vyhľadávaniu."
     },
     "integrations": {
       "title": "Integrácie",

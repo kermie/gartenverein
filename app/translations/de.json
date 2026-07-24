@@ -338,7 +338,9 @@
       "invoice_number_format_error": "Ungültiges Format für Rechnungsnummern -- es muss genau einmal {number} enthalten (optional auch {year}), keine anderen Platzhalter.",
       "invoice_number_format_help": "Platzhalter: {year} und {number} (erforderlich). Jeder andere Text wird unverändert übernommen, z. B. \"R-{year}-{number}\".",
       "invoice_number_format_currently_used": "Aktuell verwendet: {example}",
-      "invoice_number_format_is_default": "(Standard, nichts Eigenes gespeichert)"
+      "invoice_number_format_is_default": "(Standard, nichts Eigenes gespeichert)",
+      "search_placeholder": "Einstellungen durchsuchen...",
+      "search_no_results": "Keine Einstellungen entsprechen Ihrer Suche."
     },
     "integrations": {
       "title": "Integrationen",

@@ -338,7 +338,9 @@
       "invoice_number_format_error": "Invalid invoice number format -- it must contain {number} exactly once (optionally {year} too), and no other placeholders.",
       "invoice_number_format_help": "Placeholders: {year} and {number} (required). Any other text is used as-is, e.g. \"R-{year}-{number}\".",
       "invoice_number_format_currently_used": "Currently used: {example}",
-      "invoice_number_format_is_default": "(default, nothing custom saved)"
+      "invoice_number_format_is_default": "(default, nothing custom saved)",
+      "search_placeholder": "Search settings...",
+      "search_no_results": "No settings match your search."
     },
     "integrations": {
       "title": "Integrations",

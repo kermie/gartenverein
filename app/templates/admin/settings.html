@@ -35,10 +35,22 @@
 </div>
 {% endif %}
 
-<div class="d-flex justify-content-end mb-3">
+<div class="d-flex justify-content-between align-items-center gap-3 mb-3 flex-wrap">
+    <div class="flex-grow-1" style="max-width: 360px;">
+        <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="search" id="settings-search" class="form-control"
+                   placeholder="{{ t('admin.settings.search_placeholder') }}"
+                   aria-label="{{ t('admin.settings.search_placeholder') }}">
+        </div>
+    </div>
     <button type="submit" form="settings-form" class="btn btn-primary">
         <i class="bi bi-check-lg me-1"></i>{{ t('admin.settings.save_button') }}
     </button>
+</div>
+
+<div id="settings-search-no-results" class="alert alert-light border text-muted text-center mb-3" style="display: none;">
+    {{ t('admin.settings.search_no_results') }}
 </div>
 
 <form method="post" action="/admin/settings" id="settings-form" enctype="multipart/form-data">
@@ -385,6 +397,41 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         input.addEventListener('input', sync);
         sync();
+    }
+
+    // Issue #71: client-side search across the already-rendered
+    // (i.e. already-translated) card text -- no backend involved, so
+    // it searches whatever language the page is currently showing.
+    // Matching cards are force-expanded (bypassing the accordion's
+    // normal "only one open" behavior while a search is active) and
+    // non-matching ones are hidden entirely; clearing the search just
+    // leaves things as they ended up rather than trying to restore the
+    // exact pre-search state.
+    var searchInput = document.getElementById('settings-search');
+    var accordion = document.getElementById('settings-accordion');
+    var noResults = document.getElementById('settings-search-no-results');
+    if (searchInput && accordion) {
+        var wrappers = Array.prototype.filter.call(accordion.children, function (el) {
+            return el.querySelector && el.querySelector('.settings-card-toggle');
+        });
+        searchInput.addEventListener('input', function () {
+            var term = searchInput.value.trim().toLowerCase();
+            var anyVisible = false;
+            wrappers.forEach(function (wrapper) {
+                var card = wrapper.querySelector('.card');
+                var toggle = wrapper.querySelector('.settings-card-toggle');
+                var body = wrapper.querySelector('.collapse');
+                var matches = term === '' || card.textContent.toLowerCase().indexOf(term) !== -1;
+                wrapper.style.display = matches ? '' : 'none';
+                if (matches) { anyVisible = true; }
+                if (term !== '' && matches && body && !body.classList.contains('show')) {
+                    body.classList.add('show');
+                    toggle.classList.remove('collapsed');
+                    toggle.setAttribute('aria-expanded', 'true');
+                }
+            });
+            if (noResults) { noResults.style.display = (term !== '' && !anyVisible) ? '' : 'none'; }
+        });
     }
 });
 </script>

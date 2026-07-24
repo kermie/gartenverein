@@ -338,7 +338,9 @@
       "invoice_number_format_error": "Ongeldig factuurnummerformaat -- het moet {number} precies één keer bevatten (optioneel ook {year}), geen andere plaatshouders.",
       "invoice_number_format_help": "Plaatshouders: {year} en {number} (verplicht). Overige tekst wordt ongewijzigd gebruikt, bijv. \"R-{year}-{number}\".",
       "invoice_number_format_currently_used": "Momenteel gebruikt: {example}",
-      "invoice_number_format_is_default": "(standaard, niets aangepasts opgeslagen)"
+      "invoice_number_format_is_default": "(standaard, niets aangepasts opgeslagen)",
+      "search_placeholder": "Instellingen zoeken...",
+      "search_no_results": "Geen instellingen komen overeen met uw zoekopdracht."
     },
     "integrations": {
       "title": "Integraties",

@@ -338,7 +338,9 @@
       "invoice_number_format_error": "Nieprawidłowy format numeru faktury -- musi zawierać dokładnie jeden {number} (opcjonalnie także {year}), żadnych innych symboli zastępczych.",
       "invoice_number_format_help": "Symbole zastępcze: {year} i {number} (wymagany). Pozostały tekst jest używany bez zmian, np. \"R-{year}-{number}\".",
       "invoice_number_format_currently_used": "Obecnie używany: {example}",
-      "invoice_number_format_is_default": "(domyślny, nic własnego nie zapisano)"
+      "invoice_number_format_is_default": "(domyślny, nic własnego nie zapisano)",
+      "search_placeholder": "Szukaj ustawień...",
+      "search_no_results": "Żadne ustawienia nie pasują do wyszukiwania."
     },
     "integrations": {
       "title": "Integracje",

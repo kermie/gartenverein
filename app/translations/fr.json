@@ -338,7 +338,9 @@
       "invoice_number_format_error": "Format de numéro de facture invalide -- il doit contenir {number} exactement une fois (et éventuellement {year}), aucun autre paramètre.",
       "invoice_number_format_help": "Paramètres : {year} et {number} (obligatoire). Tout autre texte est utilisé tel quel, p. ex. \"R-{year}-{number}\".",
       "invoice_number_format_currently_used": "Actuellement utilisé : {example}",
-      "invoice_number_format_is_default": "(par défaut, rien de personnalisé enregistré)"
+      "invoice_number_format_is_default": "(par défaut, rien de personnalisé enregistré)",
+      "search_placeholder": "Rechercher dans les paramètres...",
+      "search_no_results": "Aucun paramètre ne correspond à votre recherche."
     },
     "integrations": {
       "title": "Intégrations",
