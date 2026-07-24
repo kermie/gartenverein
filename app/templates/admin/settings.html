@@ -211,9 +211,19 @@
                 {% for key, label in finance_fields %}
                 <div class="mb-3">
                     <label class="form-label fw-semibold">{{ label }}</label>
+                    {% if key == 'invoice_number_format' %}
+                    <select name="{{ key }}" class="form-select">
+                        {% for format_str in invoice_number_formats %}
+                        <option value="{{ format_str }}" {% if settings_map.get(key, '{year}/{number}') == format_str %}selected{% endif %}>
+                            {{ format_str.replace('{year}', '2026').replace('{number}', '1') }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
                     <input type="text" name="{{ key }}" class="form-control"
                            {% if key == 'invoice_number_start' %}placeholder="1"{% endif %}
                            value="{{ settings_map.get(key, '') or '' }}">
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>

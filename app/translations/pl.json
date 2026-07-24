@@ -294,7 +294,8 @@
         "bank_name": "Nazwa banku",
         "bank_iban": "IBAN",
         "bank_bic": "BIC",
-        "invoice_number_start": "Początkowy numer faktury (dla pierwszego rozliczanego roku)"
+        "invoice_number_start": "Początkowy numer faktury (dla pierwszego rozliczanego roku)",
+        "invoice_number_format": "Format numeru faktury"
       },
       "modules": {
         "work_hours_name": "Zarządzanie pracami społecznymi",

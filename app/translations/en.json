@@ -294,7 +294,8 @@
         "bank_name": "Bank name",
         "bank_iban": "IBAN",
         "bank_bic": "BIC",
-        "invoice_number_start": "Starting invoice number (for the first year invoiced)"
+        "invoice_number_start": "Starting invoice number (for the first year invoiced)",
+        "invoice_number_format": "Invoice number format"
       },
       "modules": {
         "work_hours_name": "Work-hours management",

@@ -294,7 +294,8 @@
         "bank_name": "Naam van de bank",
         "bank_iban": "IBAN",
         "bank_bic": "BIC",
-        "invoice_number_start": "Beginnummer factuur (voor het eerste gefactureerde jaar)"
+        "invoice_number_start": "Beginnummer factuur (voor het eerste gefactureerde jaar)",
+        "invoice_number_format": "Factuurnummerformaat"
       },
       "modules": {
         "work_hours_name": "Werktijdenbeheer",

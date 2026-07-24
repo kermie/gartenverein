@@ -294,7 +294,8 @@
         "bank_name": "Název banky",
         "bank_iban": "IBAN",
         "bank_bic": "BIC",
-        "invoice_number_start": "Počáteční číslo faktury (pro první fakturovaný rok)"
+        "invoice_number_start": "Počáteční číslo faktury (pro první fakturovaný rok)",
+        "invoice_number_format": "Formát čísla faktury"
       },
       "modules": {
         "work_hours_name": "Správa pracovních hodin",

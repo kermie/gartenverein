@@ -30,6 +30,7 @@ from app.i18n import AVAILABLE_LANGUAGES, t_for
 from app.l10n import AVAILABLE_REGIONS, AVAILABLE_CURRENCIES
 from app.branding import save_logo_upload, remove_logo_file
 from app.nav_order import NAV_ORDER_DEFAULTS
+from app.invoice_generation import INVOICE_NUMBER_FORMATS
 from app.config import settings
 from app.public_api_auth import get_or_create_public_api_token, regenerate_public_api_token
 from app.update_check import get_update_status, refresh_update_check_cache
@@ -556,15 +557,20 @@ MODULE_FIELDS = [
 ]
 
 # Finances module (annual invoices, issue #55): bank details for the
-# invoice footer and the starting sequence number for invoice numbers
-# ("{year}/{sequence}", resets yearly -- see app/models.py's
-# InvoiceRun/Invoice). Rendered as their own card on the settings page,
-# same pattern as SETTINGS_FIELDS above.
+# invoice footer, and the starting sequence number + display format
+# for invoice numbers (issue #65 -- see app/invoice_generation.py's
+# INVOICE_NUMBER_FORMATS/DEFAULT_INVOICE_NUMBER_FORMAT; the format
+# only affects NEW invoices, past ones keep whatever they were
+# assigned since invoice numbers are permanent once finalized).
+# Rendered as their own card on the settings page, same pattern as
+# SETTINGS_FIELDS above -- invoice_number_format is special-cased to a
+# <select> in admin/settings.html rather than a free-text input.
 FINANCE_SETTINGS_FIELDS = [
     ("bank_name", "admin.settings.fields.bank_name"),
     ("bank_iban", "admin.settings.fields.bank_iban"),
     ("bank_bic", "admin.settings.fields.bank_bic"),
     ("invoice_number_start", "admin.settings.fields.invoice_number_start"),
+    ("invoice_number_format", "admin.settings.fields.invoice_number_format"),
 ]
 
 # Issue #60: lets a club reorder its own sidebar. Keys follow the
@@ -615,6 +621,7 @@ async def settings_page(request: Request, db: AsyncSession = Depends(get_db)):
             "settings_map": settings_map,
             "fields": resolved_fields,
             "finance_fields": resolved_finance_fields,
+            "invoice_number_formats": INVOICE_NUMBER_FORMATS,
             "module_fields": resolved_module_fields,
             "nav_order_fields": resolved_nav_order_fields,
             "available_languages": AVAILABLE_LANGUAGES,
@@ -657,6 +664,9 @@ async def settings_save(
             logo_error = str(e)
 
     for key, description in SETTINGS_FIELDS + FINANCE_SETTINGS_FIELDS:
+        if key == "invoice_number_format":
+            continue  # validated separately below, same reasoning as language/region/currency
+
         value = form.get(key, "").strip() or None
 
         result = await db.execute(
@@ -754,6 +764,22 @@ async def settings_save(
             entry.value = currency_value
         else:
             db.add(ClubSetting(key="currency", value=currency_value, description="Currency"))
+
+    # Invoice number format (issue #65): validated against the fixed
+    # set of {year}/{number} combinations, same reasoning as language/
+    # region/currency above -- only ever affects invoices generated
+    # from here on, see app/invoice_generation.py.
+    invoice_number_format_value = form.get("invoice_number_format", "").strip()
+    if invoice_number_format_value in INVOICE_NUMBER_FORMATS:
+        result = await db.execute(select(ClubSetting).where(ClubSetting.key == "invoice_number_format"))
+        entry = result.scalar_one_or_none()
+        if entry:
+            entry.value = invoice_number_format_value
+        else:
+            db.add(ClubSetting(
+                key="invoice_number_format", value=invoice_number_format_value,
+                description="Invoice number display format",
+            ))
 
     # Update check: same "checkbox sends nothing when off" handling as
     # the module toggles above (see app/update_check.py).

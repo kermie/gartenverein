@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Dict, List, Optional, Tuple
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -29,6 +29,17 @@ from app.models import (
 from app.insurance_utils import calculate_insurance_cost, _normalized_address
 from app.meter_utils import calculate_consumption
 from app.l10n import load_current_region, format_address
+
+# Issue #65: club-configurable invoice number format/starting sequence.
+# {year} and {number} are the only placeholders -- exactly the ones the
+# issue itself asked for. DEFAULT_INVOICE_NUMBER_FORMAT matches every
+# invoice number ever produced before this setting existed, so an
+# install that never touches the setting sees no change.
+DEFAULT_INVOICE_NUMBER_FORMAT = "{year}/{number}"
+INVOICE_NUMBER_FORMATS = [
+    "{year}{number}", "{year}-{number}", "{year}/{number}",
+    "{number}{year}", "{number}-{year}", "{number}/{year}",
+]
 
 
 @dataclass
@@ -182,10 +193,19 @@ async def compute_invoices_for_run(db: AsyncSession, run: InvoiceRun) -> List[Co
 
 
 async def _first_invoice_sequence(db: AsyncSession, year: int) -> int:
-    result = await db.execute(select(Invoice.invoice_number).where(Invoice.invoice_number.like(f"{year}/%")))
-    existing = [row[0] for row in result.all()]
-    if existing:
-        return max(int(n.split("/", 1)[1]) for n in existing) + 1
+    """The sequence number to start THIS year's numbering at: one past
+    whatever's already been assigned this year (across every run, so a
+    second run in the same year continues rather than collides), or
+    the club's configured starting number if this is the year's first
+    invoice ever."""
+    result = await db.execute(
+        select(func.max(Invoice.sequence_number))
+        .join(InvoiceRun, Invoice.invoice_run_id == InvoiceRun.id)
+        .where(InvoiceRun.year == year)
+    )
+    max_seq = result.scalar_one_or_none()
+    if max_seq is not None:
+        return max_seq + 1
 
     start_result = await db.execute(select(ClubSetting).where(ClubSetting.key == "invoice_number_start"))
     entry = start_result.scalar_one_or_none()
@@ -195,17 +215,28 @@ async def _first_invoice_sequence(db: AsyncSession, year: int) -> int:
         return 1
 
 
+async def _invoice_number_format(db: AsyncSession) -> str:
+    result = await db.execute(select(ClubSetting).where(ClubSetting.key == "invoice_number_format"))
+    entry = result.scalar_one_or_none()
+    if entry and entry.value in INVOICE_NUMBER_FORMATS:
+        return entry.value
+    return DEFAULT_INVOICE_NUMBER_FORMAT
+
+
 async def finalize_run(db: AsyncSession, run: InvoiceRun) -> List[Invoice]:
     """Computes and PERSISTS every invoice for `run`, assigning
     permanent invoice numbers in order, then marks the run FINALIZED.
     Caller commits."""
     computed = await compute_invoices_for_run(db, run)
 
+    number_format = await _invoice_number_format(db)
     invoices = []
     next_seq = await _first_invoice_sequence(db, run.year)
     for c in computed:
+        invoice_number = number_format.format(year=run.year, number=next_seq)
         invoice = Invoice(
-            invoice_run_id=run.id, parcel_id=c.parcel.id, invoice_number=f"{run.year}/{next_seq}",
+            invoice_run_id=run.id, parcel_id=c.parcel.id,
+            invoice_number=invoice_number, sequence_number=next_seq,
             recipient_names=c.recipient_names, recipient_address=c.recipient_address,
             subtotal=c.subtotal,
         )

@@ -294,7 +294,8 @@
         "bank_name": "Bankname",
         "bank_iban": "IBAN",
         "bank_bic": "BIC",
-        "invoice_number_start": "Erste Rechnungsnummer (für das erste abgerechnete Jahr)"
+        "invoice_number_start": "Erste Rechnungsnummer (für das erste abgerechnete Jahr)",
+        "invoice_number_format": "Format der Rechnungsnummer"
       },
       "modules": {
         "work_hours_name": "Pflichtstunden-Verwaltung",

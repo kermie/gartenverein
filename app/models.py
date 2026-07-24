@@ -1930,6 +1930,13 @@ class Invoice(Base):
     )
 
     invoice_number: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, index=True)
+    # The raw, unformatted sequence number within invoice_run.year --
+    # numbering (app/invoice_generation.py) reads MAX(sequence_number)
+    # scoped to the year to find the next one, rather than parsing it
+    # back out of invoice_number, since invoice_number's *display*
+    # format is club-configurable (issue #65) and a past invoice's
+    # format must never change once assigned.
+    sequence_number: Mapped[int] = mapped_column(Integer, nullable=False)
     recipient_names: Mapped[str] = mapped_column(Text, nullable=False)
     recipient_address: Mapped[str] = mapped_column(Text, nullable=False)
     subtotal: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
