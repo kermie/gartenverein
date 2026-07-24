@@ -2,6 +2,18 @@
 {% block title %}{{ t('admin.settings.page_title') }}{% endblock %}
 {% block page_title %}{{ t('admin.settings.heading') }}{% endblock %}
 
+{% block extra_head %}
+<style>
+    /* Foldable settings cards (issue #68): only one open at a time,
+       same accordion idea as the sidebar's module groups. */
+    .settings-card-toggle {
+        cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    }
+    .settings-card-chevron { transition: transform 0.2s; }
+    .settings-card-toggle.collapsed .settings-card-chevron { transform: rotate(-90deg); }
+</style>
+{% endblock %}
+
 {% block content %}
 {% if request.query_params.get('success') %}
 <div class="alert alert-success d-flex gap-2 align-items-center mb-3">
@@ -30,11 +42,16 @@
 </div>
 
 <form method="post" action="/admin/settings" id="settings-form" enctype="multipart/form-data">
-<div class="row g-3">
+<div class="row g-3" id="settings-accordion">
 
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><i class="bi bi-translate me-2"></i>{{ t('admin.settings.language_header') }}</div>
+            <div class="card-header settings-card-toggle" role="button" data-bs-toggle="collapse"
+                 data-bs-target="#settings-card-language" aria-expanded="true">
+                <span><i class="bi bi-translate me-2"></i>{{ t('admin.settings.language_header') }}</span>
+                <i class="bi bi-chevron-down settings-card-chevron"></i>
+            </div>
+            <div class="collapse show" id="settings-card-language" data-bs-parent="#settings-accordion">
             <div class="card-body">
                 <p class="text-muted" style="font-size: 0.85rem;">
                     {{ t('admin.settings.language_help') }}
@@ -47,12 +64,18 @@
                     {% endfor %}
                 </select>
             </div>
+            </div>
         </div>
     </div>
 
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><i class="bi bi-globe2 me-2"></i>{{ t('admin.settings.region_header') }} &amp; {{ t('admin.settings.currency_header') }}</div>
+            <div class="card-header settings-card-toggle collapsed" role="button" data-bs-toggle="collapse"
+                 data-bs-target="#settings-card-region" aria-expanded="false">
+                <span><i class="bi bi-globe2 me-2"></i>{{ t('admin.settings.region_header') }} &amp; {{ t('admin.settings.currency_header') }}</span>
+                <i class="bi bi-chevron-down settings-card-chevron"></i>
+            </div>
+            <div class="collapse" id="settings-card-region" data-bs-parent="#settings-accordion">
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-sm-6">
@@ -83,12 +106,18 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><i class="bi bi-toggles me-2"></i>{{ t('admin.settings.module_header') }}</div>
+            <div class="card-header settings-card-toggle collapsed" role="button" data-bs-toggle="collapse"
+                 data-bs-target="#settings-card-modules" aria-expanded="false">
+                <span><i class="bi bi-toggles me-2"></i>{{ t('admin.settings.module_header') }}</span>
+                <i class="bi bi-chevron-down settings-card-chevron"></i>
+            </div>
+            <div class="collapse" id="settings-card-modules" data-bs-parent="#settings-accordion">
             <div class="card-body">
                 <p class="text-muted" style="font-size: 0.85rem;">
                     {{ t('admin.settings.module_help') }}
@@ -112,12 +141,18 @@
                     {% endfor %}
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><i class="bi bi-arrow-down-up me-2"></i>{{ t('admin.settings.nav_order_header') }}</div>
+            <div class="card-header settings-card-toggle collapsed" role="button" data-bs-toggle="collapse"
+                 data-bs-target="#settings-card-nav-order" aria-expanded="false">
+                <span><i class="bi bi-arrow-down-up me-2"></i>{{ t('admin.settings.nav_order_header') }}</span>
+                <i class="bi bi-chevron-down settings-card-chevron"></i>
+            </div>
+            <div class="collapse" id="settings-card-nav-order" data-bs-parent="#settings-accordion">
             <div class="card-body">
                 <p class="text-muted" style="font-size: 0.85rem;">
                     {{ t('admin.settings.nav_order_help') }}
@@ -132,12 +167,18 @@
                     {% endfor %}
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><i class="bi bi-arrow-repeat me-2"></i>{{ t('admin.settings.updates_header') }}</div>
+            <div class="card-header settings-card-toggle collapsed" role="button" data-bs-toggle="collapse"
+                 data-bs-target="#settings-card-updates" aria-expanded="false">
+                <span><i class="bi bi-arrow-repeat me-2"></i>{{ t('admin.settings.updates_header') }}</span>
+                <i class="bi bi-chevron-down settings-card-chevron"></i>
+            </div>
+            <div class="collapse" id="settings-card-updates" data-bs-parent="#settings-accordion">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start gap-3 p-3"
                      style="background: #f8faf9; border-radius: 8px;">
@@ -152,12 +193,18 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header"><i class="bi bi-building me-2"></i>{{ t('admin.settings.club_data_header') }}</div>
+            <div class="card-header settings-card-toggle collapsed" role="button" data-bs-toggle="collapse"
+                 data-bs-target="#settings-card-club-data" aria-expanded="false">
+                <span><i class="bi bi-building me-2"></i>{{ t('admin.settings.club_data_header') }}</span>
+                <i class="bi bi-chevron-down settings-card-chevron"></i>
+            </div>
+            <div class="collapse" id="settings-card-club-data" data-bs-parent="#settings-accordion">
             <div class="card-body">
                 <div class="mb-3">
                     <label class="form-label fw-semibold">{{ t('admin.settings.logo_label') }}</label>
@@ -189,12 +236,18 @@
                 </div>
                 {% endfor %}
             </div>
+            </div>
         </div>
     </div>
 
     <div class="col-lg-6">
         <div class="card mb-3">
-            <div class="card-header"><i class="bi bi-rulers me-2"></i>{{ t('admin.settings.areas_header') }}</div>
+            <div class="card-header settings-card-toggle collapsed" role="button" data-bs-toggle="collapse"
+                 data-bs-target="#settings-card-areas" aria-expanded="false">
+                <span><i class="bi bi-rulers me-2"></i>{{ t('admin.settings.areas_header') }}</span>
+                <i class="bi bi-chevron-down settings-card-chevron"></i>
+            </div>
+            <div class="collapse" id="settings-card-areas" data-bs-parent="#settings-accordion">
             <div class="card-body">
                 {% for key, label in fields[6:10] %}
                 <div class="mb-3">
@@ -205,10 +258,16 @@
                 </div>
                 {% endfor %}
             </div>
+            </div>
         </div>
 
         <div class="card mb-3">
-            <div class="card-header"><i class="bi bi-cash-coin me-2"></i>{{ t('admin.settings.finance_header') }}</div>
+            <div class="card-header settings-card-toggle collapsed" role="button" data-bs-toggle="collapse"
+                 data-bs-target="#settings-card-finance" aria-expanded="false">
+                <span><i class="bi bi-cash-coin me-2"></i>{{ t('admin.settings.finance_header') }}</span>
+                <i class="bi bi-chevron-down settings-card-chevron"></i>
+            </div>
+            <div class="collapse" id="settings-card-finance" data-bs-parent="#settings-accordion">
             <div class="card-body">
                 <p class="text-muted mb-3" style="font-size: 0.82rem;">
                     {{ t('admin.settings.finance_help') }}
@@ -238,10 +297,16 @@
                 </div>
                 {% endfor %}
             </div>
+            </div>
         </div>
 
         <div class="card">
-            <div class="card-header"><i class="bi bi-envelope-at me-2"></i>{{ t('admin.settings.email_header') }}</div>
+            <div class="card-header settings-card-toggle collapsed" role="button" data-bs-toggle="collapse"
+                 data-bs-target="#settings-card-email" aria-expanded="false">
+                <span><i class="bi bi-envelope-at me-2"></i>{{ t('admin.settings.email_header') }}</span>
+                <i class="bi bi-chevron-down settings-card-chevron"></i>
+            </div>
+            <div class="collapse" id="settings-card-email" data-bs-parent="#settings-accordion">
             <div class="card-body">
                 <p class="text-muted mb-3" style="font-size: 0.82rem;">
                     {{ t('admin.settings.email_help') }}
@@ -258,10 +323,16 @@
                 </div>
                 {% endfor %}
             </div>
+            </div>
         </div>
 
         <div class="card mt-3">
-            <div class="card-header"><i class="bi bi-shield-exclamation me-2"></i>{{ t('admin.settings.spam_header') }}</div>
+            <div class="card-header settings-card-toggle collapsed" role="button" data-bs-toggle="collapse"
+                 data-bs-target="#settings-card-spam" aria-expanded="false">
+                <span><i class="bi bi-shield-exclamation me-2"></i>{{ t('admin.settings.spam_header') }}</span>
+                <i class="bi bi-chevron-down settings-card-chevron"></i>
+            </div>
+            <div class="collapse" id="settings-card-spam" data-bs-parent="#settings-accordion">
             <div class="card-body">
                 <p class="text-muted mb-3" style="font-size: 0.82rem;">
                     {{ t('admin.settings.spam_help') }}
@@ -277,6 +348,7 @@
                            {% endif %}>
                 </div>
                 {% endfor %}
+            </div>
             </div>
         </div>
     </div>
