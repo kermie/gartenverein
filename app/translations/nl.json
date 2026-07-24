@@ -333,7 +333,9 @@
       "logo_help": "PNG, JPEG, WebP of SVG, maximaal 2 MB. Vervangt het boomicoon in de zijbalk.",
       "logo_remove_label": "Logo verwijderen (terug naar het standaardicoon)",
       "logo_error_type": "Ongeldig bestandstype. Upload een PNG-, JPEG-, WebP- of SVG-bestand.",
-      "logo_error_size": "Het bestand is te groot (maximaal 2 MB)."
+      "logo_error_size": "Het bestand is te groot (maximaal 2 MB).",
+      "invoice_number_format_error": "Ongeldig factuurnummerformaat -- het moet {number} precies één keer bevatten (optioneel ook {year}), geen andere plaatshouders.",
+      "invoice_number_format_help": "Plaatshouders: {year} en {number} (verplicht). Overige tekst wordt ongewijzigd gebruikt, bijv. \"R-{year}-{number}\"."
     },
     "integrations": {
       "title": "Integraties",

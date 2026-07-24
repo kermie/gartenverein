@@ -333,7 +333,9 @@
       "logo_help": "PNG, JPEG, WebP, or SVG, maximum 2 MB. Replaces the tree icon in the sidebar.",
       "logo_remove_label": "Remove logo (revert to the default icon)",
       "logo_error_type": "Invalid file type. Please upload PNG, JPEG, WebP, or SVG.",
-      "logo_error_size": "The file is too large (maximum 2 MB)."
+      "logo_error_size": "The file is too large (maximum 2 MB).",
+      "invoice_number_format_error": "Invalid invoice number format -- it must contain {number} exactly once (optionally {year} too), and no other placeholders.",
+      "invoice_number_format_help": "Placeholders: {year} and {number} (required). Any other text is used as-is, e.g. \"R-{year}-{number}\"."
     },
     "integrations": {
       "title": "Integrations",

@@ -333,7 +333,9 @@
       "logo_help": "PNG, JPEG, WebP oder SVG, maximal 2 MB. Ersetzt das Baum-Symbol in der Seitenleiste.",
       "logo_remove_label": "Logo entfernen (zurück zum Standard-Symbol)",
       "logo_error_type": "Ungültiger Dateityp. Bitte PNG, JPEG, WebP oder SVG hochladen.",
-      "logo_error_size": "Die Datei ist zu groß (maximal 2 MB)."
+      "logo_error_size": "Die Datei ist zu groß (maximal 2 MB).",
+      "invoice_number_format_error": "Ungültiges Format für Rechnungsnummern -- es muss genau einmal {number} enthalten (optional auch {year}), keine anderen Platzhalter.",
+      "invoice_number_format_help": "Platzhalter: {year} und {number} (erforderlich). Jeder andere Text wird unverändert übernommen, z. B. \"R-{year}-{number}\"."
     },
     "integrations": {
       "title": "Integrationen",

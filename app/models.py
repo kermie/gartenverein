@@ -1929,7 +1929,7 @@ class Invoice(Base):
         String(36), ForeignKey("parcels.id", ondelete="CASCADE"), nullable=False, index=True
     )
 
-    invoice_number: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, index=True)
+    invoice_number: Mapped[str] = mapped_column(String(50), nullable=False, unique=True, index=True)
     # The raw, unformatted sequence number within invoice_run.year --
     # numbering (app/invoice_generation.py) reads MAX(sequence_number)
     # scoped to the year to find the next one, rather than parsing it

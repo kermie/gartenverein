@@ -333,7 +333,9 @@
       "logo_help": "PNG, JPEG, WebP lub SVG, maksymalnie 2 MB. Zastępuje ikonę drzewa w panelu bocznym.",
       "logo_remove_label": "Usuń logo (powrót do domyślnej ikony)",
       "logo_error_type": "Nieprawidłowy typ pliku. Proszę przesłać PNG, JPEG, WebP lub SVG.",
-      "logo_error_size": "Plik jest za duży (maksymalnie 2 MB)."
+      "logo_error_size": "Plik jest za duży (maksymalnie 2 MB).",
+      "invoice_number_format_error": "Nieprawidłowy format numeru faktury -- musi zawierać dokładnie jeden {number} (opcjonalnie także {year}), żadnych innych symboli zastępczych.",
+      "invoice_number_format_help": "Symbole zastępcze: {year} i {number} (wymagany). Pozostały tekst jest używany bez zmian, np. \"R-{year}-{number}\"."
     },
     "integrations": {
       "title": "Integracje",

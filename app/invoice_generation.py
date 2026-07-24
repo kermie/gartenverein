@@ -31,15 +31,34 @@ from app.meter_utils import calculate_consumption
 from app.l10n import load_current_region, format_address
 
 # Issue #65: club-configurable invoice number format/starting sequence.
-# {year} and {number} are the only placeholders -- exactly the ones the
-# issue itself asked for. DEFAULT_INVOICE_NUMBER_FORMAT matches every
-# invoice number ever produced before this setting existed, so an
-# install that never touches the setting sees no change.
+# Freely typed (e.g. "R-{year}-{number}"), not a fixed list -- {year}
+# and {number} are the only placeholders, and DEFAULT_INVOICE_NUMBER_FORMAT
+# matches every invoice number ever produced before this setting
+# existed, so an install that never touches the setting sees no change.
 DEFAULT_INVOICE_NUMBER_FORMAT = "{year}/{number}"
-INVOICE_NUMBER_FORMATS = [
-    "{year}{number}", "{year}-{number}", "{year}/{number}",
-    "{number}{year}", "{number}-{year}", "{number}/{year}",
+INVOICE_NUMBER_FORMAT_MAX_LENGTH = 30
+INVOICE_NUMBER_FORMAT_EXAMPLES = [
+    "{year}/{number}", "{year}-{number}", "{number}/{year}", "R-{year}-{number}",
 ]
+
+
+def is_valid_invoice_number_format(format_str: str) -> bool:
+    """A safe, well-formed format: {number} is required (guarantees
+    every generated number is unique), {year} is optional, any other
+    literal text is fine -- but no other placeholder, no format spec
+    (e.g. "{number:03d}"), and no stray/unmatched braces, since this
+    string is fed straight into str.format(year=..., number=...) at
+    finalize time and a malformed one would crash that (see
+    finalize_run). Removing the two literal placeholder substrings and
+    checking no "{"/"}" remains catches all of that in one step."""
+    if not format_str or not format_str.strip():
+        return False
+    if len(format_str) > INVOICE_NUMBER_FORMAT_MAX_LENGTH:
+        return False
+    if "{number}" not in format_str:
+        return False
+    remainder = format_str.replace("{year}", "").replace("{number}", "")
+    return "{" not in remainder and "}" not in remainder
 
 
 @dataclass
@@ -218,7 +237,7 @@ async def _first_invoice_sequence(db: AsyncSession, year: int) -> int:
 async def _invoice_number_format(db: AsyncSession) -> str:
     result = await db.execute(select(ClubSetting).where(ClubSetting.key == "invoice_number_format"))
     entry = result.scalar_one_or_none()
-    if entry and entry.value in INVOICE_NUMBER_FORMATS:
+    if entry and entry.value and is_valid_invoice_number_format(entry.value):
         return entry.value
     return DEFAULT_INVOICE_NUMBER_FORMAT
 

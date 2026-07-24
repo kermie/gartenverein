@@ -30,7 +30,7 @@ from app.i18n import AVAILABLE_LANGUAGES, t_for
 from app.l10n import AVAILABLE_REGIONS, AVAILABLE_CURRENCIES
 from app.branding import save_logo_upload, remove_logo_file
 from app.nav_order import NAV_ORDER_DEFAULTS
-from app.invoice_generation import INVOICE_NUMBER_FORMATS
+from app.invoice_generation import INVOICE_NUMBER_FORMAT_EXAMPLES, is_valid_invoice_number_format
 from app.config import settings
 from app.public_api_auth import get_or_create_public_api_token, regenerate_public_api_token
 from app.update_check import get_update_status, refresh_update_check_cache
@@ -559,12 +559,12 @@ MODULE_FIELDS = [
 # Finances module (annual invoices, issue #55): bank details for the
 # invoice footer, and the starting sequence number + display format
 # for invoice numbers (issue #65 -- see app/invoice_generation.py's
-# INVOICE_NUMBER_FORMATS/DEFAULT_INVOICE_NUMBER_FORMAT; the format
-# only affects NEW invoices, past ones keep whatever they were
+# is_valid_invoice_number_format/DEFAULT_INVOICE_NUMBER_FORMAT; the
+# format only affects NEW invoices, past ones keep whatever they were
 # assigned since invoice numbers are permanent once finalized).
 # Rendered as their own card on the settings page, same pattern as
 # SETTINGS_FIELDS above -- invoice_number_format is special-cased to a
-# <select> in admin/settings.html rather than a free-text input.
+# free-text input with a datalist of examples in admin/settings.html.
 FINANCE_SETTINGS_FIELDS = [
     ("bank_name", "admin.settings.fields.bank_name"),
     ("bank_iban", "admin.settings.fields.bank_iban"),
@@ -621,7 +621,7 @@ async def settings_page(request: Request, db: AsyncSession = Depends(get_db)):
             "settings_map": settings_map,
             "fields": resolved_fields,
             "finance_fields": resolved_finance_fields,
-            "invoice_number_formats": INVOICE_NUMBER_FORMATS,
+            "invoice_number_format_examples": INVOICE_NUMBER_FORMAT_EXAMPLES,
             "module_fields": resolved_module_fields,
             "nav_order_fields": resolved_nav_order_fields,
             "available_languages": AVAILABLE_LANGUAGES,
@@ -765,14 +765,23 @@ async def settings_save(
         else:
             db.add(ClubSetting(key="currency", value=currency_value, description="Currency"))
 
-    # Invoice number format (issue #65): validated against the fixed
-    # set of {year}/{number} combinations, same reasoning as language/
-    # region/currency above -- only ever affects invoices generated
-    # from here on, see app/invoice_generation.py.
+    # Invoice number format (issue #65): freely typed, so -- unlike
+    # language/region/currency's silent-skip-if-unknown above -- an
+    # invalid one gets flashed back to the admin rather than quietly
+    # discarded, since a typo here is easy to make and "it just didn't
+    # save, no explanation" would be confusing. Only ever affects
+    # invoices generated from here on, see app/invoice_generation.py.
+    invoice_number_format_error = None
     invoice_number_format_value = form.get("invoice_number_format", "").strip()
-    if invoice_number_format_value in INVOICE_NUMBER_FORMATS:
-        result = await db.execute(select(ClubSetting).where(ClubSetting.key == "invoice_number_format"))
-        entry = result.scalar_one_or_none()
+    result = await db.execute(select(ClubSetting).where(ClubSetting.key == "invoice_number_format"))
+    entry = result.scalar_one_or_none()
+    if not invoice_number_format_value:
+        # Blank = revert to DEFAULT_INVOICE_NUMBER_FORMAT, same "clear
+        # the field to go back to default" convention as the plain
+        # SETTINGS_FIELDS text inputs above.
+        if entry:
+            entry.value = None
+    elif is_valid_invoice_number_format(invoice_number_format_value):
         if entry:
             entry.value = invoice_number_format_value
         else:
@@ -780,6 +789,8 @@ async def settings_save(
                 key="invoice_number_format", value=invoice_number_format_value,
                 description="Invoice number display format",
             ))
+    else:
+        invoice_number_format_error = "1"
 
     # Update check: same "checkbox sends nothing when off" handling as
     # the module toggles above (see app/update_check.py).
@@ -797,6 +808,8 @@ async def settings_save(
     await db.commit()
     if logo_error:
         return RedirectResponse(f"/admin/settings?logo_error={logo_error}", status_code=302)
+    if invoice_number_format_error:
+        return RedirectResponse("/admin/settings?invoice_number_format_error=1", status_code=302)
     return RedirectResponse("/admin/settings?success=1", status_code=302)
 
 

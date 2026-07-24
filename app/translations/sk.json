@@ -333,7 +333,9 @@
       "logo_help": "PNG, JPEG, WebP alebo SVG, maximálne 2 MB. Nahradí ikonu stromu v bočnom paneli.",
       "logo_remove_label": "Odstrániť logo (späť na predvolenú ikonu)",
       "logo_error_type": "Neplatný typ súboru. Nahrajte prosím PNG, JPEG, WebP alebo SVG.",
-      "logo_error_size": "Súbor je príliš veľký (maximálne 2 MB)."
+      "logo_error_size": "Súbor je príliš veľký (maximálne 2 MB).",
+      "invoice_number_format_error": "Neplatný formát čísla faktúry -- musí obsahovať práve raz {number} (voliteľne aj {year}), žiadne iné zástupné symboly.",
+      "invoice_number_format_help": "Zástupné symboly: {year} a {number} (povinný). Ostatný text sa použije bez zmeny, napr. \"R-{year}-{number}\"."
     },
     "integrations": {
       "title": "Integrácie",

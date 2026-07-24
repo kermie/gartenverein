@@ -17,6 +17,11 @@
     <i class="bi bi-exclamation-triangle-fill"></i> {{ t('admin.settings.logo_error_size') }}
 </div>
 {% endif %}
+{% if request.query_params.get('invoice_number_format_error') %}
+<div class="alert alert-danger d-flex gap-2 align-items-center mb-3">
+    <i class="bi bi-exclamation-triangle-fill"></i> {{ t('admin.settings.invoice_number_format_error') }}
+</div>
+{% endif %}
 
 <div class="d-flex justify-content-end mb-3">
     <button type="submit" form="settings-form" class="btn btn-primary">
@@ -212,13 +217,19 @@
                 <div class="mb-3">
                     <label class="form-label fw-semibold">{{ label }}</label>
                     {% if key == 'invoice_number_format' %}
-                    <select name="{{ key }}" class="form-select">
-                        {% for format_str in invoice_number_formats %}
-                        <option value="{{ format_str }}" {% if settings_map.get(key, '{year}/{number}') == format_str %}selected{% endif %}>
-                            {{ format_str.replace('{year}', '2026').replace('{number}', '1') }}
-                        </option>
+                    <input type="text" name="{{ key }}" id="invoice-number-format-input" class="form-control"
+                           list="invoice-number-format-examples"
+                           placeholder="{year}/{number}"
+                           value="{{ settings_map.get(key, '') or '' }}">
+                    <datalist id="invoice-number-format-examples">
+                        {% for format_str in invoice_number_format_examples %}
+                        <option value="{{ format_str }}">
                         {% endfor %}
-                    </select>
+                    </datalist>
+                    <div class="form-text">
+                        {{ t('admin.settings.invoice_number_format_help') }}
+                        <span id="invoice-number-format-preview" class="fw-semibold"></span>
+                    </div>
                     {% else %}
                     <input type="text" name="{{ key }}" class="form-control"
                            {% if key == 'invoice_number_start' %}placeholder="1"{% endif %}
@@ -278,4 +289,20 @@
 
 </div>
 </form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('invoice-number-format-input');
+    var preview = document.getElementById('invoice-number-format-preview');
+    if (input && preview) {
+        function sync() {
+            preview.textContent = input.value ? input.value.replace('{year}', '2026').replace('{number}', '1') : '';
+        }
+        input.addEventListener('input', sync);
+        sync();
+    }
+});
+</script>
 {% endblock %}

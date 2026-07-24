@@ -333,7 +333,9 @@
       "logo_help": "PNG, JPEG, WebP ou SVG, 2 Mo maximum. Remplace l'icône d'arbre dans la barre latérale.",
       "logo_remove_label": "Supprimer le logo (revenir à l'icône par défaut)",
       "logo_error_type": "Type de fichier invalide. Veuillez charger un fichier PNG, JPEG, WebP ou SVG.",
-      "logo_error_size": "Le fichier est trop volumineux (2 Mo maximum)."
+      "logo_error_size": "Le fichier est trop volumineux (2 Mo maximum).",
+      "invoice_number_format_error": "Format de numéro de facture invalide -- il doit contenir {number} exactement une fois (et éventuellement {year}), aucun autre paramètre.",
+      "invoice_number_format_help": "Paramètres : {year} et {number} (obligatoire). Tout autre texte est utilisé tel quel, p. ex. \"R-{year}-{number}\"."
     },
     "integrations": {
       "title": "Intégrations",
