@@ -1837,11 +1837,11 @@
       "title": "Factures reçues"
     },
     "category_groups": {
-      "income": "Recettes",
-      "expense": "Dépenses",
-      "fixed_assets": "Immobilisations",
-      "equity_liabilities": "Capitaux propres et dettes",
-      "other": "Autre"
+      "INCOME": "Recettes",
+      "EXPENSE": "Dépenses",
+      "FIXED_ASSETS": "Immobilisations",
+      "EQUITY_LIABILITIES": "Capitaux propres et dettes",
+      "OTHER": "Autre"
     },
     "category_list": {
       "title": "Catégories",

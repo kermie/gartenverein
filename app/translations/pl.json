@@ -1837,11 +1837,11 @@
       "title": "Faktury przychodzące"
     },
     "category_groups": {
-      "income": "Przychody",
-      "expense": "Wydatki",
-      "fixed_assets": "Środki trwałe",
-      "equity_liabilities": "Kapitał własny i zobowiązania",
-      "other": "Inne"
+      "INCOME": "Przychody",
+      "EXPENSE": "Wydatki",
+      "FIXED_ASSETS": "Środki trwałe",
+      "EQUITY_LIABILITIES": "Kapitał własny i zobowiązania",
+      "OTHER": "Inne"
     },
     "category_list": {
       "title": "Kategorie",

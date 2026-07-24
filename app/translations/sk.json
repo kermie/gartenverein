@@ -1837,11 +1837,11 @@
       "title": "Prijaté faktúry"
     },
     "category_groups": {
-      "income": "Príjmy",
-      "expense": "Výdavky",
-      "fixed_assets": "Dlhodobý majetok",
-      "equity_liabilities": "Vlastné imanie a záväzky",
-      "other": "Ostatné"
+      "INCOME": "Príjmy",
+      "EXPENSE": "Výdavky",
+      "FIXED_ASSETS": "Dlhodobý majetok",
+      "EQUITY_LIABILITIES": "Vlastné imanie a záväzky",
+      "OTHER": "Ostatné"
     },
     "category_list": {
       "title": "Kategórie",

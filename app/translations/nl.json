@@ -1837,11 +1837,11 @@
       "title": "Inkomende facturen"
     },
     "category_groups": {
-      "income": "Inkomsten",
-      "expense": "Uitgaven",
-      "fixed_assets": "Vaste activa",
-      "equity_liabilities": "Eigen vermogen & schulden",
-      "other": "Overig"
+      "INCOME": "Inkomsten",
+      "EXPENSE": "Uitgaven",
+      "FIXED_ASSETS": "Vaste activa",
+      "EQUITY_LIABILITIES": "Eigen vermogen & schulden",
+      "OTHER": "Overig"
     },
     "category_list": {
       "title": "Categorieën",

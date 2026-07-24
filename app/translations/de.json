@@ -1837,11 +1837,11 @@
       "title": "Eingangsrechnungen"
     },
     "category_groups": {
-      "income": "Einnahmen",
-      "expense": "Ausgaben",
-      "fixed_assets": "Anlagevermögen",
-      "equity_liabilities": "Eigenkapital & Verbindlichkeiten",
-      "other": "Sonstiges"
+      "INCOME": "Einnahmen",
+      "EXPENSE": "Ausgaben",
+      "FIXED_ASSETS": "Anlagevermögen",
+      "EQUITY_LIABILITIES": "Eigenkapital & Verbindlichkeiten",
+      "OTHER": "Sonstiges"
     },
     "category_list": {
       "title": "Kategorien",

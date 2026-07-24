@@ -1837,11 +1837,11 @@
       "title": "Přijaté faktury"
     },
     "category_groups": {
-      "income": "Příjmy",
-      "expense": "Výdaje",
-      "fixed_assets": "Dlouhodobý majetek",
-      "equity_liabilities": "Vlastní kapitál a závazky",
-      "other": "Ostatní"
+      "INCOME": "Příjmy",
+      "EXPENSE": "Výdaje",
+      "FIXED_ASSETS": "Dlouhodobý majetek",
+      "EQUITY_LIABILITIES": "Vlastní kapitál a závazky",
+      "OTHER": "Ostatní"
     },
     "category_list": {
       "title": "Kategorie",

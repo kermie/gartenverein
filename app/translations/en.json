@@ -1837,11 +1837,11 @@
       "title": "Incoming Invoices"
     },
     "category_groups": {
-      "income": "Income",
-      "expense": "Expense",
-      "fixed_assets": "Fixed assets",
-      "equity_liabilities": "Equity & liabilities",
-      "other": "Other"
+      "INCOME": "Income",
+      "EXPENSE": "Expense",
+      "FIXED_ASSETS": "Fixed assets",
+      "EQUITY_LIABILITIES": "Equity & liabilities",
+      "OTHER": "Other"
     },
     "category_list": {
       "title": "Categories",
