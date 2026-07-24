@@ -295,7 +295,8 @@
         "bank_iban": "IBAN",
         "bank_bic": "BIC",
         "invoice_number_start": "Premier numéro de facture (pour la première année facturée)",
-        "invoice_number_format": "Format du numéro de facture"
+        "invoice_number_format": "Format du numéro de facture",
+        "bank_account_owner": "Titulaire du compte"
       },
       "modules": {
         "work_hours_name": "Gestion des heures de travail",

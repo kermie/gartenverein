@@ -200,12 +200,25 @@ def _wrap_document(body_html: str, club_name: str, logo_path: Optional[Path], fo
     """
 
 
+def _bank_footer_bits(bank_name: str, bank_iban: str, bank_bic: str, bank_account_owner: str) -> List[str]:
+    """Bank details for the footer, in the order issue #69 asked for:
+    name, IBAN, BIC, account holder (added since the account holder --
+    e.g. the club's registered legal name -- can differ from the
+    display name used elsewhere in the club_name/branding)."""
+    return [b for b in [
+        bank_name,
+        f"IBAN {bank_iban}" if bank_iban else "",
+        f"BIC {bank_bic}" if bank_bic else "",
+        f"Account holder: {bank_account_owner}" if bank_account_owner else "",
+    ] if b]
+
+
 def render_invoice_pdf(
     data: InvoicePdfData, club_name: str, logo_path: Optional[Path],
     club_address_lines: List[str], bank_name: str, bank_iban: str, bank_bic: str,
-    region: str, currency: str,
+    region: str, currency: str, bank_account_owner: str = "",
 ) -> bytes:
-    bank_bits = [b for b in [bank_name, f"IBAN {bank_iban}" if bank_iban else "", f"BIC {bank_bic}" if bank_bic else ""] if b]
+    bank_bits = _bank_footer_bits(bank_name, bank_iban, bank_bic, bank_account_owner)
     footer_line = " · ".join([*club_address_lines, *bank_bits])
     html_doc = _wrap_document(_invoice_body_html(data, region, currency), club_name, logo_path, footer_line)
     return HTML(string=html_doc).write_pdf()
@@ -214,7 +227,7 @@ def render_invoice_pdf(
 def render_invoice_bundle_pdf(
     items: List[InvoicePdfData], club_name: str, logo_path: Optional[Path],
     club_address_lines: List[str], bank_name: str, bank_iban: str, bank_bic: str,
-    region: str, currency: str,
+    region: str, currency: str, bank_account_owner: str = "",
 ) -> bytes:
     """Same rendering as render_invoice_pdf, but for many invoices in
     one PDF (issue #58's "merge PDFs to one big one so we can print
@@ -222,7 +235,7 @@ def render_invoice_bundle_pdf(
     one @page header/footer/page-numbering across the whole bundle
     rather than resetting per invoice, since it's meant to be printed
     and handled as a single stack."""
-    bank_bits = [b for b in [bank_name, f"IBAN {bank_iban}" if bank_iban else "", f"BIC {bank_bic}" if bank_bic else ""] if b]
+    bank_bits = _bank_footer_bits(bank_name, bank_iban, bank_bic, bank_account_owner)
     footer_line = " · ".join([*club_address_lines, *bank_bits])
     body_html = "".join(_invoice_body_html(data, region, currency) for data in items)
     html_doc = _wrap_document(body_html, club_name, logo_path, footer_line)

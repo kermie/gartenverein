@@ -569,6 +569,7 @@ FINANCE_SETTINGS_FIELDS = [
     ("bank_name", "admin.settings.fields.bank_name"),
     ("bank_iban", "admin.settings.fields.bank_iban"),
     ("bank_bic", "admin.settings.fields.bank_bic"),
+    ("bank_account_owner", "admin.settings.fields.bank_account_owner"),
     ("invoice_number_start", "admin.settings.fields.invoice_number_start"),
     ("invoice_number_format", "admin.settings.fields.invoice_number_format"),
 ]

@@ -111,9 +111,10 @@ async def _pdf_context(db: AsyncSession) -> dict:
     logo_path = Path("app" + branding["logo_url"]) if branding["logo_url"] else None
 
     settings_result = await db.execute(
-        select(ClubSetting).where(ClubSetting.key.in_(
-            ["verein_strasse", "verein_plz", "verein_ort", "bank_name", "bank_iban", "bank_bic"]
-        ))
+        select(ClubSetting).where(ClubSetting.key.in_([
+            "verein_strasse", "verein_plz", "verein_ort",
+            "bank_name", "bank_iban", "bank_bic", "bank_account_owner",
+        ]))
     )
     settings_map = {e.key: e.value for e in settings_result.scalars().all()}
     club_address_lines = [
@@ -129,6 +130,7 @@ async def _pdf_context(db: AsyncSession) -> dict:
         "bank_name": settings_map.get("bank_name") or "",
         "bank_iban": settings_map.get("bank_iban") or "",
         "bank_bic": settings_map.get("bank_bic") or "",
+        "bank_account_owner": settings_map.get("bank_account_owner") or "",
         "region": await load_current_region(db),
         "currency": await load_current_currency(db),
     }
