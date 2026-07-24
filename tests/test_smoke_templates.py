@@ -286,6 +286,47 @@ async def test_smoke_finances_pages_render_without_jinja_errors(client, admin_us
     r_third_run = await client.get(f"/finances/runs/{second_run_id}")
     assert "40000" in r_third_run.text and "Membership fees" in r_third_run.text
 
+    # Starting-number override (issue #73): always available, not just
+    # when the year has zero invoices -- and checked for collisions at
+    # finalize time.
+    r_override_run = await client.post("/finances/runs", data={
+        "year": "2028", "subject": "Override test", "issued_date": "2028-08-01",
+        "due_date": "2028-09-01", "footer_text": "", "starting_sequence_override": "500",
+    })
+    override_run_id = r_override_run.headers["location"].rstrip("/").split("/")[-1]
+
+    await client.post(f"/finances/runs/{override_run_id}/items", data={
+        "order_number": "10", "name": "Override fee", "pricing_mode": "fixed_per_parcel",
+        "unit_price": "1.00", "applies_to_all_parcels": "on",
+    })
+    r_override_finalize = await client.post(f"/finances/runs/{override_run_id}/finalize")
+    assert r_override_finalize.status_code in (302, 303)
+    assert "error" not in r_override_finalize.headers["location"]
+
+    r_override_detail = await client.get(f"/finances/runs/{override_run_id}")
+    assert "2028/500" in r_override_detail.text
+
+    # A second run in the same year with the same override collides.
+    r_collide_run = await client.post("/finances/runs", data={
+        "year": "2028", "subject": "Collision test", "issued_date": "2028-08-01",
+        "due_date": "2028-09-01", "footer_text": "", "starting_sequence_override": "500",
+    })
+    collide_run_id = r_collide_run.headers["location"].rstrip("/").split("/")[-1]
+    await client.post(f"/finances/runs/{collide_run_id}/items", data={
+        "order_number": "10", "name": "Fee", "pricing_mode": "fixed_per_parcel",
+        "unit_price": "1.00", "applies_to_all_parcels": "on",
+    })
+    r_collide_finalize = await client.post(f"/finances/runs/{collide_run_id}/finalize")
+    assert "error=" in r_collide_finalize.headers["location"]
+
+    # Editing the override to a free number lets it finalize.
+    r_edit_override = await client.post(
+        f"/finances/runs/{collide_run_id}/starting-sequence", data={"starting_sequence_override": "600"},
+    )
+    assert r_edit_override.status_code in (302, 303)
+    r_collide_retry = await client.post(f"/finances/runs/{collide_run_id}/finalize")
+    assert "error" not in r_collide_retry.headers["location"]
+
     # Delivery + payments (phase 3, issue #58). The SMOKE-01 member has
     # no stored email, so deliver() should email nobody and the print
     # bundle should include this invoice instead.

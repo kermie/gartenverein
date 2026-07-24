@@ -336,7 +336,9 @@
       "logo_error_type": "Neplatný typ souboru. Nahrajte prosím PNG, JPEG, WebP nebo SVG.",
       "logo_error_size": "Soubor je příliš velký (maximálně 2 MB).",
       "invoice_number_format_error": "Neplatný formát čísla faktury -- musí obsahovat právě jednou {number} (volitelně i {year}), žádné jiné zástupné symboly.",
-      "invoice_number_format_help": "Zástupné symboly: {year} a {number} (povinný). Ostatní text se použije beze změny, např. \"R-{year}-{number}\"."
+      "invoice_number_format_help": "Zástupné symboly: {year} a {number} (povinný). Ostatní text se použije beze změny, např. \"R-{year}-{number}\".",
+      "invoice_number_format_currently_used": "Aktuálně používaný: {example}",
+      "invoice_number_format_is_default": "(výchozí, nic vlastního není uloženo)"
     },
     "integrations": {
       "title": "Integrace",
@@ -1693,7 +1695,11 @@
       "open_button": "Otevřít",
       "no_runs": "Zatím žádná vyúčtování.",
       "delete_confirm": "Smazat toto vyúčtování včetně všech definic položek? Tuto akci nelze vrátit zpět.",
-      "all_invoices_button": "Všechny faktury"
+      "all_invoices_button": "Všechny faktury",
+      "label_starting_number": "Počáteční číslo (přepsat)",
+      "starting_number_placeholder": "např. 20000",
+      "starting_number_help": "Volitelné. Pro toto vyúčtování přepíše běžné pokračování od posledního čísla, bez ohledu na to, co existuje v jiných vyúčtováních/letech. Ponechte prázdné pro běžné pokračování.",
+      "success_message": "Hotovo."
     },
     "run_detail": {
       "title": "Vyúčtování",
@@ -1738,7 +1744,10 @@
       "copy_items_label": "Zkopírovat definice položek z",
       "copy_items_button": "Zkopírovat položky",
       "col_category": "Kategorie",
-      "label_category": "Kategorie"
+      "label_category": "Kategorie",
+      "starting_number_header": "Přepsání počátečního čísla",
+      "starting_number_help": "Nastavte explicitní počáteční číslo pro faktury tohoto vyúčtování -- vždy dostupné, kolize s existujícími čísly se kontrolují až při finalizaci.",
+      "starting_number_save": "Uložit"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Pevná částka za parcelu",

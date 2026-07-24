@@ -336,7 +336,9 @@
       "logo_error_type": "Invalid file type. Please upload PNG, JPEG, WebP, or SVG.",
       "logo_error_size": "The file is too large (maximum 2 MB).",
       "invoice_number_format_error": "Invalid invoice number format -- it must contain {number} exactly once (optionally {year} too), and no other placeholders.",
-      "invoice_number_format_help": "Placeholders: {year} and {number} (required). Any other text is used as-is, e.g. \"R-{year}-{number}\"."
+      "invoice_number_format_help": "Placeholders: {year} and {number} (required). Any other text is used as-is, e.g. \"R-{year}-{number}\".",
+      "invoice_number_format_currently_used": "Currently used: {example}",
+      "invoice_number_format_is_default": "(default, nothing custom saved)"
     },
     "integrations": {
       "title": "Integrations",
@@ -1693,7 +1695,11 @@
       "open_button": "Open",
       "no_runs": "No invoice runs yet.",
       "delete_confirm": "Delete this invoice run and all its item definitions? This cannot be undone.",
-      "all_invoices_button": "All invoices"
+      "all_invoices_button": "All invoices",
+      "label_starting_number": "Starting number (override)",
+      "starting_number_placeholder": "e.g. 20000",
+      "starting_number_help": "Optional. Overrides the normal continue-from-last-number behavior for this run, regardless of what other runs/years exist. Leave blank to continue normally.",
+      "success_message": "Done."
     },
     "run_detail": {
       "title": "Invoice run",
@@ -1738,7 +1744,10 @@
       "copy_items_label": "Copy item definitions from",
       "copy_items_button": "Copy items",
       "col_category": "Category",
-      "label_category": "Category"
+      "label_category": "Category",
+      "starting_number_header": "Starting number override",
+      "starting_number_help": "Set an explicit starting number for this run's invoices -- always available, checked for collisions with existing numbers only when you finalize.",
+      "starting_number_save": "Save"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Fixed amount per parcel",

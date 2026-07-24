@@ -336,7 +336,9 @@
       "logo_error_type": "Nieprawidłowy typ pliku. Proszę przesłać PNG, JPEG, WebP lub SVG.",
       "logo_error_size": "Plik jest za duży (maksymalnie 2 MB).",
       "invoice_number_format_error": "Nieprawidłowy format numeru faktury -- musi zawierać dokładnie jeden {number} (opcjonalnie także {year}), żadnych innych symboli zastępczych.",
-      "invoice_number_format_help": "Symbole zastępcze: {year} i {number} (wymagany). Pozostały tekst jest używany bez zmian, np. \"R-{year}-{number}\"."
+      "invoice_number_format_help": "Symbole zastępcze: {year} i {number} (wymagany). Pozostały tekst jest używany bez zmian, np. \"R-{year}-{number}\".",
+      "invoice_number_format_currently_used": "Obecnie używany: {example}",
+      "invoice_number_format_is_default": "(domyślny, nic własnego nie zapisano)"
     },
     "integrations": {
       "title": "Integracje",
@@ -1693,7 +1695,11 @@
       "open_button": "Otwórz",
       "no_runs": "Brak serii faktur.",
       "delete_confirm": "Usunąć tę serię faktur wraz ze wszystkimi definicjami pozycji? Tej czynności nie można cofnąć.",
-      "all_invoices_button": "Wszystkie faktury"
+      "all_invoices_button": "Wszystkie faktury",
+      "label_starting_number": "Numer początkowy (nadpisanie)",
+      "starting_number_placeholder": "np. 20000",
+      "starting_number_help": "Opcjonalne. Nadpisuje dla tej serii normalne kontynuowanie od ostatniego numeru, niezależnie od tego, co istnieje w innych seriach/latach. Pozostaw puste, aby kontynuować normalnie.",
+      "success_message": "Gotowe."
     },
     "run_detail": {
       "title": "Seria faktur",
@@ -1738,7 +1744,10 @@
       "copy_items_label": "Skopiuj definicje pozycji z",
       "copy_items_button": "Skopiuj pozycje",
       "col_category": "Kategoria",
-      "label_category": "Kategoria"
+      "label_category": "Kategoria",
+      "starting_number_header": "Nadpisanie numeru początkowego",
+      "starting_number_help": "Ustaw jawny numer początkowy dla faktur tej serii -- zawsze dostępne, sprawdzane pod kątem kolizji z istniejącymi numerami dopiero przy finalizacji.",
+      "starting_number_save": "Zapisz"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Kwota stała za działkę",

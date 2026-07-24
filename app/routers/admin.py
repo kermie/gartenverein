@@ -30,7 +30,9 @@ from app.i18n import AVAILABLE_LANGUAGES, t_for
 from app.l10n import AVAILABLE_REGIONS, AVAILABLE_CURRENCIES
 from app.branding import save_logo_upload, remove_logo_file
 from app.nav_order import NAV_ORDER_DEFAULTS
-from app.invoice_generation import INVOICE_NUMBER_FORMAT_EXAMPLES, is_valid_invoice_number_format
+from app.invoice_generation import (
+    INVOICE_NUMBER_FORMAT_EXAMPLES, DEFAULT_INVOICE_NUMBER_FORMAT, is_valid_invoice_number_format,
+)
 from app.config import settings
 from app.public_api_auth import get_or_create_public_api_token, regenerate_public_api_token
 from app.update_check import get_update_status, refresh_update_check_cache
@@ -614,6 +616,14 @@ async def settings_page(request: Request, db: AsyncSession = Depends(get_db)):
         for name, label_key in NAV_ORDER_FIELDS
     ]
 
+    # Issue #72: the format field can be legitimately blank (falls back
+    # to DEFAULT_INVOICE_NUMBER_FORMAT, see app/invoice_generation.py),
+    # but a blank input looks identical to "nothing saved" -- show what's
+    # actually in effect either way, computed the same way finalize_run()
+    # would resolve it.
+    effective_invoice_number_format = settings_map.get("invoice_number_format") or DEFAULT_INVOICE_NUMBER_FORMAT
+    effective_invoice_number_example = effective_invoice_number_format.replace("{year}", "2026").replace("{number}", "1")
+
     return templates.TemplateResponse(
         "admin/settings.html",
         {
@@ -623,6 +633,8 @@ async def settings_page(request: Request, db: AsyncSession = Depends(get_db)):
             "fields": resolved_fields,
             "finance_fields": resolved_finance_fields,
             "invoice_number_format_examples": INVOICE_NUMBER_FORMAT_EXAMPLES,
+            "effective_invoice_number_format": effective_invoice_number_format,
+            "effective_invoice_number_example": effective_invoice_number_example,
             "module_fields": resolved_module_fields,
             "nav_order_fields": resolved_nav_order_fields,
             "available_languages": AVAILABLE_LANGUAGES,

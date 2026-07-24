@@ -279,9 +279,16 @@
                 <div class="mb-3">
                     <label class="form-label fw-semibold">{{ label }}</label>
                     {% if key == 'invoice_number_format' %}
+                    <div class="alert alert-success py-2 px-3 mb-2" style="font-size: 0.85rem;">
+                        <i class="bi bi-check-circle-fill me-1"></i>
+                        {{ t('admin.settings.invoice_number_format_currently_used', example=effective_invoice_number_example) }}
+                        {% if not settings_map.get(key) %}
+                        <span class="text-muted">{{ t('admin.settings.invoice_number_format_is_default') }}</span>
+                        {% endif %}
+                    </div>
                     <input type="text" name="{{ key }}" id="invoice-number-format-input" class="form-control"
                            list="invoice-number-format-examples"
-                           placeholder="{year}/{number}"
+                           placeholder="{{ effective_invoice_number_format }}"
                            value="{{ settings_map.get(key, '') or '' }}">
                     <datalist id="invoice-number-format-examples">
                         {% for format_str in invoice_number_format_examples %}
@@ -373,7 +380,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var preview = document.getElementById('invoice-number-format-preview');
     if (input && preview) {
         function sync() {
-            preview.textContent = input.value ? input.value.replace('{year}', '2026').replace('{number}', '1') : '';
+            var value = input.value || input.placeholder;
+            preview.textContent = value ? value.replace('{year}', '2026').replace('{number}', '1') : '';
         }
         input.addEventListener('input', sync);
         sync();

@@ -336,7 +336,9 @@
       "logo_error_type": "Ungültiger Dateityp. Bitte PNG, JPEG, WebP oder SVG hochladen.",
       "logo_error_size": "Die Datei ist zu groß (maximal 2 MB).",
       "invoice_number_format_error": "Ungültiges Format für Rechnungsnummern -- es muss genau einmal {number} enthalten (optional auch {year}), keine anderen Platzhalter.",
-      "invoice_number_format_help": "Platzhalter: {year} und {number} (erforderlich). Jeder andere Text wird unverändert übernommen, z. B. \"R-{year}-{number}\"."
+      "invoice_number_format_help": "Platzhalter: {year} und {number} (erforderlich). Jeder andere Text wird unverändert übernommen, z. B. \"R-{year}-{number}\".",
+      "invoice_number_format_currently_used": "Aktuell verwendet: {example}",
+      "invoice_number_format_is_default": "(Standard, nichts Eigenes gespeichert)"
     },
     "integrations": {
       "title": "Integrationen",
@@ -1693,7 +1695,11 @@
       "open_button": "Öffnen",
       "no_runs": "Noch keine Rechnungsläufe vorhanden.",
       "delete_confirm": "Diesen Rechnungslauf mitsamt allen Positionsdefinitionen löschen? Das kann nicht rückgängig gemacht werden.",
-      "all_invoices_button": "Alle Rechnungen"
+      "all_invoices_button": "Alle Rechnungen",
+      "label_starting_number": "Startnummer (überschreiben)",
+      "starting_number_placeholder": "z. B. 20000",
+      "starting_number_help": "Optional. Überschreibt für diesen Lauf das normale Fortsetzen der letzten Nummer, unabhängig davon, was in anderen Läufen/Jahren existiert. Leer lassen, um normal fortzusetzen.",
+      "success_message": "Erledigt."
     },
     "run_detail": {
       "title": "Rechnungslauf",
@@ -1738,7 +1744,10 @@
       "copy_items_label": "Positionsdefinitionen übernehmen von",
       "copy_items_button": "Positionen übernehmen",
       "col_category": "Kategorie",
-      "label_category": "Kategorie"
+      "label_category": "Kategorie",
+      "starting_number_header": "Startnummer überschreiben",
+      "starting_number_help": "Legt eine explizite Startnummer für die Rechnungen dieses Laufs fest -- jederzeit verfügbar, wird erst beim Abschließen auf Kollisionen mit bestehenden Nummern geprüft.",
+      "starting_number_save": "Speichern"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Festbetrag je Parzelle",

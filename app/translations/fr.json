@@ -336,7 +336,9 @@
       "logo_error_type": "Type de fichier invalide. Veuillez charger un fichier PNG, JPEG, WebP ou SVG.",
       "logo_error_size": "Le fichier est trop volumineux (2 Mo maximum).",
       "invoice_number_format_error": "Format de numéro de facture invalide -- il doit contenir {number} exactement une fois (et éventuellement {year}), aucun autre paramètre.",
-      "invoice_number_format_help": "Paramètres : {year} et {number} (obligatoire). Tout autre texte est utilisé tel quel, p. ex. \"R-{year}-{number}\"."
+      "invoice_number_format_help": "Paramètres : {year} et {number} (obligatoire). Tout autre texte est utilisé tel quel, p. ex. \"R-{year}-{number}\".",
+      "invoice_number_format_currently_used": "Actuellement utilisé : {example}",
+      "invoice_number_format_is_default": "(par défaut, rien de personnalisé enregistré)"
     },
     "integrations": {
       "title": "Intégrations",
@@ -1693,7 +1695,11 @@
       "open_button": "Ouvrir",
       "no_runs": "Aucune série de factures pour le moment.",
       "delete_confirm": "Supprimer cette série de factures ainsi que toutes ses lignes ? Cette action est irréversible.",
-      "all_invoices_button": "Toutes les factures"
+      "all_invoices_button": "Toutes les factures",
+      "label_starting_number": "Numéro de départ (remplacer)",
+      "starting_number_placeholder": "p. ex. 20000",
+      "starting_number_help": "Facultatif. Remplace pour cette série le comportement normal de poursuite du dernier numéro, indépendamment des autres séries/années. Laissez vide pour continuer normalement.",
+      "success_message": "Terminé."
     },
     "run_detail": {
       "title": "Série de factures",
@@ -1738,7 +1744,10 @@
       "copy_items_label": "Copier les lignes types depuis",
       "copy_items_button": "Copier les lignes",
       "col_category": "Catégorie",
-      "label_category": "Catégorie"
+      "label_category": "Catégorie",
+      "starting_number_header": "Remplacement du numéro de départ",
+      "starting_number_help": "Définissez un numéro de départ explicite pour les factures de cette série -- toujours disponible, vérifié pour les collisions avec les numéros existants uniquement lors de la finalisation.",
+      "starting_number_save": "Enregistrer"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Montant fixe par parcelle",

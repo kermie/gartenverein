@@ -336,7 +336,9 @@
       "logo_error_type": "Ongeldig bestandstype. Upload een PNG-, JPEG-, WebP- of SVG-bestand.",
       "logo_error_size": "Het bestand is te groot (maximaal 2 MB).",
       "invoice_number_format_error": "Ongeldig factuurnummerformaat -- het moet {number} precies één keer bevatten (optioneel ook {year}), geen andere plaatshouders.",
-      "invoice_number_format_help": "Plaatshouders: {year} en {number} (verplicht). Overige tekst wordt ongewijzigd gebruikt, bijv. \"R-{year}-{number}\"."
+      "invoice_number_format_help": "Plaatshouders: {year} en {number} (verplicht). Overige tekst wordt ongewijzigd gebruikt, bijv. \"R-{year}-{number}\".",
+      "invoice_number_format_currently_used": "Momenteel gebruikt: {example}",
+      "invoice_number_format_is_default": "(standaard, niets aangepasts opgeslagen)"
     },
     "integrations": {
       "title": "Integraties",
@@ -1693,7 +1695,11 @@
       "open_button": "Openen",
       "no_runs": "Nog geen factuurrondes.",
       "delete_confirm": "Deze factuurronde met alle regeldefinities verwijderen? Dit kan niet ongedaan worden gemaakt.",
-      "all_invoices_button": "Alle facturen"
+      "all_invoices_button": "Alle facturen",
+      "label_starting_number": "Startnummer (overschrijven)",
+      "starting_number_placeholder": "bijv. 20000",
+      "starting_number_help": "Optioneel. Overschrijft voor deze ronde het normale doortellen vanaf het laatste nummer, ongeacht wat er in andere rondes/jaren bestaat. Laat leeg om normaal door te tellen.",
+      "success_message": "Klaar."
     },
     "run_detail": {
       "title": "Factuurronde",
@@ -1738,7 +1744,10 @@
       "copy_items_label": "Regeldefinities kopiëren van",
       "copy_items_button": "Regels kopiëren",
       "col_category": "Categorie",
-      "label_category": "Categorie"
+      "label_category": "Categorie",
+      "starting_number_header": "Startnummer overschrijven",
+      "starting_number_help": "Stel een expliciet startnummer in voor de facturen van deze ronde -- altijd beschikbaar, wordt pas bij het afronden gecontroleerd op botsingen met bestaande nummers.",
+      "starting_number_save": "Opslaan"
     },
     "pricing_modes": {
       "fixed_per_parcel": "Vast bedrag per perceel",
